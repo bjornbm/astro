@@ -32,16 +32,31 @@ We define type synonyms to make the function signatures clearer.
 
 = Constants =
 
-The angular velocity of Earth's rotation (Soop p. 7).
+We keep all empirical physical constants and other "slowly changing"
+data in a data structure.
 
-> phi = 360.985647 *~ (degree / day)
+> data Constants a = Constants 
+>   { greenwichRefEpoch :: UTCTime
+>   , greenwichRefAngle :: Angle a
+>   , phi               :: AngularVelocity a
+>   }
 
-The Greenwich Right Ascension reference epoch and angle (Soop p. 128).
-These should ideally be updated on a yearly basis. TODO: Investigate
-options.
+We define a default set of constants.
 
-> greenwichRefEpoch = UTCTime (fromGregorian 2007 01 01) midnight'
-> greenwichRefAngle = 100.268 *~ degree
+> defaultConstants = Constants
+
+    The angular velocity of Earth's rotation (Soop p. 7).
+
+>   { phi = 360.985647 *~ (degree / day)
+
+    The Greenwich Right Ascension reference epoch and angle (Soop p. 128).
+    These should ideally be updated on a yearly basis. TODO: Investigate
+    options.
+
+>   , greenwichRefEpoch = UTCTime (fromGregorian 2007 01 01) midnight'
+>   , greenwichRefAngle = 100.268 *~ degree
+
+>   }
 
 > midnight' = timeOfDayToTime midnight
 
@@ -50,31 +65,31 @@ options.
 
 Calculates the right ascension of the Greenwich meridian at the epoch.
 
-> greenwichRA t = greenwichRefAngle + phi * dt
+> greenwichRA c t = greenwichRefAngle c + phi c * dt
 >   where
->       dt = utcToDimensional t - utcToDimensional greenwichRefEpoch
+>       dt = utcToDimensional t - utcToDimensional (greenwichRefEpoch c)
 
 Calculates the right ascension of the longitude at the epoch. This 
 This function is often used with a 'MeanLongitude' instead of a 
 'Longitude'.
 
-> longitudeRA t l = greenwichRA t + l
+> longitudeRA c t l = greenwichRA c t + l
 
 Calculate the time of day when the longitude has the specified right
 ascension on the given day. On days when the longitude passes the right
 ascension twice only the first occurence will be returned.
 
-> longitudeToD l ra d = dayFractionToTimeOfDay . toRational $ dt /~ day
+> longitudeToD c l ra d = dayFractionToTimeOfDay . toRational $ dt /~ day
 >   where
 >       -- Greenwich Right Ascension at midnight.
->       ra0 = longitudeRA (UTCTime d midnight') l
+>       ra0 = longitudeRA c (UTCTime d midnight') l
 >       dra = angleMod (ra - ra0)
 >       -- Time required to accumulate dra.
->       dt  = dra / phi
+>       dt  = dra / phi c
 
 Same for the Greenwich meridian.
 
-> gwraToD ra d = longitudeToD (0 *~ degree)
+> gwraToD c ra d = longitudeToD c (0 *~ degree)
 
 
 = Utility functions =
@@ -99,11 +114,11 @@ Limit an angle to within 0 and 2 pi.
 > long1  = 32.9 *~ degree
 > day1   = fromGregorian 2006 04 18
 > ra1    = (-88.2510367419438) *~ degree
-> tod1   = longitudeToD long1 ra1 day1
+> tod1   = longitudeToD defaultConstants long1 ra1 day1
 > epoch1 = LocalTime day1 tod1
 
 > ra2 = atan2 ((-0.009121) *~ radian) ((-0.000776) *~ radian)
-> tod2   = longitudeToD long1 ra2 day1
+> tod2   = longitudeToD defaultConstants long1 ra2 day1
 > epoch2 = LocalTime day1 tod2
 
 
