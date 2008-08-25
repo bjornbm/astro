@@ -2,9 +2,11 @@ A collection of astrodynamics functionality.
 
 > module Astrodynamics where
 
-> import Buckwalter.Dimensional.Prelude
-> import Buckwalter.Dimensional.NonSI (revolution)
+> import Numeric.Units.Dimensional.Prelude
+> import Numeric.Units.Dimensional.NonSI (revolution)
 > import Data.Time
+> import Data.Time.Clock.TAI
+> import Time
 > import Prelude 
 >   ( fromIntegral, toRational, properFraction
 >   , Fractional, RealFloat, Num, realToFrac
@@ -30,76 +32,116 @@ We define type synonyms to make the function signatures clearer.
 > type Latitude = Angle
 
 
-= Constants =
+Constants
+=========
 
-We keep all empirical physical constants and other "slowly changing"
-data in a data structure.
+The speed of light in vacuum (Beta p. 509).
 
-> data Constants a = Constants 
->   { greenwichRefEpoch :: UTCTime
->   , greenwichRefAngle :: Angle a
->   , phi               :: AngularVelocity a
->   }
+> c :: Fractional a => Velocity a
+> c = 2.997925e8 *~ (meter / second)
 
-We define a default set of constants.
+The angular velocity of Earth's rotation (Soop p. 7).
 
-> defaultConstants = Constants
+> phi :: Floating a => AngularVelocity a
+> phi = 360.985647 *~ (degree / day)
 
-    The angular velocity of Earth's rotation (Soop p. 7).
+The gravitational parameter of Earth. Value from Wikipedia[3].
 
->   { phi = 360.985647 *~ (degree / day)
+> mu :: Fractional a => GravitationalParameter a
+> mu = 398600.4418 *~ (kilo meter ^ pos3 / second ^ pos2)
 
-    The Greenwich Right Ascension reference epoch and angle (Soop p. 128).
-    These should ideally be updated on a yearly basis. TODO: Investigate
-    options.
+The Greenwich Right Ascension reference epoch and angle (Soop p. 128).
+These should ideally be updated on a yearly basis. TODO: Investigate
+options.
 
->   , greenwichRefEpoch = UTCTime (fromGregorian 2007 01 01) midnight'
->   , greenwichRefAngle = 100.268 *~ degree
+> greenwichRefEpoch = utcToTTTime (const 33)  -- Valid for 2008.
+>                   $ UTCTime (fromGregorian 2008 01 01) midnight'
+> greenwichRefAngle :: Floating a => Angle a
+> greenwichRefAngle = 100.029 *~ degree
 
->   }
+The epoch J2000.0. Definition from Wikipedia[1].
 
-> midnight' = timeOfDayToTime midnight
+> j2000 = UTCTime (fromGregorian 2000 01 01) (timeOfDayToTime time)
+>   where time = TimeOfDay 11 58 55.816
+
+The ideal geostationary radius and velocity.
+
+> r_GEO :: Floating a => Length a
+> r_GEO = semiMajorAxis phi
+> v_GEO :: Floating a => Velocity a
+> v_GEO = phi * r_GEO
+
+The sidereal day. See wikipedia[2] for other approximation.
+
+> siderealDay :: Floating a => Time a
+> siderealDay = 1 *~ revolution / phi
 
 
-= Functions =
+Functions
+=========
 
+Longitudes
+----------
 Calculates the right ascension of the Greenwich meridian at the epoch.
 
-> greenwichRA c t = greenwichRefAngle c + phi c * dt
+> greenwichRA t = greenwichRefAngle + phi * dt
 >   where
->       dt = utcToDimensional t - utcToDimensional (greenwichRefEpoch c)
+>       dt = ttToDimensional t - ttToDimensional greenwichRefEpoch
 
 Calculates the right ascension of the longitude at the epoch. This 
 This function is often used with a 'MeanLongitude' instead of a 
 'Longitude'.
 
-> longitudeRA c t l = greenwichRA c t + l
+> longitudeRA t l = greenwichRA t + l
+> raToLongitude t ra = ra - greenwichRA t
 
 Calculate the time of day when the longitude has the specified right
 ascension on the given day. On days when the longitude passes the right
 ascension twice only the first occurence will be returned.
 
-> longitudeToD c l ra d = dayFractionToTimeOfDay . toRational $ dt /~ day
+> longitudeToD l ra d = dayFractionToTimeOfDay . toRational $ dt /~ day
 >   where
+>       t   = utcToTTTime (const 33) (UTCTime d midnight')
 >       -- Greenwich Right Ascension at midnight.
->       ra0 = longitudeRA c (UTCTime d midnight') l
+>       ra0 = longitudeRA t l
 >       dra = angleMod (ra - ra0)
 >       -- Time required to accumulate dra.
->       dt  = dra / phi c
+>       dt  = dra / phi
 
 Same for the Greenwich meridian.
 
-> gwraToD c ra d = longitudeToD c (0 *~ degree)
+> gwraToD :: RealFloat a => Angle a -> Day -> TimeOfDay
+> gwraToD = longitudeToD (0 *~ degree)
+
+Orbits
+------
+Calculate the semi-major axis of an orbit based on the mean angular motion.
+
+> semiMajorAxis :: Floating a => AngularVelocity a -> Length a
+> semiMajorAxis n = cbrt (mu / n ^ pos2)
 
 
-= Utility functions =
+Utility functions
+=================
+
+Convert an 'AbsoluteTime' to a 'Dimensional' representing the time
+elapsed since MJD reference epoch. Leapseconds are not an issue
+since TAI has none.
+
+> taiToDimensional :: (Fractional a) => AbsoluteTime -> Time a
+> taiToDimensional t = fromDiffTime dt where
+>   dt = diffAbsoluteTime t taiEpoch
+
+Same for 'TerrestrialTime'.
+
+> ttToDimensional :: (Fractional a) => TerrestrialTime -> Time a
+> ttToDimensional = taiToDimensional . ttToTAITime
 
 Convert a UTCTime to a Dimensional representing the time elapsed since
 MJD reference epoch. Leapseconds are not honored.
 
 > utcToDimensional :: (Fractional a) => UTCTime -> Time a
-> utcToDimensional (UTCTime (ModifiedJulianDay d) dt)
->   = fromIntegral d *~ day + realToFrac dt *~ second
+> utcToDimensional  = taiToDimensional . utcToTAITime (const 33)
 
 Limit an angle to within 0 and 2 pi.
 
@@ -108,18 +150,57 @@ Limit an angle to within 0 and 2 pi.
 >   where
 >       (n, f) = properFraction (x /~ revolution)
 
+A helper -- midnight as a 'DiffTime'.
+
+> midnight' :: DiffTime
+> midnight' = timeOfDayToTime midnight  -- Or "= 0"?
+
+
+References
+==========
+
+[1] http://en.wikipedia.org/wiki/J2000
+[2] http://en.wikipedia.org/wiki/Sideral_day
+[3] http://en.wikipedia.org/wiki/Standard_gravitational_parameter
+
 
 = Test stuff =
 
+IS-11 ephemeris upload check.
+
+> {-
+> t = UTCTime (fromGregorian 2007 12 13) (timeOfDayToTime $ TimeOfDay 22 00 00)
+> l = 316.8 *~ degree  -- SK longitude
+> scra = greenwichRA t + l
+> x = r_GEO * cos scra
+> y = r_GEO * sin scra
+> vx = r_GEO * phi * negate (sin scra) -- dx/dt
+> vy = r_GEO * phi * cos scra          -- dy/dt
+> -}
+
+4367 longitude
+
+> {-
+> t = UTCTime (fromGregorian 2007 02 19) (timeOfDayToTime $ TimeOfDay 14 47 16)
+> x = (-33304.86272037) *~ kilo meter
+> y =   25960.48887207  *~ kilo meter
+> z =     609.81557403  *~ kilo meter
+> ra = atan2 y x
+> l = angleMod $ ra - greenwichRA t
+> -- -}
+ 
+
+> {-
 > long1  = 32.9 *~ degree
 > day1   = fromGregorian 2006 04 18
 > ra1    = (-88.2510367419438) *~ degree
-> tod1   = longitudeToD defaultConstants long1 ra1 day1
+> tod1   = longitudeToD long1 ra1 day1
 > epoch1 = LocalTime day1 tod1
 
 > ra2 = atan2 ((-0.009121) *~ radian) ((-0.000776) *~ radian)
-> tod2   = longitudeToD defaultConstants long1 ra2 day1
+> tod2   = longitudeToD long1 ra2 day1
 > epoch2 = LocalTime day1 tod2
+> -}
 
 
 > {-
