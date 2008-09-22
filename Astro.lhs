@@ -67,12 +67,13 @@ min s@ where the seconds can have a fractional part. Example usage:
 > tt :: Integer -> Int -> Int -> Int -> Int -> Pico -> Epoch
 > tt y m d h min s = addAbsoluteTime (-32.184) $ tai y m d h min s
 
-> j2000 = tt 2000 01 01 12 00 00.000
-
 | Computes the difference between the two epochs.
 
 > diffTime :: Fractional a => Epoch -> Epoch -> Time a
 > diffTime t1 t2 = realToFrac (diffAbsoluteTime t1 t2) *~ second
+
+> j2000 = tt 2000 01 01 12 00 00.000
+> sinceJ2000 t = diffTime t j2000
 
 
 Defaults
