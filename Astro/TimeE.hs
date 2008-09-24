@@ -24,9 +24,16 @@ instance DiffEpoch (E t) where
   diffEpoch (E t) (E t') = diffEpoch t t'
   addTime   (E t)    dt  = E $ addTime t dt
 
+infixl 6 .+, .-
+(.+) :: (DiffEpoch t, RealFrac a) => t -> Time a -> t
+(.+) = addTime
+(.-) :: (DiffEpoch t, Fractional a) => t -> t ->  Time a
+(.-) = diffEpoch
+
+
 --addTime :: RealFrac a => Epoch -> Time a -> Epoch
 --addTime e t = addAbsoluteTime (toDiffTime t) e
-subTime :: RealFrac a => Epoch -> Time a -> Epoch
+subTime :: (RealFrac a, DiffEpoch t) => t -> Time a -> t
 subTime e = addTime e . negate
 
 
@@ -205,64 +212,40 @@ instance T TDB where
 data TCB = TCB; instance Show TCB where show _ = "TCB"
 
 -- | The fractional difference in rate between the time scales TDB and TCB.
--- According to [3] the IAU didn'f fix the exact rate ratio @l_B@ but the
--- value given in [2] is used here. However, [2] (page 104) also states that
--- "since no precise definition of TDB exists, there is no definitive value
--- of l_B and such an expression [relating TDB to TCB] should be used with
--- caution."
+-- @l_B@ was given an exact value and declared a defining constant in
+-- [IAU 2006 Resolution B3].
 l_B :: Fractional a => Dimensionless a
-l_B = 1.55051976772e-8 *~ (second/second)
+l_B = 1.550519768e-8 *~ (second/second)
 
 -- | The difference between TCB and TDB time scales at the convergence epoch
--- 1977 January 1.0 TAI. This is the approximate value provided on page 104
--- of [TN32] as opposed to the difference calculated using the TDB conversion
--- provided in this module. As a result, since calculation of TCB relies on
+-- 1977 January 1.0 TAI. 
+
+-- The TDB epoch corresponding to 1977 January 1.0 TAI.
+-- This epoch is based on the defining constant TDB_0 from
+-- [IAU 2006 Resolution B3] as opposed to the epoch calculated using the TDB
+-- conversion formulae provided in this module.
+-- As a result, since calculation of TCB relies on
 -- an intermediate calculation of TDB a calculation of TCB at the convergence
 -- epoch will not produce 1977-01-01 00:00:32.184 TCB exactly. The difference
 -- is introduced by the intermediate TDB calculation and is within its error
 -- margin.
-p_0 :: Fractional a => Time a
-p_0 = 6.55e-5 *~ second
-   -- Another source provided 65.564518 us.
-   -- 6.7243915e-5 s gives convergence in this module.
-
--- | The difference between the TCB and TDB time scales as a function of
--- TDB epoch. Here we've substituted TDB for TAI as the independent variable
--- in the formula provided in [TN32], thereby introducing an error of less
--- than a picosecond.
-tcbMinusTDB :: Floating a => E TDB -> Time a
-tcbMinusTDB tdb = l_B * diffEpoch tdb convergenceEpochTDB + p_0
-  where convergenceEpochTDB = let E t = convergenceEpochTCG in E (addTime t p_0)
-
--- | The difference between the TCB and TDB time scales as a function of
--- TDB epoch. In this formula adapted from [TN32] the independent variable
--- is a TAI epoch so the TDB epoch is converted to a TAI epoch.
--- (Substituting a TDB epoch for the independent variable would cause
--- periodic errors on the order of 30 pico seconds.)
-tcbMinusTDB' :: Floating a => E TDB -> Time a
-tcbMinusTDB' tdb = tcbMinusTDB_tai (fromTAI $ toTAI tdb)
--- | The difference between the TCB and TDB time scales as a function of
--- TAI epoch. This is the formula provided in [TN32].
-tcbMinusTDB_tai :: Floating a => E TAI -> Time a
-tcbMinusTDB_tai tai = l_B * diffEpoch tai convergenceEpochTAI + p_0
-
--- | The difference between the TDB and TCB time scales as a function of
--- TCB epoch. This formula here is adapted from that provided by Klioner
--- in e.g. [Klioner]. In contrast to the formula from [TN32] used in
--- 'tcbMinusTDB' the independent variable used by Klioner is a TCB epoch.
--- One of these formulae must be incorrect with an error increasing
--- linearly by roughly 8 ns per year (insignificant compared to errors
--- in TDB calculations and more generally the ill-definedness of TCB.)
-tdbMinusTCB :: Fractional a => E TCB -> Time a
-tdbMinusTCB tcb = negate (l_B * diffEpoch tcb convergenceEpochTCB + p_0)
+convergenceEpochTDB :: E TDB
+convergenceEpochTDB = jd 0 TDB -- E $ t .+ tdb_0
+  where
+    E t = convergenceEpochTCG
+    tdb_0 = (-6.55e-5) *~ second :: Time Pico
 
 -- | Convert a TDB epoch into a TCB epoch.
 tdbToTCB :: E TDB -> E TCB
-tdbToTCB tdb@(E t) = E $ addTime t (tcbMinusTDB tdb)
+tdbToTCB tdb = convergenceEpochTCB .+ (tdb .- convergenceEpochTDB) * f
+  where f = _1 - l_B :: Dimensionless Double
 
 -- | Convert a TCB epoch into a TDB epoch.
 tcbToTDB :: E TCB -> E TDB
-tcbToTDB tcb@(E t) = E $ addTime t (tdbMinusTCB tcb)
+--tcbToTDB tcb = convergenceEpochTDB .+ (tcb .- convergenceEpochTCB) / f
+tcbToTDB tcb = convergenceEpochTDB .+ (tcb .- convergenceEpochTCB) / f
+  where f = _1 - l_B :: Dimensionless Double
+
 
 instance T TCB where
   fromTAI = tdbToTCB . fromTAI

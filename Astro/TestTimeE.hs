@@ -20,18 +20,21 @@ cmpE acc t t' = abs (diffEpoch t t') < acc
 -- J200 epoch.
 prop_J2000 = clock 2000 1 1 12 0 0 TT == jd 2451545 TT
 
-prop_TAI, prop_TT, prop_TCG, prop_TDB, prop_TCB :: Double -> Bool
+prop_TAI, prop_TT, prop_TCG, prop_TDB, prop_TCB, prop_TCB' :: Double -> Bool
 prop_TAI a = let t = jd a TAI in t == fromTAI (toTAI t)  -- ^ Conversion back and forth to TAI.
 prop_TT  a = let t = jd a TT  in t == fromTAI (toTAI t)  -- ^ Conversion back and forth to TAI.
 prop_TCG a = let t = jd a TCG in cmpE dblError t $ fromTAI (toTAI t)  -- ^ Conversion back and forth to TAI.
 prop_TDB a = let t = jd a TDB in cmpE dblError t $ fromTAI (toTAI t)  -- ^ Conversion back and forth to TAI.
--- One of the TCB conversions has an error growing by 8 ns per year from
--- 1977. We use MJD instead of JD to limit the error.
-prop_TCB a = let t = mjd a TCB in cmpE tdbError t $ fromTAI (toTAI t)  -- ^ Conversion back and forth to TAI.
+-- accuracy is limited by the difference between convergenceEpochTDB and (fromTAI $ toTAI convergenceEpoch TAI :: E TDB)
+prop_TCB a = let t = jd a TCB in cmpE tdbError t $ fromTAI (toTAI t)  -- ^ Conversion back and forth to TAI.
+prop_TCB' a = let t = jd a TCB in t == tdbToTCB (tcbToTDB t) -- ^ Conversion back and forth to TDB.
+
 
 ttConverges  = toTAI (clock 1977 01 01 00 00 32.184 TT)  == toTAI (clock 1977 1 1 0 0 0 TAI)
 tcgConverges = toTAI (clock 1977 01 01 00 00 32.184 TCG) == toTAI (clock 1977 1 1 0 0 0 TAI)
-tcbConverges = cmpE tdbError (clock 1977 01 01 00 00 32.184 TCB) (fromTAI $ toTAI (clock 1977 1 1 0 0 0 TAI))
+-- The accuracy of TCB is limited by the TDB conversions.
+tcbConverges = cmpE tdbError (toTAI $ clock 1977 01 01 00 00 32.184 TCB)
+                             (toTAI $ clock 1977 1 1 0 0 0 TAI)
 
 -- utc 1990 05 14 10 43 00.000 from [1].
 valladoExample = toTAI tai == toTAI tt
@@ -72,3 +75,4 @@ main = do
   quickCheck prop_TCG
   quickCheck prop_TDB
   quickCheck prop_TCB
+  quickCheck prop_TCB'
