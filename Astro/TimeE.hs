@@ -8,6 +8,9 @@ import Data.Time.Clock.TAI
 import Data.Fixed (Pico)
 
 
+century :: Num a => Unit DTime a
+century = prefix 36525 day
+
 -- | We chose to represent our epoch as 'AbsoluteTime's.
 type Epoch = AbsoluteTime
 
@@ -143,13 +146,34 @@ l_G = 6.969290134e-10 *~ (second / second)
 -- | The difference between the TT and TCG time scales as a function of
 -- TCG epoch. The formula used is exact.
 ttMinusTCG :: Fractional a => E TCG -> Time a
-ttMinusTCG tcg = negate l_G * (tcg `diffEpoch` convergenceEpochTCG)
+ttMinusTCG tcg = negate l_G * (tcg .- convergenceEpochTCG)
+
+{-
+The exact mathematical expression for TCG with TT as the free variable is
+
+  TCG = (TT - t0) / (1 - L_G) + t0
+
+where t0 is the convergence epoch (identical for TT and TCG). However,
+this expression doesn't lend it self well to implementations based on
+double precision arithmetic. In particular the term (1 - L_G) suffers a
+significant loss of precision. Also, the error in (TT - t0) is carried
+over undiminished to TCG.
+
+We follow the suggestion on page 15 of [Vallado] and expand the fraction
+to obtain
+
+  TCG = (TT - t0) (1 + L_G + L_G^2 + L_G^3 ...) + t0
+      = TT + (TT - t0) (L_G + L_G^2 + L_G^3 ...)
+
+This expression avoids both precision problems mentioned
+above. Furthermore, for double precision terms beyond L_G^2 are
+insignificant.
+-}
 
 -- | The difference between the TCG and TT time scales as a function of
--- TT epoch. The inaccuracy of the formula used should be "negligibly small while
--- using double-precision (8-byte) words" (page 15 of [Vallado]).
+-- TT epoch.
 tcgMinusTT :: Fractional a => E TT -> Time a
-tcgMinusTT tt = (tt `diffEpoch` convergenceEpochTT) * (l_G + l_G^pos2 + l_G^pos3)  -- (27) of [Vallado].
+tcgMinusTT tt = (tt .- convergenceEpochTT) * (l_G + l_G^pos2)  -- (27) of [Vallado].
 
 -- | Convert a TCG epoch into a TT epoch.
 tcgToTT :: E TCG -> E TT
@@ -208,6 +232,7 @@ instance T TDB where
 
 -- Barycentric Coordinate Time
 -- ---------------------------
+-- An atomic (SI) clock located at the solar system barycenter.
 -- "The relation between TCB and TDB is linear."
 data TCB = TCB; instance Show TCB where show _ = "TCB"
 
@@ -218,10 +243,7 @@ l_B :: Fractional a => Dimensionless a
 l_B = 1.550519768e-8 *~ (second/second)
 
 -- | The difference between TCB and TDB time scales at the convergence epoch
--- 1977 January 1.0 TAI. 
-
--- The TDB epoch corresponding to 1977 January 1.0 TAI.
--- This epoch is based on the defining constant TDB_0 from
+-- 1977 January 1.0 TAI. This difference is a defining constant from
 -- [IAU 2006 Resolution B3] as opposed to the epoch calculated using the TDB
 -- conversion formulae provided in this module.
 -- As a result, since calculation of TCB relies on
@@ -229,22 +251,38 @@ l_B = 1.550519768e-8 *~ (second/second)
 -- epoch will not produce 1977-01-01 00:00:32.184 TCB exactly. The difference
 -- is introduced by the intermediate TDB calculation and is within its error
 -- margin.
+tdb_0 :: Fractional a => Time a
+tdb_0 = (-6.55e-5) *~ second  --  :: Time Pico
+
+-- The TDB epoch corresponding to 1977 January 1.0 TAI.
 convergenceEpochTDB :: E TDB
-convergenceEpochTDB = jd 0 TDB -- E $ t .+ tdb_0
+convergenceEpochTDB = E $ t .+ (tdb_0 :: Time Pico)
   where
     E t = convergenceEpochTCG
-    tdb_0 = (-6.55e-5) *~ second :: Time Pico
 
--- | Convert a TDB epoch into a TCB epoch.
-tdbToTCB :: E TDB -> E TCB
-tdbToTCB tdb = convergenceEpochTCB .+ (tdb .- convergenceEpochTDB) * f
-  where f = _1 - l_B :: Dimensionless Double
+-- | The difference between the TDB and TCB time scales as a function of
+-- TCB epoch.
+tdbMinusTCB :: Fractional a => E TCB -> Time a
+tdbMinusTCB tcb = tdb_0 - (tcb .- convergenceEpochTCB) * l_B
+
+{-
+'tcbMinusTDB' is defined analogously with 'tcgMinusTT' (see commentary
+above). Note that since L_B is two orders of magnitude larger than L_G
+the L_B^3 term does have a very small effect.
+-}
+
+-- | The difference between the TCB and TDB time scales as a function of
+-- TDB epoch.
+tcbMinusTDB :: Fractional a => E TDB -> Time a
+tcbMinusTDB tdb = (tdb .- convergenceEpochTDB) * (l_B + l_B^pos2 + l_B^pos3) - tdb_0
 
 -- | Convert a TCB epoch into a TDB epoch.
 tcbToTDB :: E TCB -> E TDB
---tcbToTDB tcb = convergenceEpochTDB .+ (tcb .- convergenceEpochTCB) / f
-tcbToTDB tcb = convergenceEpochTDB .+ (tcb .- convergenceEpochTCB) / f
-  where f = _1 - l_B :: Dimensionless Double
+tcbToTDB tcb@(E t) = E $ addTime t (tdbMinusTCB tcb)
+
+-- | Convert a TDB epoch into a TCB epoch.
+tdbToTCB :: E TDB -> E TCB
+tdbToTCB tdb@(E t) = E $ addTime t (tcbMinusTDB tdb)
 
 
 instance T TCB where

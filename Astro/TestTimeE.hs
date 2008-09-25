@@ -20,21 +20,34 @@ cmpE acc t t' = abs (diffEpoch t t') < acc
 -- J200 epoch.
 prop_J2000 = clock 2000 1 1 12 0 0 TT == jd 2451545 TT
 
+-- Check conversions back and forth are consistent. Test around both
+-- JD 0 and MJD 0 to make sure we aren't favoring algorithms that are
+-- only good around certain dates.
 prop_TAI, prop_TT, prop_TCG, prop_TDB, prop_TCB, prop_TCB' :: Double -> Bool
-prop_TAI a = let t = jd a TAI in t == fromTAI (toTAI t)  -- ^ Conversion back and forth to TAI.
-prop_TT  a = let t = jd a TT  in t == fromTAI (toTAI t)  -- ^ Conversion back and forth to TAI.
-prop_TCG a = let t = jd a TCG in cmpE dblError t $ fromTAI (toTAI t)  -- ^ Conversion back and forth to TAI.
-prop_TDB a = let t = jd a TDB in cmpE dblError t $ fromTAI (toTAI t)  -- ^ Conversion back and forth to TAI.
--- accuracy is limited by the difference between convergenceEpochTDB and (fromTAI $ toTAI convergenceEpoch TAI :: E TDB)
-prop_TCB a = let t = jd a TCB in cmpE tdbError t $ fromTAI (toTAI t)  -- ^ Conversion back and forth to TAI.
-prop_TCB' a = let t = jd a TCB in t == tdbToTCB (tcbToTDB t) -- ^ Conversion back and forth to TDB.
+-- These should be exact.
+prop_TAI a = let t =  jd a TAI in t == fromTAI (toTAI t)  -- ^ Conversion back and forth to TAI.
+          && let t = mjd a TAI in t == fromTAI (toTAI t)  -- ^ Conversion back and forth to TAI.
+prop_TT  a = let t =  jd a TT  in t == fromTAI (toTAI t)  -- ^ Conversion back and forth to TAI.
+          && let t = mjd a TT  in t == fromTAI (toTAI t)  -- ^ Conversion back and forth to TAI.
+-- In the remaining double precision errors come into play.
+prop_TCG a = let t =  jd a TCG in cmpE dblError t (fromTAI $ toTAI t)  -- ^ Conversion back and forth to TAI.
+          && let t = mjd a TCG in cmpE dblError t (fromTAI $ toTAI t)  -- ^ Conversion back and forth to TAI.
+-- Accuracy of TDB|TCB <-> TAI is limited by the accuracy of TDB <-> TAI. 
+-- However, the reverse conversion appears to cancels the error nicely.
+prop_TDB a = let t =  jd a TDB in cmpE dblError t (fromTAI $ toTAI t)  -- ^ Conversion back and forth to TAI.
+          && let t = mjd a TDB in cmpE dblError t (fromTAI $ toTAI t)  -- ^ Conversion back and forth to TAI.
+prop_TCB a = let t =  jd a TCB in cmpE dblError t (fromTAI $ toTAI t)  -- ^ Conversion back and forth to TAI.
+          && let t = mjd a TCB in cmpE dblError t (fromTAI $ toTAI t)  -- ^ Conversion back and forth to TAI.
+-- The accuracy of TCB <-> TDB conversions should be good. (This test is mostly redundant given prop_TCB).
+prop_TCB' a = let t =  jd a TCB in cmpE dblError t (tdbToTCB $ tcbToTDB t) -- ^ Conversion back and forth to TDB.
+           && let t = mjd a TCB in cmpE dblError t (tdbToTCB $ tcbToTDB t) -- ^ Conversion back and forth to TDB.
 
-
+-- Test convergence epochs.
 ttConverges  = toTAI (clock 1977 01 01 00 00 32.184 TT)  == toTAI (clock 1977 1 1 0 0 0 TAI)
 tcgConverges = toTAI (clock 1977 01 01 00 00 32.184 TCG) == toTAI (clock 1977 1 1 0 0 0 TAI)
--- The accuracy of TCB is limited by the TDB conversions.
-tcbConverges = cmpE tdbError (toTAI $ clock 1977 01 01 00 00 32.184 TCB)
-                             (toTAI $ clock 1977 1 1 0 0 0 TAI)
+-- The accuracy of TDB and TCB are limited by the TDB conversions.
+tcbConverges = cmpE tdbError (toTAI $ clock 1977 01 01 00 00 32.184 TCB) (toTAI $ clock 1977 1 1 0 0 0 TAI) 
+tdbConverges = cmpE tdbError (toTAI $ clock 1977 01 01 00 00 32.1839345 TDB) (toTAI $ clock 1977 1 1 0 0 0 TAI) 
 
 -- utc 1990 05 14 10 43 00.000 from [1].
 valladoExample = toTAI tai == toTAI tt
@@ -68,6 +81,7 @@ main = do
   onceCheck ttConverges
   onceCheck tcgConverges
   onceCheck tcbConverges
+  onceCheck tdbConverges
   onceCheck valladoExample
   onceCheck valladoExample2
   quickCheck prop_TAI
@@ -76,3 +90,4 @@ main = do
   quickCheck prop_TDB
   quickCheck prop_TCB
   quickCheck prop_TCB'
+
