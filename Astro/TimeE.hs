@@ -190,11 +190,23 @@ instance T TCG where
 
 -- Barycentric Dynamical Time (TDB)
 -- --------------------------------
+-- TDB is defined to be a linear function of TCB with its time unit scaled
+-- so that TDB is "on average" equal to that of TT. This isn't strictly
+-- achievable and the average value of TDB will diverge from TT at a rate of
+-- roughly 10 microseconds per century (from 1977). The periodic variations
+-- of TDB w.r.t. TT have an maximum amplitude of less than 2 milliseconds.
+--
+-- In terms of implementing TDB the defintion as a linear relation with TCB
+-- is of limited utility in computing TDB from other time scales as TCB lacks
+-- a concrete realization. Instead we will use an imprecise expression
+-- relating TDB to TT. (This expression, together with the definition of TDB,
+-- is also used to obtain TCB.)
 data TDB = TDB; instance Show TDB where show _ = "TDB"
 
 -- | The difference between the TDB and TT time scales as a function of
--- TT epoch. The maximum error is about 10 microseconds from 1600 to 2200.
--- Adapted from (2.6) of [Kaplan].
+-- TT epoch. This formula is adapted from (2.6) of [Kaplan] and reportedly
+-- has a maximum error of about 10 microseconds from between years 1600 
+-- and 2200.
 tdbMinusTT :: Floating a => E TT -> Time a
 tdbMinusTT tt = 0.001657*~second * sin ( 628.3076 *~rpc * t + 6.2401 *~radian)
               + 0.000022*~second * sin ( 575.3385 *~rpc * t + 4.2970 *~radian)
@@ -206,14 +218,16 @@ tdbMinusTT tt = 0.001657*~second * sin ( 628.3076 *~rpc * t + 6.2401 *~radian)
   where
     rpc = radian / century
     t   = diffEpoch tt j2000  
-      -- ^ This isn't strictly correct, should use final value (iteratively?).
-      -- However, the impact is far less than 10 us.
+
+{-
+We incorrectly substitute TDB for TT in 'ttMinusTDB' but the error
+introduced by this approximation is less than a picosecond (far less than
+the 10 microsecond accuracy inherent in the formula in the first place).
+-}
 
 -- | The difference between the TDB and TT time scales as a function of
 -- TT epoch. The maximum error is about 10 microseconds from 1600 to 2200.
--- Adapted from (2.6) of [Kaplan]. We incorrectly substitute TDB for TT in
--- the formula but the error introduced by this approximation is far less
--- than the 10 microsecond accuracy inherent in (2.6).
+-- Adapted from (2.6) of [Kaplan].
 ttMinusTDB :: Floating a => E TDB -> Time a
 ttMinusTDB (E t) = negate $ tdbMinusTT (E t)
 
