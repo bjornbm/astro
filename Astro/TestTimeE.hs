@@ -15,7 +15,7 @@ tdbError = 20 *~ micro second  -- About 10 us according to Kaplan, but for Valla
 dblError =  1 *~ nano second
 
 cmpE :: (DiffEpoch t, Fractional a, Ord a) => Time a -> t -> t -> Bool
-cmpE acc t t' = abs (diffEpoch t t') < acc
+cmpE accuracy t t' = abs (diffEpoch t t') < accuracy
 
 -- J200 epoch.
 prop_J2000 = clock 2000 1 1 12 0 0 TT == jd 2451545 TT
@@ -34,7 +34,7 @@ prop_TCG a = let t =  jd a TCG in cmpE dblError t (fromTAI $ toTAI t)  -- ^ Conv
           && let t = mjd a TCG in cmpE dblError t (fromTAI $ toTAI t)  -- ^ Conversion back and forth to TAI.
 -- Accuracy of TDB|TCB <-> TAI is limited by the accuracy of TDB <-> TAI. 
 -- However, the reverse conversion appears to cancels the error nicely.
-prop_TDB a = let t =  jd a TDB in cmpE dblError t (fromTAI $ toTAI t)  -- ^ Conversion back and forth to TAI.
+prop_TDB a = let t =  jd a TDB in cmpE dblError t (convert (convert t :: E TAI))  -- ^ Conversion back and forth to TAI.
           && let t = mjd a TDB in cmpE dblError t (fromTAI $ toTAI t)  -- ^ Conversion back and forth to TAI.
 prop_TCB a = let t =  jd a TCB in cmpE dblError t (fromTAI $ toTAI t)  -- ^ Conversion back and forth to TAI.
           && let t = mjd a TCB in cmpE dblError t (fromTAI $ toTAI t)  -- ^ Conversion back and forth to TAI.
@@ -43,27 +43,27 @@ prop_TCB' a = let t =  jd a TCB in cmpE dblError t (tdbToTCB $ tcbToTDB t) -- ^ 
            && let t = mjd a TCB in cmpE dblError t (tdbToTCB $ tcbToTDB t) -- ^ Conversion back and forth to TDB.
 
 -- Test convergence epochs.
-ttConverges  = toTAI (clock 1977 01 01 00 00 32.184 TT)  == toTAI (clock 1977 1 1 0 0 0 TAI)
-tcgConverges = toTAI (clock 1977 01 01 00 00 32.184 TCG) == toTAI (clock 1977 1 1 0 0 0 TAI)
+ttConverges  = clock 1977 01 01 00 00 32.184 TT  == convert (clock 1977 1 1 0 0 0 TAI)
+tcgConverges = clock 1977 01 01 00 00 32.184 TCG == convert (clock 1977 1 1 0 0 0 TAI)
 -- The accuracy of TDB and TCB are limited by the TDB conversions.
-tcbConverges = cmpE tdbError (toTAI $ clock 1977 01 01 00 00 32.184 TCB) (toTAI $ clock 1977 1 1 0 0 0 TAI) 
-tdbConverges = cmpE tdbError (toTAI $ clock 1977 01 01 00 00 32.1839345 TDB) (toTAI $ clock 1977 1 1 0 0 0 TAI) 
+tcbConverges = cmpE tdbError (clock 1977 01 01 00 00 32.184     TCB) (convert $ clock 1977 1 1 0 0 0 TAI) 
+tdbConverges = cmpE tdbError (clock 1977 01 01 00 00 32.1839345 TDB) (convert $ clock 1977 1 1 0 0 0 TAI) 
 
 -- utc 1990 05 14 10 43 00.000 from [1].
 valladoExample = toTAI tai == toTAI tt
-              && cmpE tdbError (toTAI tai) (toTAI tdb)
-              && cmpE tdbError (toTAI tt) (toTAI tdb)
+              && cmpE tdbError (tai) (convert tdb)
+              && cmpE tdbError (tt ) (convert tdb)
   where 
     tai = clock 1990 05 14 16 43 25.000 TAI
     tt  = clock 1990 05 14 16 43 57.184 TT
     tdb = clock 1990 05 14 16 43 57.18527 TDB
 
 -- utc 2004 04 06 07 51 28.386009 from [2].
-valladoExample2 = toTAI tai == toTAI tt && (fromTAI $ toTAI tai) == tt
-               && cmpE dblError (toTAI tai) (toTAI tcg)    -- Test conversion from TCG.
-               && cmpE dblError (fromTAI $ toTAI tai) tcg  -- Test conversion to TCG.
-               && cmpE tdbError (toTAI tai) (toTAI tdb)    -- Test conversion from TDB.
-               && cmpE tdbError (fromTAI $ toTAI tai) tdb  -- Test conversion to TDB.
+valladoExample2 = tai == convert tt && convert tai == tt
+               && cmpE dblError tai (convert tcg)    -- Test conversion from TCG.
+               && cmpE dblError (convert tai) tcg  -- Test conversion to TCG.
+               && cmpE tdbError tai (convert tdb)    -- Test conversion from TDB.
+               && cmpE tdbError (convert tai) tdb  -- Test conversion to TDB.
                -- && cmpE dblError (tdbToTCB tdb) tcb         -- Test conversion to TCB.
                -- && cmpE tdbError (fromTAI $ toTAI tai) tcb  -- Test conversion to TCB.
   --where
