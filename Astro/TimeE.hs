@@ -161,9 +161,18 @@ data TT  = TT ; instance Show TT  where show _ = "TT"
 ttMinusTAI :: Time Pico
 ttMinusTAI = 32.184 *~ second  -- (2.4)
 
+-- | Convert a TAI epoch into a TT epoch.
+taiToTT :: E TAI -> E TT
+taiToTT (E t) = E $ addTime t ttMinusTAI
+
+-- | Convert a TT epoch into a TAI epoch.
+ttToTAI :: E TT -> E TAI
+ttToTAI (E t) = E $ subTime t ttMinusTAI
+
+
 instance T TT where
-  toTAI (E t) = subTime t ttMinusTAI
-  fromTAI t = E (addTime t ttMinusTAI)
+  toTAI = toTAI . ttToTAI
+  fromTAI = taiToTT . fromTAI
 
 -- | The "standard epoch" J2000.0 (2000-01-01 12:00 TT or JD 2451545.0 TT).
 -- Page 9 of [1], page 34 of [2].
