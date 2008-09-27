@@ -1,4 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables
+           , MultiParamTypeClasses
+           , FlexibleInstances
   #-}
 
 -- References
@@ -368,4 +370,40 @@ tdbToTCB tdb@(E t) = E $ addTime t (tcbMinusTDB tdb)
 instance T TCB where
   fromTAI = tdbToTCB . fromTAI
   toTAI = toTAI . tcbToTDB
+
+
+-- Conversion
+-- ==========
+-- Brute force.
+
+class Convert t t' where
+  convert :: E t -> E t'
+
+instance Convert a a where convert = id
+
+instance Convert TAI TT  where convert = taiToTT
+instance Convert TAI TCG where convert = convert . taiToTT
+instance Convert TAI TDB where convert = convert . taiToTT
+instance Convert TAI TCB where convert = convert . taiToTT
+
+instance Convert TT  TAI where convert =  ttToTAI
+instance Convert TT  TCG where convert =  ttToTCG
+instance Convert TT  TDB where convert =  ttToTDB
+instance Convert TT  TCB where convert =  convert . ttToTDB
+
+instance Convert TCG TAI where convert = convert . tcgToTT
+instance Convert TCG TT  where convert = tcgToTT
+instance Convert TCG TDB where convert = convert . tcgToTT
+instance Convert TCG TCB where convert = convert . tcgToTT
+
+instance Convert TDB TAI where convert = convert . tdbToTT
+instance Convert TDB TT  where convert = tdbToTT
+instance Convert TDB TCG where convert = convert . tdbToTT
+instance Convert TDB TCB where convert = tdbToTCB
+
+instance Convert TCB TAI where convert = convert . tcbToTDB
+instance Convert TCB TT  where convert = convert . tcbToTDB
+instance Convert TCB TCG where convert = convert . tcbToTDB
+instance Convert TCB TDB where convert = tcbToTDB
+
 
