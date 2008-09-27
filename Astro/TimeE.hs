@@ -1,6 +1,20 @@
+{-# LANGUAGE ScopedTypeVariables
+  #-}
+
+-- References
+-- ==========
+{-
+[dav]  <http://www.centerforspace.com/downloads/files/pubs/AAS-06-134.pdf>
+[C179] <http://aa.usno.navy.mil/publications/docs/Circular_179.php>
+[AAG]  <http://asa.usno.navy.mil/SecM/Glossary.html>
+[B3]   <http://www.iau.org/static/resolutions/IAU2006_Resol3.pdf>
+
+-}
+
+
 module Astro.TimeE where
 
-import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional.Prelude hiding (century)
 import qualified Prelude
 import Data.Time hiding (utc)
 import qualified Data.Time (utc)
@@ -16,9 +30,10 @@ type Epoch = AbsoluteTime
 
 class DiffEpoch t where 
   -- | Obtain the difference in seconds between two epochs. Beware that if
-  -- the time scale of the epoch isn't based on SI seconds the result won't
-  -- be SI seconds!
+  -- the epochs' time scale isn't based on SI seconds the result won't be
+  -- in SI seconds.
   diffEpoch :: Fractional a => t -> t -> Time a
+  -- | Add time to an epoch.
   addTime   :: RealFrac   a => t -> Time a -> t
 instance DiffEpoch AbsoluteTime where
   diffEpoch t t' = fromDiffTime $ diffAbsoluteTime t t'
@@ -49,9 +64,9 @@ class T t where
   toTAI :: E t -> AbsoluteTime
   fromTAI :: AbsoluteTime -> E t
 
-
--- Clock dates
--- ===========
+-- * Time Representations
+-- ** Clock dates
+--   ===========
 -- | Define an epoch using "clock time" and time scale. 
 clock :: Integer -> Int -> Int -> Int -> Int -> Pico -> t -> E t
 clock y m d h min s _ = E $ utcToTAITime (const 0) $
@@ -66,26 +81,8 @@ showClock :: forall t. Show t => E t -> String
 showClock (E t) = show (utcToLocalTime Data.Time.utc (taiToUTCTime (const 0) t)) 
                ++ ' ':show (undefined::t)
 
-
--- Julian dates
--- ============
-
--- Modified Julian Date (MJD)
--- --------------------------
--- | The epoch of MJD 0.0.
-mjdEpoch = taiEpoch
-
--- | Define an epoch by specifying a MJD and time scale.
-mjd :: RealFrac a => a -> t -> E t
-mjd d _ = E (addTime mjdEpoch (d *~ day))
-
--- | Show an epoch as MJD.
-showMJD :: forall t. Show t => E t -> String
-showMJD (E t) = "MJD " ++ show (diffEpoch t mjdEpoch /~ day) ++ " " ++ show (undefined::t)
-
-
--- Julian Date (JD)
--- ----------------
+-- ** Julian Date (JD)
+--    ----------------
 -- | The epoch of JD 0.0.
 jdEpoch  = subTime mjdEpoch (2400000.5 *~ day)
 
@@ -98,11 +95,37 @@ showJD :: forall t. Show t => E t -> String
 showJD (E t) = "JD " ++ show (diffEpoch t jdEpoch /~ day) ++ " " ++ show (undefined::t)
 
 
--- Time scales
--- ===========
+-- ** Modified Julian Date (MJD)
+--    --------------------------
+-- | The epoch of MJD 0.0.
+mjdEpoch = taiEpoch
 
--- International Atomic Time (TAI)
--- -------------------------------
+-- | Define an epoch by specifying a MJD and time scale.
+mjd :: RealFrac a => a -> t -> E t
+mjd d _ = E (addTime mjdEpoch (d *~ day))
+
+-- | Show an epoch as MJD.
+showMJD :: forall t. Show t => E t -> String
+showMJD (E t) = "MJD " ++ show (diffEpoch t mjdEpoch /~ day) ++ " " ++ show (undefined::t)
+
+
+
+
+-- * Time scales
+-- ===========
+{-
+For the SI-based time scales, the event tagged 1977 January 1,
+00:00:00 TAI (JD 2443144.5 TAI) at the geocenter is special. At
+that event, the time scales TT, TCG, and TCB all read 1977 January
+1, 00:00:32.184 (JD 2443144.5003725). (The 32.184 s offset is the
+estimated difference between TAI and the old Ephemeris Time scale.)
+This event will be designated the //convergence epoch// in the
+following; it can be represented in any of the time scales, and the
+context will dictate which time scale is appropriate. [C179]
+-}
+
+-- ** International Atomic Time (TAI)
+--    -------------------------------
 data TAI = TAI; instance Show TAI where show _ = "TAI"
 
 instance T TAI where 
@@ -112,14 +135,26 @@ instance T TAI where
 j2000tai = clock 2000 01 01 12 00 00.000 TAI
 
 -- | The epoch at which TT, TCG and TDB all read 1977-01-01T00:00:32.184.
+convergenceEpochTAI :: E TAI
 convergenceEpochTAI = clock 1977 01 01 00 00 00.000 TAI
 convergenceEpochTT  = clock 1977 01 01 00 00 32.184 TT
 convergenceEpochTCG = clock 1977 01 01 00 00 32.184 TCG
 convergenceEpochTCB = clock 1977 01 01 00 00 32.184 TCB
 
 
--- Terrestial Time (TT)
--- --------------------
+-- ** Terrestial Time (TT)
+--    --------------------
+{- |
+The astronomical time scale called Terrestrial Time (TT) is used
+widely for geocentric and topocentric ephemerides and runs at the
+same rate as a time scale based on SI seconds on the surface of the
+Earth. TT can be considered an idealized form of TAI with an epoch
+offset: TT = TAI + 32.184 s. This expressssion for TT preserves
+continuity with previously-used (now obsolete) \"dynamical\" time
+scales, Terrestrial Dynamical Time (TDT) and Ephemeris Time (ET).
+That is, ET -> TDT -> TT can be considered a single continuous time
+scale.
+-}
 data TT  = TT ; instance Show TT  where show _ = "TT"
 
 -- | The difference between TAI and TT.
@@ -135,16 +170,29 @@ instance T TT where
 j2000 = clock 2000 01 01 12 00 00.000 TT
 
 
--- Geocentric Coordinate Time (TCG)
--- --------------------------------
+-- * Theoretical Time Scales
+-- =======================
+{-
+dafda
+fafa
+afa
+-}
+
+-- ** Geocentric Coordinate Time (TCG)
+--   --------------------------------
+{- | 
+The coordinate time of the Geocentric Celestial Reference System
+(GCRS), which advances by SI seconds within that system. [AAG]
+-}
 data TCG = TCG; instance Show TCG where show _ = "TCG"
 
--- | The fractional difference in rate between the time scales TT and TCG. Page viii of [1].
+-- | The fractional difference in rate between the time scales TT and TCG.
+-- Page viii of [1].
 l_G :: Fractional a => Dimensionless a
 l_G = 6.969290134e-10 *~ (second / second)
 
 -- | The difference between the TT and TCG time scales as a function of
--- TCG epoch. The formula used is exact.
+-- TCG epoch. The formula used is exact, barring numerical errors.
 ttMinusTCG :: Fractional a => E TCG -> Time a
 ttMinusTCG tcg = negate l_G * (tcg .- convergenceEpochTCG)
 
@@ -159,7 +207,7 @@ double precision arithmetic. In particular the term (1 - L_G) suffers a
 significant loss of precision. Also, the error in (TT - t0) is carried
 over undiminished to TCG.
 
-We follow the suggestion on page 15 of [Vallado] and expand the fraction
+We follow the suggestion on page 15 of [dav] and expand the fraction
 to obtain
 
   TCG = (TT - t0) (1 + L_G + L_G^2 + L_G^3 ...) + t0
@@ -171,9 +219,9 @@ insignificant.
 -}
 
 -- | The difference between the TCG and TT time scales as a function of
--- TT epoch.
+-- TT epoch. This function implements Eq (27) of [dav].
 tcgMinusTT :: Fractional a => E TT -> Time a
-tcgMinusTT tt = (tt .- convergenceEpochTT) * (l_G + l_G^pos2)  -- (27) of [Vallado].
+tcgMinusTT tt = (tt .- convergenceEpochTT) * (l_G + l_G^pos2)  -- (27) of [dav].
 
 -- | Convert a TCG epoch into a TT epoch.
 tcgToTT :: E TCG -> E TT
@@ -188,24 +236,31 @@ instance T TCG where
   fromTAI = ttToTCG . fromTAI
 
 
--- Barycentric Dynamical Time (TDB)
--- --------------------------------
--- TDB is defined to be a linear function of TCB with its time unit scaled
--- so that TDB is "on average" equal to that of TT. This isn't strictly
--- achievable and the average value of TDB will diverge from TT at a rate of
--- roughly 10 microseconds per century (from 1977). The periodic variations
--- of TDB w.r.t. TT have an maximum amplitude of less than 2 milliseconds.
---
--- In terms of implementing TDB the defintion as a linear relation with TCB
--- is of limited utility in computing TDB from other time scales as TCB lacks
--- a concrete realization. Instead we will use an imprecise expression
--- relating TDB to TT. (This expression, together with the definition of TDB,
--- is also used to obtain TCB.)
+
+-- ** Barycentric Dynamical Time (TDB)
+--    --------------------------------
+{- |
+A time scale defined by the IAU (originally in 1976; named in 1979;
+revised in 2006) for use as an independent argument of barycentric
+ephemerides and equations of motion. TDB is a linear function of
+Barycentric Coordinate Time (TCB) that on average tracks TT over
+long periods of time; differences between TDB and TT evaluated at
+the Earth's surface remain under 2 ms for several thousand years
+around the current epoch. TDB is functionally equivalent to T_eph,
+the independent argument of the JPL planetary and lunar ephemerides
+DE405/LE405. (From [AAG].)
+
+In terms of implementing TDB the defintion as a linear relation
+with TCB is of limited utility in computing TDB from other time
+scales as TCB lacks a concrete realization. Instead we will use an
+imprecise expression relating TDB to TT. (This expression, together
+with the definition of TDB, is also used to obtain TCB.)
+-}
 data TDB = TDB; instance Show TDB where show _ = "TDB"
 
 -- | The difference between the TDB and TT time scales as a function of
--- TT epoch. This formula is adapted from (2.6) of [Kaplan] and reportedly
--- has a maximum error of about 10 microseconds from between years 1600 
+-- TT epoch. This formula is adapted from (2.6) of [C179] and reportedly
+-- has a maximum error of about 10 microseconds between the years 1600 
 -- and 2200.
 tdbMinusTT :: Floating a => E TT -> Time a
 tdbMinusTT tt = 0.001657*~second * sin ( 628.3076 *~rpc * t + 6.2401 *~radian)
@@ -227,7 +282,7 @@ the 10 microsecond accuracy inherent in the formula in the first place).
 
 -- | The difference between the TDB and TT time scales as a function of
 -- TT epoch. The maximum error is about 10 microseconds from 1600 to 2200.
--- Adapted from (2.6) of [Kaplan].
+-- Adapted from (2.6) of [C179].
 ttMinusTDB :: Floating a => E TDB -> Time a
 ttMinusTDB (E t) = negate $ tdbMinusTT (E t)
 
@@ -244,31 +299,33 @@ instance T TDB where
   fromTAI = ttToTDB . fromTAI
 
 
--- Barycentric Coordinate Time
--- ---------------------------
--- An atomic (SI) clock located at the solar system barycenter.
--- "The relation between TCB and TDB is linear."
+-- ** Barycentric Coordinate Time (TCB)
+--    ---------------------------------
+{- |
+The coordinate time of the Barycentric Celestial Reference System
+(BCRS), which advances by SI seconds within that system. [AAG]
+-}
 data TCB = TCB; instance Show TCB where show _ = "TCB"
 
 -- | The fractional difference in rate between the time scales TDB and TCB.
--- @l_B@ was given an exact value and declared a defining constant in
--- [IAU 2006 Resolution B3].
+-- @l_B@ was given an exact value and declared a defining constant in [B3].
 l_B :: Fractional a => Dimensionless a
 l_B = 1.550519768e-8 *~ (second/second)
 
--- | The difference between TCB and TDB time scales at the convergence epoch
--- 1977 January 1.0 TAI. This difference is a defining constant from
--- [IAU 2006 Resolution B3] as opposed to the epoch calculated using the TDB
--- conversion formulae provided in this module.
--- As a result, since calculation of TCB relies on
--- an intermediate calculation of TDB a calculation of TCB at the convergence
--- epoch will not produce 1977-01-01 00:00:32.184 TCB exactly. The difference
--- is introduced by the intermediate TDB calculation and is within its error
--- margin.
+{- |
+The difference between TCB and TDB time scales at the convergence
+epoch 1977 January 1.0 TAI. This difference is a defining constant
+from [B3] as opposed to the epoch calculated using the TDB conversion
+formulae provided in this module.  As a result, since calculation
+of TCB relies on an intermediate calculation of TDB a calculation
+of TCB at the convergence epoch will not produce 1977-01-01
+00:00:32.184 TCB exactly. The difference is introduced by the
+intermediate TDB calculation and is within its error margin.
+-}
 tdb_0 :: Fractional a => Time a
-tdb_0 = (-6.55e-5) *~ second  --  :: Time Pico
+tdb_0 = (-6.55e-5) *~ second  -- :: Time Pico
 
--- The TDB epoch corresponding to 1977 January 1.0 TAI.
+-- | The TDB epoch corresponding to 1977 January 1.0 TAI.
 convergenceEpochTDB :: E TDB
 convergenceEpochTDB = E $ t .+ (tdb_0 :: Time Pico)
   where
