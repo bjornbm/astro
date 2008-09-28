@@ -3,20 +3,43 @@
            , FlexibleInstances
   #-}
 
--- References
--- ==========
-{-
-[dav]  <http://www.centerforspace.com/downloads/files/pubs/AAS-06-134.pdf>
-[C179] <http://aa.usno.navy.mil/publications/docs/Circular_179.php>
-[AAG]  <http://asa.usno.navy.mil/SecM/Glossary.html>
-[B3]   <http://www.iau.org/static/resolutions/IAU2006_Resol3.pdf>
-
--}
 
 
-module Astro.TimeE where
+module Astro.TimeE (
+  -- * References
+  -- $ref
+  -- * Time Scales
+  E
+  -- ** International Atomic Time (TAI)
+  , TAI (TAI)
+  -- ** Terrestial Time (TT)
+  , TT  (TT)
+  , j2000
+  -- ** Geocentric Coordinate Time (TCG)
+  , TCG (TCG)
+  -- ** Barycentric Dynamical Time (TDB)
+  , TDB (TDB)
+  -- ** Barycentric Coordinate Time (TCB)
+  , TCB (TCB)
+  , convert
+  -- * Time Respresentations
+  -- ** Clock Time
+  , clock
+  , showClock
+  -- ** Julian Dates (JD)
+  -- $jd
+  , jd
+  , showJD
+  -- ** Modified Julian Dates (MJD)
+  -- $mjd
+  , mjd
+  , showMJD
+  -- * Subject To Change
+  , DiffEpoch
+  , diffEpoch
+  ) where
 
-import Numeric.Units.Dimensional.Prelude hiding (century)
+import Numeric.Units.Dimensional.Prelude -- hiding (century)
 import qualified Prelude
 import Data.Time hiding (utc)
 import qualified Data.Time (utc)
@@ -24,11 +47,16 @@ import Data.Time.Clock.TAI
 import Data.Fixed (Pico)
 
 
+-- A Julian century.
 century :: Num a => Unit DTime a
 century = prefix 36525 day
 
--- | We chose to represent our epoch as 'AbsoluteTime's.
-type Epoch = AbsoluteTime
+
+
+-- | A wrapper for tagging an AbsoluteTime with a time scale.
+newtype E t = E AbsoluteTime deriving (Eq, Ord)
+instance Show t => Show (E t) where show = showClock
+
 
 class DiffEpoch t where 
   -- | Obtain the difference in seconds between two epochs. Beware that if
@@ -37,6 +65,9 @@ class DiffEpoch t where
   diffEpoch :: Fractional a => t -> t -> Time a
   -- | Add time to an epoch.
   addTime   :: RealFrac   a => t -> Time a -> t
+  -- | Subtract time from an epoch.
+  subTime   :: RealFrac   a => t -> Time a -> t
+  subTime e = addTime e . negate
 instance DiffEpoch AbsoluteTime where
   diffEpoch t t' = fromDiffTime $ diffAbsoluteTime t t'
   addTime   t dt = addAbsoluteTime (toDiffTime dt) t
@@ -44,6 +75,9 @@ instance DiffEpoch (E t) where
   diffEpoch (E t) (E t') = diffEpoch t t'
   addTime   (E t)    dt  = E $ addTime t dt
 
+
+-- Convenience operators. These allow our function definitions to more
+-- closely resemble the formulae they implement.
 infixl 6 .+, .-
 (.+) :: (DiffEpoch t, RealFrac a) => t -> Time a -> t
 (.+) = addTime
@@ -51,24 +85,10 @@ infixl 6 .+, .-
 (.-) = diffEpoch
 
 
---addTime :: RealFrac a => Epoch -> Time a -> Epoch
---addTime e t = addAbsoluteTime (toDiffTime t) e
-subTime :: (RealFrac a, DiffEpoch t) => t -> Time a -> t
-subTime e = addTime e . negate
-
-
--- | A wrapper for tagging an AbsoluteTime with a time scale.
-newtype E t = E AbsoluteTime deriving (Eq, Ord)
-instance Show t => Show (E t) where show = showClock
-
--- | Epochs in a time scale must be convertable to TAI for it to be useful(?).
-class T t where
-  toTAI :: E t -> AbsoluteTime
-  fromTAI :: AbsoluteTime -> E t
 
 -- * Time Representations
 -- ** Clock dates
---   ===========
+--    -----------
 -- | Define an epoch using "clock time" and time scale. 
 clock :: Integer -> Int -> Int -> Int -> Int -> Pico -> t -> E t
 clock y m d h min s _ = E $ utcToTAITime (const 0) $
@@ -78,38 +98,58 @@ clock y m d h min s _ = E $ utcToTAITime (const 0) $
 clock' :: t -> Integer -> Int -> Int -> Int -> Int -> Pico -> E t
 clock' t y m d h min s = clock y m d h min s t
 
--- | Show an epoch in "clock".
+-- | Show an epoch as a clock time. This function is used by the @Show@
+-- instance. TODO: should change this to use ISO8601 format.
 showClock :: forall t. Show t => E t -> String
 showClock (E t) = show (utcToLocalTime Data.Time.utc (taiToUTCTime (const 0) t)) 
                ++ ' ':show (undefined::t)
 
+
 -- ** Julian Date (JD)
 --    ----------------
--- | The epoch of JD 0.0.
+{- $jd
+A Julian Date (JD) is a continuous count of days and fractions elapsed
+since an initial epoch. The integral part is the Julian day number.
+The fractional part is the time of day since noon UT as a decimal fraction
+of one day, with 0.5 representing midnight. [WPJD]
+
+The initial epoch is defined as noon, January 1, 4713 BC in the
+proleptic Julian calendar. Traditionally JD has been used with the UT1
+time scale but it is common (see e.g. [C179]) to specify Julian dates
+in other time scales.
+-}
+
+-- | The epoch of JD 0.0 as an AbsoluteTime.
+jdEpoch :: AbsoluteTime
 jdEpoch  = subTime mjdEpoch (2400000.5 *~ day)
 
 -- | Define an epoch by specifying a JD and time scale.
 jd :: RealFrac a => a -> t -> E t
 jd d _ = E (addTime jdEpoch (d *~ day))
 
--- Show an epoch as JD.
+-- | Show an epoch as JD on the format \"JD 0.0 TAI\".
 showJD :: forall t. Show t => E t -> String
 showJD (E t) = "JD " ++ show (diffEpoch t jdEpoch /~ day) ++ " " ++ show (undefined::t)
 
 
 -- ** Modified Julian Date (MJD)
 --    --------------------------
--- | The epoch of MJD 0.0.
+{- $mjd
+A Modified Julian Date (MJD) is analogous with a Julian Date but with
+an initial epoch of 1858-11-17 00:00.
+-}
+
+-- | The epoch of MJD 0.0 as an AbsoluteTime.
+mjdEpoch :: AbsoluteTime
 mjdEpoch = taiEpoch
 
 -- | Define an epoch by specifying a MJD and time scale.
 mjd :: RealFrac a => a -> t -> E t
 mjd d _ = E (addTime mjdEpoch (d *~ day))
 
--- | Show an epoch as MJD.
+-- | Show an epoch as MJD on the format \"MJD 0.0 TAI\".
 showMJD :: forall t. Show t => E t -> String
 showMJD (E t) = "MJD " ++ show (diffEpoch t mjdEpoch /~ day) ++ " " ++ show (undefined::t)
-
 
 
 
@@ -130,11 +170,6 @@ context will dictate which time scale is appropriate. [C179]
 --    -------------------------------
 data TAI = TAI; instance Show TAI where show _ = "TAI"
 
-instance T TAI where 
-  toTAI (E t) = t
-  fromTAI t = E t
-
-j2000tai = clock 2000 01 01 12 00 00.000 TAI
 
 -- | The epoch at which TT, TCG and TDB all read 1977-01-01T00:00:32.184.
 convergenceEpochTAI :: E TAI
@@ -159,6 +194,10 @@ scale.
 -}
 data TT  = TT ; instance Show TT  where show _ = "TT"
 
+-- | The "standard epoch" J2000.0 (2000-01-01 12:00 TT or JD 2451545.0 TT).
+-- Page 9 of [1], page 34 of [2].
+j2000 = clock 2000 01 01 12 00 00.000 TT
+
 -- | The difference between TAI and TT.
 ttMinusTAI :: Time Pico
 ttMinusTAI = 32.184 *~ second  -- (2.4)
@@ -171,14 +210,6 @@ taiToTT (E t) = E $ addTime t ttMinusTAI
 ttToTAI :: E TT -> E TAI
 ttToTAI (E t) = E $ subTime t ttMinusTAI
 
-
-instance T TT where
-  toTAI = toTAI . ttToTAI
-  fromTAI = taiToTT . fromTAI
-
--- | The "standard epoch" J2000.0 (2000-01-01 12:00 TT or JD 2451545.0 TT).
--- Page 9 of [1], page 34 of [2].
-j2000 = clock 2000 01 01 12 00 00.000 TT
 
 
 -- * Theoretical Time Scales
@@ -242,10 +273,6 @@ tcgToTT tcg@(E t) = E $ addTime t (ttMinusTCG tcg)
 ttToTCG :: E TT -> E TCG
 ttToTCG tt@(E t) = E $ addTime t (tcgMinusTT tt)
 
-instance T TCG where
-  toTAI = toTAI . tcgToTT
-  fromTAI = ttToTCG . fromTAI
-
 
 
 -- ** Barycentric Dynamical Time (TDB)
@@ -305,9 +332,6 @@ ttToTDB tt@(E t) = E $ addTime t (tdbMinusTT tt)
 tdbToTT :: E TDB -> E TT
 tdbToTT tdb@(E t) = E $ addTime t (ttMinusTDB tdb)
 
-instance T TDB where
-  toTAI = toTAI . tdbToTT
-  fromTAI = ttToTDB . fromTAI
 
 
 -- ** Barycentric Coordinate Time (TCB)
@@ -367,19 +391,20 @@ tdbToTCB :: E TDB -> E TCB
 tdbToTCB tdb@(E t) = E $ addTime t (tcbMinusTDB tdb)
 
 
-instance T TCB where
-  fromTAI = tdbToTCB . fromTAI
-  toTAI = toTAI . tcbToTDB
-
 
 -- Conversion
 -- ==========
--- Brute force.
 
 class Convert t t' where
+  -- | Convert between time scales. The target of the conversion is
+  -- decided from the expected type (provide a type signature if you
+  -- need to be explicit).
   convert :: E t -> E t'
 
-instance Convert a a where convert = id
+-- Since the number or time scales is limited we "brute force" the instance
+-- definitions instead of trying to get fancy.
+
+instance Convert a a where convert = id  -- Trivial.
 
 instance Convert TAI TT  where convert = taiToTT
 instance Convert TAI TCG where convert = convert . taiToTT
@@ -406,4 +431,20 @@ instance Convert TCB TT  where convert = convert . tcbToTDB
 instance Convert TCB TCG where convert = convert . tcbToTDB
 instance Convert TCB TDB where convert = tcbToTDB
 
+
+-- References
+-- ==========
+{-$ref
+
+ * [dav]  <http://www.centerforspace.com/downloads/files/pubs/AAS-06-134.pdf>
+
+ * [C179] <http://aa.usno.navy.mil/publications/docs/Circular_179.php>
+
+ * [AAG]  <http://asa.usno.navy.mil/SecM/Glossary.html>
+
+ * [B3]   <http://www.iau.org/static/resolutions/IAU2006_Resol3.pdf>
+ 
+ * [WPJD] <http://en.wikipedia.org/wiki/Julian_date>
+
+-}
 
