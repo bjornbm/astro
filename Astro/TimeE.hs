@@ -8,18 +8,25 @@
 module Astro.TimeE (
   -- * References
   -- $ref
+
   -- * Time Scales
   E
   -- ** International Atomic Time (TAI)
   , TAI (TAI)
+  , wrapTAI
+  , unwrapTAI
   -- ** Terrestial Time (TT)
+  -- $tt
   , TT  (TT)
   , j2000
   -- ** Geocentric Coordinate Time (TCG)
+  -- $tcg
   , TCG (TCG)
   -- ** Barycentric Dynamical Time (TDB)
+  -- $tdb
   , TDB (TDB)
   -- ** Barycentric Coordinate Time (TCB)
+  -- $tcb
   , TCB (TCB)
   , convert
   -- * Time Respresentations
@@ -39,7 +46,8 @@ module Astro.TimeE (
   , diffEpoch
   ) where
 
-import Numeric.Units.Dimensional.Prelude -- hiding (century)
+
+import Numeric.Units.Dimensional.Prelude hiding (century)
 import qualified Prelude
 import Data.Time hiding (utc)
 import qualified Data.Time (utc)
@@ -52,8 +60,7 @@ century :: Num a => Unit DTime a
 century = prefix 36525 day
 
 
-
--- | A wrapper for tagging an AbsoluteTime with a time scale.
+-- | Representation of an epoch parameterized by time scale.
 newtype E t = E AbsoluteTime deriving (Eq, Ord)
 instance Show t => Show (E t) where show = showClock
 
@@ -170,6 +177,16 @@ context will dictate which time scale is appropriate. [C179]
 --    -------------------------------
 data TAI = TAI; instance Show TAI where show _ = "TAI"
 
+-- | Converts a 'Data.Time.Clock.TAI.AbsoluteTime' into this module's
+-- representation of an epoch. (Perhaps the use of \"wrap\" in the function
+-- name is inappropriate as it leaks/implies implementation details.)
+wrapTAI :: AbsoluteTime -> E TAI
+wrapTAI = E
+
+-- | Converts this module's representation of a TAI epoch into a
+-- 'Data.Time.Clock.TAI.AbsoluteTime'.
+unwrapTAI :: E TAI -> AbsoluteTime
+unwrapTAI (E t) = t
 
 -- | The epoch at which TT, TCG and TDB all read 1977-01-01T00:00:32.184.
 convergenceEpochTAI :: E TAI
@@ -181,7 +198,7 @@ convergenceEpochTCB = clock 1977 01 01 00 00 32.184 TCB
 
 -- ** Terrestial Time (TT)
 --    --------------------
-{- |
+{- $tt
 The astronomical time scale called Terrestrial Time (TT) is used
 widely for geocentric and topocentric ephemerides and runs at the
 same rate as a time scale based on SI seconds on the surface of the
@@ -222,7 +239,7 @@ afa
 
 -- ** Geocentric Coordinate Time (TCG)
 --   --------------------------------
-{- | 
+{- $tcg
 The coordinate time of the Geocentric Celestial Reference System
 (GCRS), which advances by SI seconds within that system. [AAG]
 -}
@@ -277,7 +294,7 @@ ttToTCG tt@(E t) = E $ addTime t (tcgMinusTT tt)
 
 -- ** Barycentric Dynamical Time (TDB)
 --    --------------------------------
-{- |
+{- $tdb
 A time scale defined by the IAU (originally in 1976; named in 1979;
 revised in 2006) for use as an independent argument of barycentric
 ephemerides and equations of motion. TDB is a linear function of
@@ -336,7 +353,7 @@ tdbToTT tdb@(E t) = E $ addTime t (ttMinusTDB tdb)
 
 -- ** Barycentric Coordinate Time (TCB)
 --    ---------------------------------
-{- |
+{- $tcb
 The coordinate time of the Barycentric Celestial Reference System
 (BCRS), which advances by SI seconds within that system. [AAG]
 -}
@@ -436,13 +453,13 @@ instance Convert TCB TDB where convert = tcbToTDB
 -- ==========
 {-$ref
 
- * [dav]  <http://www.centerforspace.com/downloads/files/pubs/AAS-06-134.pdf>
-
  * [C179] <http://aa.usno.navy.mil/publications/docs/Circular_179.php>
 
- * [AAG]  <http://asa.usno.navy.mil/SecM/Glossary.html>
-
  * [B3]   <http://www.iau.org/static/resolutions/IAU2006_Resol3.pdf>
+
+ * [dav]  <http://www.centerforspace.com/downloads/files/pubs/AAS-06-134.pdf>
+
+ * [AAG]  <http://asa.usno.navy.mil/SecM/Glossary.html>
  
  * [WPJD] <http://en.wikipedia.org/wiki/Julian_date>
 
