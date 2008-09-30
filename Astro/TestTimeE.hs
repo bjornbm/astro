@@ -10,18 +10,47 @@ import Test.QuickCheck
 import Data.Time hiding (utc)
 import Data.Time.Clock.TAI
 
--- Accuracies.
-tdbError = 20 *~ micro second  -- About 10 us according to Kaplan, but for Vallado's cases the difference is greater...
-dblError =  1 *~ nano second
+-- Preliminaries
+-- =============
 
--- Comparison allowing for inaccuracy.
+onceCheck = check (defaultConfig {configMaxTest = 1})
+
+-- | Comparison allowing for inaccuracy.
 cmpE :: (DiffEpoch t, Fractional a, Ord a) => Time a -> t -> t -> Bool
 cmpE accuracy t t' = abs (diffEpoch t t') < accuracy
 
--- J200 epoch.
-prop_J2000_jd    = j2000 == jd 2451545 TT
-prop_J2000_clock = j2000 == clock 2000 1 1 12 0 0 TT
+-- Accuracies.
+tdbError = 20 *~ micro second  -- About 10 us according to Kaplan, but for Vallado's cases the difference is greater...
+dblError =  1 *~ nano second
+noError  =  0 *~ second
 
+
+
+
+-- Specific epochs
+-- ===============
+
+-- J200 epoch.
+prop_J2000_jd    = j2000 ==  jd  2451545 TT
+prop_J2000_mjd   = j2000 == mjd  51544.5 TT
+prop_J2000_clock = j2000 == clock 2000 1 1 12 0 0 TT
+prop_J2000_TAI   = convert j2000 == clock 2000 1 1 11 59 27.816 TAI 
+-- prop_J2000_UTC   = convertUTC () j2000 == clock 2000 1 1 11 58 55.816 UTC
+
+-- Convergence epoch
+-- -----------------
+ttConverges  = clock 1977 01 01 00 00 32.184 TT  == convert (clock 1977 1 1 0 0 0 TAI)
+tcgConverges = clock 1977 01 01 00 00 32.184 TCG == convert (clock 1977 1 1 0 0 0 TAI)
+-- The accuracy of TDB and TCB are limited by the TDB conversions.
+tcbConverges = cmpE tdbError (clock 1977 01 01 00 00 32.184     TCB) (convert $ clock 1977 1 1 0 0 0 TAI) 
+tdbConverges = cmpE tdbError (clock 1977 01 01 00 00 32.1839345 TDB) (convert $ clock 1977 1 1 0 0 0 TAI) 
+-- This first test isn't adversely affected by conversion to Double while the second is.
+prop_TDBTCB_conv  = clock 1977 01 01 00 00 32.184 TCB == convert (clock 1977 01 01 00 00 32.1839345 TDB)
+prop_TDBTCB_conv' = cmpE dblError (convert $ clock 1977 01 01 00 00 32.184 TCB) (clock 1977 01 01 00 00 32.1839345 TDB)
+
+
+-- Conversion tests
+-- ================
 -- Check conversions back and forth are consistent. Test around both
 -- JD 0 and MJD 0 to make sure we aren't favoring algorithms that are
 -- only good around certain dates.
@@ -44,12 +73,10 @@ prop_TCB a = let t =  jd a TCB in cmpE dblError t (convert (convert t :: E TAI))
 prop_TCB' a = let t =  jd a TCB in cmpE dblError t (convert (convert t :: E TDB))  -- ^ Conversion back and forth to TDB.
            && let t = mjd a TCB in cmpE dblError t (convert (convert t :: E TDB))  -- ^ Conversion back and forth to TDB.
 
--- Test convergence epochs.
-ttConverges  = clock 1977 01 01 00 00 32.184 TT  == convert (clock 1977 1 1 0 0 0 TAI)
-tcgConverges = clock 1977 01 01 00 00 32.184 TCG == convert (clock 1977 1 1 0 0 0 TAI)
--- The accuracy of TDB and TCB are limited by the TDB conversions.
-tcbConverges = cmpE tdbError (clock 1977 01 01 00 00 32.184     TCB) (convert $ clock 1977 1 1 0 0 0 TAI) 
-tdbConverges = cmpE tdbError (clock 1977 01 01 00 00 32.1839345 TDB) (convert $ clock 1977 1 1 0 0 0 TAI) 
+
+
+-- Tests from literature
+-- =====================
 
 -- utc 1990 05 14 10 43 00.000 from [1].
 valladoExample = tai == convert tt
@@ -76,11 +103,17 @@ tdb = clock 2004 04 06 7 52 32.5716651154 TDB
 tcb = clock 2004 04 06 7 52 45.9109901113 TCB  -- Incorrect in example, no offset.
 
 
-onceCheck = check (defaultConfig {configMaxTest = 1})
+-- Driver
+-- ======
+
 main = do
   -- Start with the faster-running tests.
   onceCheck prop_J2000_jd
+  onceCheck prop_J2000_mjd
   onceCheck prop_J2000_clock
+  onceCheck prop_J2000_TAI
+  onceCheck prop_TDBTCB_conv
+  onceCheck prop_TDBTCB_conv'
   onceCheck ttConverges
   onceCheck tcgConverges
   onceCheck tcbConverges

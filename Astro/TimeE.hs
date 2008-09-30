@@ -49,7 +49,7 @@ module Astro.TimeE (
   ) where
 
 
-import Numeric.Units.Dimensional.Prelude hiding (century)
+import Numeric.Units.Dimensional.Prelude  -- hiding (century)
 import qualified Prelude
 import Data.Time hiding (utc)
 import qualified Data.Time (utc)
