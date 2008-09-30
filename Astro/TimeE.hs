@@ -10,7 +10,9 @@ module Astro.TimeE (
   -- $ref
 
   -- * Time Scales
-  E
+  E (E)
+  , Convert
+  , convert
   -- ** International Atomic Time (TAI)
   , TAI (TAI)
   , wrapTAI
@@ -28,7 +30,6 @@ module Astro.TimeE (
   -- ** Barycentric Coordinate Time (TCB)
   -- $tcb
   , TCB (TCB)
-  , convert
   -- * Time Respresentations
   -- ** Clock Time
   , clock
@@ -44,6 +45,7 @@ module Astro.TimeE (
   -- * Subject To Change
   , DiffEpoch
   , diffEpoch
+  , addTime
   ) where
 
 
