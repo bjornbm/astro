@@ -6,6 +6,7 @@
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import Astro.Time
+import Astro.Time.TDB.Kaplan2006
 import Test.QuickCheck
 import Data.Time hiding (utc)
 import Data.Time.Clock.TAI

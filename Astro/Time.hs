@@ -3,8 +3,16 @@
            , FlexibleInstances
   #-}
 
+{- |
+   Copyright  : Copyright (C) 2008 Bjorn Buckwalter
+   License    : BSD3
 
+   Maintainer : bjorn.buckwalter@gmail.com
+   Stability  : experimental
+   Portability: GHC only?
 
+Time scales and time conversion facilities relevant to astrodynamics.
+-}
 module Astro.Time (
   -- * References
   -- $ref
@@ -46,6 +54,7 @@ module Astro.Time (
   , DiffEpoch
   , diffEpoch
   , addTime
+  , century
   ) where
 
 
@@ -233,11 +242,6 @@ ttToTAI (E t) = E $ subTime t ttMinusTAI
 
 -- * Theoretical Time Scales
 -- =======================
-{-
-dafda
-fafa
-afa
--}
 
 -- ** Geocentric Coordinate Time (TCG)
 --   --------------------------------
@@ -309,48 +313,12 @@ DE405/LE405. (From [AAG].)
 
 In terms of implementing TDB the defintion as a linear relation
 with TCB is of limited utility in computing TDB from other time
-scales as TCB lacks a concrete realization. Instead we will use an
-imprecise expression relating TDB to TT. (This expression, together
-with the definition of TDB, is also used to obtain TCB.)
+scales as TCB lacks a concrete realization. Instead one would
+generally use an (imprecise) expression relating TDB to TT. This
+expression, together with the definition of TDB, would then also
+be used to obtain TCB.
 -}
 data TDB = TDB; instance Show TDB where show _ = "TDB"
-
--- | The difference between the TDB and TT time scales as a function of
--- TT epoch. This formula is adapted from (2.6) of [C179] and reportedly
--- has a maximum error of about 10 microseconds between the years 1600 
--- and 2200.
-tdbMinusTT :: Floating a => E TT -> Time a
-tdbMinusTT tt = 0.001657*~second * sin ( 628.3076 *~rpc * t + 6.2401 *~radian)
-              + 0.000022*~second * sin ( 575.3385 *~rpc * t + 4.2970 *~radian)
-              + 0.000014*~second * sin (1256.6152 *~rpc * t + 6.1969 *~radian)
-              + 0.000005*~second * sin ( 606.9777 *~rpc * t + 4.0212 *~radian)
-              + 0.000005*~second * sin (  52.9691 *~rpc * t + 0.4444 *~radian)
-              + 0.000002*~second * sin (  21.3299 *~rpc * t + 5.5431 *~radian)
-              + 0.000010*~(second/century) * t * sin ( 628.3076 *~rpc * t + 4.2490 *~radian)
-  where
-    rpc = radian / century
-    t   = diffEpoch tt j2000  
-
-{-
-We incorrectly substitute TDB for TT in 'ttMinusTDB' but the error
-introduced by this approximation is less than a picosecond (far less than
-the 10 microsecond accuracy inherent in the formula in the first place).
--}
-
--- | The difference between the TDB and TT time scales as a function of
--- TT epoch. The maximum error is about 10 microseconds from 1600 to 2200.
--- Adapted from (2.6) of [C179].
-ttMinusTDB :: Floating a => E TDB -> Time a
-ttMinusTDB (E t) = negate $ tdbMinusTT (E t)
-
--- | Convert a TT epoch into a TDB epoch.
-ttToTDB :: E TT -> E TDB
-ttToTDB tt@(E t) = E $ addTime t (tdbMinusTT tt)
-
--- | Convert a TDB epoch into a TT epoch.
-tdbToTT :: E TDB -> E TT
-tdbToTT tdb@(E t) = E $ addTime t (ttMinusTDB tdb)
-
 
 
 -- ** Barycentric Coordinate Time (TCB)
@@ -427,27 +395,15 @@ instance Convert a a where convert = id  -- Trivial.
 
 instance Convert TAI TT  where convert = taiToTT
 instance Convert TAI TCG where convert = convert . taiToTT
-instance Convert TAI TDB where convert = convert . taiToTT
-instance Convert TAI TCB where convert = convert . taiToTT
 
 instance Convert TT  TAI where convert =  ttToTAI
 instance Convert TT  TCG where convert =  ttToTCG
-instance Convert TT  TDB where convert =  ttToTDB
-instance Convert TT  TCB where convert =  convert . ttToTDB
 
 instance Convert TCG TAI where convert = convert . tcgToTT
 instance Convert TCG TT  where convert = tcgToTT
-instance Convert TCG TDB where convert = convert . tcgToTT
-instance Convert TCG TCB where convert = convert . tcgToTT
 
-instance Convert TDB TAI where convert = convert . tdbToTT
-instance Convert TDB TT  where convert = tdbToTT
-instance Convert TDB TCG where convert = convert . tdbToTT
 instance Convert TDB TCB where convert = tdbToTCB
 
-instance Convert TCB TAI where convert = convert . tcbToTDB
-instance Convert TCB TT  where convert = convert . tcbToTDB
-instance Convert TCB TCG where convert = convert . tcbToTDB
 instance Convert TCB TDB where convert = tcbToTDB
 
 
