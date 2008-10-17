@@ -1,5 +1,5 @@
 {-
-[1] http://books.google.com/books?id=PJLlWzMBKjkC&pg=RA1-PA197&lpg=RA1-PA197&dq=tdb+tt&source=web&ots=V0jT1Cnfsl&sig=LNVZxWoDhWWoe7_V1Sn07kZgcvM&hl=en&sa=X&oi=book_result&resnum=1&ct=result#PRA1-PA197,M1
+[1] http://books.google.com/books?id=PJLlWzMBKjkC&pg=RA1-PA197
 -}
 
 
@@ -7,6 +7,7 @@ import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import Astro.Time
 import Astro.Time.TDB.Kaplan2006
+--import Astro.Time.TDB.TT
 import Test.QuickCheck
 import Data.Time hiding (utc)
 import Data.Time.Clock.TAI
