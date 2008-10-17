@@ -15,7 +15,7 @@ The formula reportedly has a maximum error in the conversions of about
 This module exports no data types or functions, it only provides additional
 'Astro.Time.Convert' instances.
 -}
-module Astro.Time.TDB.Kaplan2006 () where
+module Astro.Time.TDB.Kaplan2005 () where
 
 import Astro.Time
 import Numeric.Units.Dimensional.Prelude
@@ -23,9 +23,7 @@ import qualified Prelude
 
 
 -- | The difference between the TDB and TT time scales as a function of
--- TT epoch. This formula is adapted from (2.6) of [C179] and reportedly
--- has a maximum error of about 10 microseconds between the years 1600 
--- and 2200.
+-- TT epoch.
 tdbMinusTT :: Floating a => E TT -> Time a
 tdbMinusTT tt = 0.001657*~second * sin ( 628.3076 *~rpc * t + 6.2401 *~radian)
               + 0.000022*~second * sin ( 575.3385 *~rpc * t + 4.2970 *~radian)
@@ -45,7 +43,6 @@ the 10 microsecond accuracy inherent in the formula in the first place).
 -}
 -- | The difference between the TDB and TT time scales as a function of
 -- TT epoch. The maximum error is about 10 microseconds from 1600 to 2200.
--- Adapted from (2.6) of [C179].
 ttMinusTDB :: Floating a => E TDB -> Time a
 ttMinusTDB (E t) = negate $ tdbMinusTT (E t)
 
