@@ -12,6 +12,22 @@
    Portability: GHC only?
 
 Time scales and time conversion facilities relevant to astrodynamics.
+
+The barycentric time scales are Barycentric Coordinate Time (TCB)
+and Barycentric Dynamical Time (TDB) where the latter is defined
+as a linear function of former. A concrete implementation of
+conversions between barycentric and terrestrial time scales isn't
+provided in this module. Instead a module in the @Astro.Time.Barycentric@
+namespace should be imported according to accuracy/performance
+requirements.
+
+(In terms of implementing TDB the defintion as a linear relation
+with TCB is of limited utility in computing TDB from other time
+scales as TCB lacks a concrete realization. Instead one would
+generally use an (imprecise) expression relating TDB to TT. This
+expression, together with the definition of TDB, would then also
+be used to obtain TCB.)
+
 -}
 module Astro.Time (
   -- * References
@@ -21,6 +37,7 @@ module Astro.Time (
   E (E)
   , Convert
   , convert
+  -- * Terrestrial Time Scales
   -- ** International Atomic Time (TAI)
   , TAI (TAI)
   , wrapTAI
@@ -32,6 +49,7 @@ module Astro.Time (
   -- ** Geocentric Coordinate Time (TCG)
   -- $tcg
   , TCG (TCG)
+  -- * Barycentric Time Scales
   -- ** Barycentric Dynamical Time (TDB)
   -- $tdb
   , TDB (TDB)
@@ -171,8 +189,8 @@ showMJD (E t) = "MJD " ++ show (diffEpoch t mjdEpoch /~ day) ++ " " ++ show (und
 
 
 
--- * Time scales
--- ===========
+-- * Terrestrial Time scales
+-- =========================
 {-
 For the SI-based time scales, the event tagged 1977 January 1,
 00:00:00 TAI (JD 2443144.5 TAI) at the geocenter is special. At
@@ -239,10 +257,6 @@ ttToTAI :: E TT -> E TAI
 ttToTAI (E t) = E $ subTime t ttMinusTAI
 
 
-
--- * Theoretical Time Scales
--- =======================
-
 -- ** Geocentric Coordinate Time (TCG)
 --   --------------------------------
 {- $tcg
@@ -297,6 +311,25 @@ ttToTCG :: E TT -> E TCG
 ttToTCG tt@(E t) = E $ addTime t (tcgMinusTT tt)
 
 
+-- * Barycentric time-scales
+--   =======================
+{- $bary
+The barycentric time scales are Barycentric Coordinate Time (TCB)
+and Barycentric Dynamical Time (TDB) where the latter is defined
+as a linear function of former.
+
+In terms of implementing TDB the defintion as a linear relation
+with TCB is of limited utility in computing TDB from other time
+scales as TCB lacks a concrete realization. Instead one would
+generally use an (imprecise) expression relating TDB to TT. This
+expression, together with the definition of TDB, would then also
+be used to obtain TCB.
+
+A concrete implementation of conversions between barycentric and
+terrestrial time scales isn't provided in this module. Instead a
+module in the @Astro.Time.Barycentric@ namespace should be imported
+according to accuracy/performance requirements.
+-}
 
 -- ** Barycentric Dynamical Time (TDB)
 --    --------------------------------
@@ -311,12 +344,12 @@ around the current epoch. TDB is functionally equivalent to T_eph,
 the independent argument of the JPL planetary and lunar ephemerides
 DE405/LE405. (From [AAG].)
 
-In terms of implementing TDB the defintion as a linear relation
-with TCB is of limited utility in computing TDB from other time
-scales as TCB lacks a concrete realization. Instead one would
-generally use an (imprecise) expression relating TDB to TT. This
-expression, together with the definition of TDB, would then also
-be used to obtain TCB.
+The TDB time scale should be used for quantities such as precession
+angles and the fundamental arguments. However, for these quantities,
+the difference between TDB and TT is negligible at the microarcsecond
+level (page B7 of AsA2009).
+
+
 -}
 data TDB = TDB; instance Show TDB where show _ = "TDB"
 

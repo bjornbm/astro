@@ -8,15 +8,17 @@
    Stability  : experimental
    Portability: GHC only?
 
-An implementation of TDB conversions based on formula (2.6) of [Kaplan2006].
-The formula reportedly has a maximum error in the conversions of about
-10 microseconds between the years 1600 and 2200.
+An implementation of TDB conversions based on formula (2.6) of
+[Kaplan2005]. The formula reportedly has a maximum error in the
+conversions of about 10 microseconds between the years 1600 and
+2200.
 
-This module exports no data types or functions, it only provides additional
-'Astro.Time.Convert' instances.
+This module exports no data types or functions, it only provides
+additional 'Astro.Time.Convert' instances.
 -}
-module Astro.Time.TDB.Kaplan2005 () where
+module Astro.Time.Barycentric.Kaplan2005 () where
 
+import Astro.References
 import Astro.Time
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
@@ -42,7 +44,7 @@ introduced by this approximation is less than a picosecond (far less than
 the 10 microsecond accuracy inherent in the formula in the first place).
 -}
 -- | The difference between the TDB and TT time scales as a function of
--- TT epoch. The maximum error is about 10 microseconds from 1600 to 2200.
+-- TT epoch.
 ttMinusTDB :: Floating a => E TDB -> Time a
 ttMinusTDB (E t) = negate $ tdbMinusTT (E t)
 

@@ -1,13 +1,10 @@
-{-
-[1] http://books.google.com/books?id=PJLlWzMBKjkC&pg=RA1-PA197
--}
-
+-- TODO: Clean out an keep only TDB/TCB test cases.
 
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import Astro.Time
-import Astro.Time.Barycentric.Kaplan2005
---import Astro.Time.Barycentric.TT
+import Astro.Time.Barycentric.AsA2009
+--import Astro.Time.TDB.TT
 import Test.QuickCheck
 import Data.Time hiding (utc)
 import Data.Time.Clock.TAI
