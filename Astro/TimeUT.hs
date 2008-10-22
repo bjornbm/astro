@@ -3,11 +3,13 @@
 module Astro.TimeUT where
 
 import Numeric.Units.Dimensional.Prelude
-import Astro.TimeE
+import Astro.Time
 import Data.Fixed (Pico)
 import Data.Time
 import Data.Time.Clock.TAI
 import qualified Prelude
+import Data.Ix
+import Data.Array.IArray
 
 
 -- UTC
@@ -51,4 +53,72 @@ convertFromUT1 f = convert . ut1ToTAI f
 
 makeUT1Tables :: LeapSecondTable -> UT1Table -> (UT1MinusTAI, TAIMinusUT1)
 makeUT1Tables = undefined
+
+
+-- Celestrak
+-- =========
+-- | Datatype holding all the parameters given in Celestrak EOP data file
+-- for a single day.
+data EOPData a = EOPData
+  { x           :: Angle a
+  , y           :: Angle a
+  , ut1MinusUTC :: Time a
+  , lod         :: Time a
+  , dPsi        :: Angle a
+  , dEpsilon    :: Angle a
+  , dX          :: Angle a
+  , dY          :: Angle a
+  , deltaAT     :: Integer
+  } deriving (Show, Eq)
+
+-- | Aggregates of the above indexed/coupled with 'Day's.
+type EOPList  a = [(Day, EOPData a)]
+type EOPArray a = Array Day (EOPData a)
+
+-- | Parses a single line of EOP data.
+parseEOPLine :: (Read a, Floating a) => String -> (Day, EOPData a)
+parseEOPLine s = ( ModifiedJulianDay (read mjd)
+                 , EOPData (readAngle x) (readAngle y)
+                           (readTime ut1MinusUTC) (readTime lod)
+                           (readAngle dPsi) (readAngle dEpsilon)
+                           (readAngle dX) (readAngle dY)
+                           (read deltaAT)
+                 )
+  where
+    [_, _, _, mjd, x, y, ut1MinusUTC, lod, dPsi, dEpsilon, dX, dY, deltaAT] = words s
+    readTime  = (*~ second) . read
+    readAngle = (*~ arcsecond) . read
+
+-- | Parse a file of Celestrak EOP data into a list.
+parseEOPData :: (Read a, Floating a) => String -> EOPList a
+parseEOPData file = map parseEOPLine (observed ++ predicted)
+  where
+    a = lines file
+    b = tail $ dropWhile  (/= "BEGIN OBSERVED\r")  a
+    observed = takeWhile  (/= "END OBSERVED\r")    b
+    c = tail $ dropWhile  (/= "BEGIN PREDICTED\r") b
+    predicted = takeWhile (/= "END PREDICTED\r")   c
+
+-- | Creates and EOPArray from an EOPList. Assumes that the EOPList is
+-- complete, i.e. there is one element per day and that the first and last
+-- elements bound the days.
+mkEOPArray :: EOPList a -> EOPArray a
+mkEOPArray table = array (fst $ head table, fst $ last table) table
+
+
+-- | Creates a 'Data.Time.Clock.TAI.LeapSecondTable' from an EOPArray.
+mkLeapSecondTable :: EOPArray a -> LeapSecondTable
+mkLeapSecondTable a d = deltaAT eop
+  where
+    b@(i,j) = bounds a
+    eop = if d < i then a ! i else if d > j then a ! j else a ! d
+
+
+
+-- Methinks this should be part of the time package... submit patch!
+instance Ix Day where
+  range (d1, d2) = map ModifiedJulianDay $ range (toModifiedJulianDay d1, toModifiedJulianDay d2)
+  index (d1, d2) d = index (toModifiedJulianDay d1, toModifiedJulianDay d2) (toModifiedJulianDay d)
+  inRange (d1, d2) d = inRange (toModifiedJulianDay d1, toModifiedJulianDay d2) (toModifiedJulianDay d)
+  rangeSize (d1, d2) = rangeSize (toModifiedJulianDay d1, toModifiedJulianDay d2)
 
