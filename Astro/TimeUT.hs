@@ -37,7 +37,9 @@ data UT1 = UT1
 type UT1MinusTAI = E TAI -> Time Pico
 type TAIMinusUT1 = E UT1 -> Time Pico
 
-type UT1Table = UTCTime -> Time Pico
+-- | Function which for a given TAI epoch calculates the instantaneous
+-- difference @UT1-TAI@.
+type UT1Table a = E TAI -> Time a
 
 ut1ToTAI :: TAIMinusUT1 -> E UT1 -> E TAI
 ut1ToTAI f ut1@(E t) = E $ t `addTime` f ut1
@@ -51,7 +53,7 @@ convertToUT1 f = taiToUT1 f . convert
 convertFromUT1 :: Convert TAI t => TAIMinusUT1 -> E UT1 -> E t
 convertFromUT1 f = convert . ut1ToTAI f
 
-makeUT1Tables :: LeapSecondTable -> UT1Table -> (UT1MinusTAI, TAIMinusUT1)
+makeUT1Tables :: LeapSecondTable -> UT1Table a -> (UT1MinusTAI, TAIMinusUT1)
 makeUT1Tables = undefined
 
 
@@ -106,12 +108,35 @@ mkEOPArray :: EOPList a -> EOPArray a
 mkEOPArray table = array (fst $ head table, fst $ last table) table
 
 
--- | Creates a 'Data.Time.Clock.TAI.LeapSecondTable' from an EOPArray.
+-- | Creates a 'Data.Time.Clock.TAI.LeapSecondTable' from an 'EOPArray'.
 mkLeapSecondTable :: EOPArray a -> LeapSecondTable
-mkLeapSecondTable a d = deltaAT eop
+mkLeapSecondTable a d = if d <= i then get i else if d >= j then get j else get d
   where
-    b@(i,j) = bounds a
-    eop = if d < i then a ! i else if d > j then a ! j else a ! d
+    (i,j) = bounds a
+    get = deltaAT . (a!)
+
+
+-- | Returns the UTC day that the epoch occurs on.
+getUTCDay :: Convert t TAI => LeapSecondTable -> E t -> Day
+getUTCDay lst = utctDay . convertToUTC lst
+
+-- | Creates a 'UT1Table' from an 'EOPArray'.
+mkUT1Table :: (Fractional a) => EOPArray a -> UT1Table a
+mkUT1Table a t = if d < i then get i else if d >= j then get j
+  else interpolate (t0, get d) (t1, get $ succ d) t
+  where
+    lst = mkLeapSecondTable a
+    (i,j) = bounds a
+    d = getUTCDay lst t
+    t0 = utcDayToTAI d
+    t1 = utcDayToTAI (succ d)
+    utcDayToTAI d = convertFromUTC lst (UTCTime d 0) :: E TAI
+    get n = ut1MinusUTC (a!n) - fromInteger (deltaAT (a!n)) *~ second
+
+-- | Linear interpolation between two points.
+interpolate :: (Mul DOne d d, Fractional a) => (E t, Quantity d a) -> (E t, Quantity d a) -> E t -> Quantity d a
+interpolate (t0, x0) (t1, x1) t = (t .- t0) / (t1 .- t0) * (x1 - x0) + x0
+  where (.-) = diffEpoch
 
 
 
