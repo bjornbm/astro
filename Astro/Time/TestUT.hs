@@ -62,3 +62,5 @@ main = do
   onceCheck $ prop_UT1_interpolate1 arr
   onceCheck $ prop_UT1_interpolate_mid arr
 
+  print $ convertToUT1 (mkUT1Table arr) (clock 2008 10 27 0 0 0 TAI)
+

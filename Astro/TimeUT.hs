@@ -15,7 +15,9 @@ import Data.Array.IArray
 -- UTC
 -- ===
 -- Just a bunch of wrappers for conversions. Use the regular UTCTime data
--- type and 'NominalDiffTime' et al for arithmetic.
+-- type and 'NominalDiffTime' et al for arithmetic. (We don't bother with
+-- bringing UTC under the 'E' umbrella since no astrodynamics algoritms
+-- rely on UTC, it is only relevant for inputs and outputs.)
 
 utcToTAI :: LeapSecondTable -> UTCTime -> E TAI
 utcToTAI lst = wrapTAI . utcToTAITime lst
@@ -33,7 +35,7 @@ convertFromUTC lst = convert . utcToTAI lst
 -- UT1
 -- ===
 
-data UT1 = UT1
+data UT1 = UT1; instance Show UT1 where show _ = "UT1"
 type UT1MinusTAI = E TAI -> Time Pico
 type TAIMinusUT1 = E UT1 -> Time Pico
 
@@ -44,7 +46,10 @@ type UT1Table a = E TAI -> Time a
 ut1ToTAI :: TAIMinusUT1 -> E UT1 -> E TAI
 ut1ToTAI f ut1@(E t) = E $ t `addTime` f ut1
 
-taiToUT1 :: UT1MinusTAI -> E TAI -> E UT1
+-- taiToUT1 :: UT1MinusTAI -> E TAI -> E UT1
+-- taiToUT1 f tai@(E t) = E $ t `addTime` f tai
+
+taiToUT1 :: RealFrac a => UT1Table a -> E TAI -> E UT1
 taiToUT1 f tai@(E t) = E $ t `addTime` f tai
 
 convertToUT1 :: Convert t TAI => UT1MinusTAI -> E t -> E UT1
