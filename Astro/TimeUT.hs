@@ -4,10 +4,12 @@ module Astro.TimeUT where
 
 import Numeric.Units.Dimensional.Prelude
 import Astro.Time
-import Data.Fixed (Pico)
+import Data.Fixed (HasResolution, Fixed, Micro, Pico)
+import Data.Char (isSpace)
+import Data.Ratio
 import Data.Time
 import Data.Time.Clock.TAI
-import qualified Prelude
+import qualified Prelude as P
 import Data.Ix
 import Data.Array.IArray
 
@@ -41,7 +43,7 @@ type TAIMinusUT1 = E UT1 -> Time Pico
 
 -- | Function which for a given TAI epoch calculates the instantaneous
 -- difference @UT1-TAI@.
-type UT1Table a = E TAI -> Time a
+type UT1Table = E TAI -> Time Pico
 
 ut1ToTAI :: TAIMinusUT1 -> E UT1 -> E TAI
 ut1ToTAI f ut1@(E t) = E $ t `addTime` f ut1
@@ -49,7 +51,7 @@ ut1ToTAI f ut1@(E t) = E $ t `addTime` f ut1
 -- taiToUT1 :: UT1MinusTAI -> E TAI -> E UT1
 -- taiToUT1 f tai@(E t) = E $ t `addTime` f tai
 
-taiToUT1 :: RealFrac a => UT1Table a -> E TAI -> E UT1
+taiToUT1 :: UT1Table -> E TAI -> E UT1
 taiToUT1 f tai@(E t) = E $ t `addTime` f tai
 
 convertToUT1 :: Convert t TAI => UT1MinusTAI -> E t -> E UT1
@@ -58,7 +60,7 @@ convertToUT1 f = taiToUT1 f . convert
 convertFromUT1 :: Convert TAI t => TAIMinusUT1 -> E UT1 -> E t
 convertFromUT1 f = convert . ut1ToTAI f
 
-makeUT1Tables :: LeapSecondTable -> UT1Table a -> (UT1MinusTAI, TAIMinusUT1)
+makeUT1Tables :: LeapSecondTable -> UT1Table -> (UT1MinusTAI, TAIMinusUT1)
 makeUT1Tables = undefined
 
 
@@ -69,7 +71,7 @@ makeUT1Tables = undefined
 data EOPData a = EOPData
   { x           :: Angle a
   , y           :: Angle a
-  , ut1MinusUTC :: Time a
+  , ut1MinusUTC :: Time Pico
   , lod         :: Time a
   , dPsi        :: Angle a
   , dEpsilon    :: Angle a
@@ -86,15 +88,16 @@ type EOPArray a = Array Day (EOPData a)
 parseEOPLine :: (Read a, Floating a) => String -> (Day, EOPData a)
 parseEOPLine s = ( ModifiedJulianDay (read mjd)
                  , EOPData (readAngle x) (readAngle y)
-                           (readTime ut1MinusUTC) (readTime lod)
+                           (readPicoTime ut1MinusUTC) (readTime lod)
                            (readAngle dPsi) (readAngle dEpsilon)
                            (readAngle dX) (readAngle dY)
                            (read deltaAT)
                  )
   where
     [_, _, _, mjd, x, y, ut1MinusUTC, lod, dPsi, dEpsilon, dX, dY, deltaAT] = words s
-    readTime  = (*~ second) . read
-    readAngle = (*~ arcsecond) . read
+    readTime     = (*~ second) . read
+    readPicoTime = (*~ second) . readFixed -- fromRational . toRational . (read :: String -> Double)
+    readAngle    = (*~ arcsecond) . read
 
 -- | Parse a file of Celestrak EOP data into a list.
 parseEOPData :: (Read a, Floating a) => String -> EOPList a
@@ -126,7 +129,7 @@ getUTCDay :: Convert t TAI => LeapSecondTable -> E t -> Day
 getUTCDay lst = utctDay . convertToUTC lst
 
 -- | Creates a 'UT1Table' from an 'EOPArray'.
-mkUT1Table :: (Fractional a) => EOPArray a -> UT1Table a
+mkUT1Table :: (Fractional a) => EOPArray a -> UT1Table
 mkUT1Table a t = if d < i then get i else if d >= j then get j
   else interpolate (t0, get d) (t1, get $ succ d) t
   where
@@ -151,4 +154,12 @@ instance Ix Day where
   index (d1, d2) d = index (toModifiedJulianDay d1, toModifiedJulianDay d2) (toModifiedJulianDay d)
   inRange (d1, d2) d = inRange (toModifiedJulianDay d1, toModifiedJulianDay d2) (toModifiedJulianDay d)
   rangeSize (d1, d2) = rangeSize (toModifiedJulianDay d1, toModifiedJulianDay d2)
+
+-- | Read a 'Data.Fixed.Fixed' value. Note that any decimals beyond the
+-- resolution of the target type are "floored" (as opposed to rounded).
+readFixed :: HasResolution a => String -> Fixed a
+readFixed s = fromRational $ int % (10 P.^ decimals)
+    where
+      int      = read $ filter (/='.') s
+      decimals = length $ takeWhile (/='.') $ dropWhile isSpace $ reverse s
 

@@ -6,15 +6,28 @@ import Astro.TimeUT
 import Test.QuickCheck
 import Data.Time hiding (utc)
 import Data.Time.Clock.TAI
+import Data.Fixed (Micro, Pico)
 import Data.Array.IArray
+import qualified Debug.Trace as D
 
 -- Preliminaries
 -- =============
 onceCheck = check (defaultConfig {configMaxTest = 1})
-
+trace x = D.trace (show x) x
 
 -- Properties
 -- ==========
+-- readPico
+prop_readPico1 = readFixed "  0.1 " == ( 0.1 :: Pico)
+prop_readPico2 = readFixed " -0.1 " == (-0.1 :: Pico)
+prop_readPico3 = readFixed "  12.123456789999\t\n" == ( 12.123456789999 :: Pico)
+prop_readPico4 = readFixed "\n\t-12.123456789999 " == (-12.123456789999 :: Pico)
+
+prop_readMicro1 = readFixed " 0.1111111" == ( 0.111111 :: Micro)
+prop_readMicro2 = readFixed "-0.1111111" == (-0.111112 :: Micro) -- Not really nice...
+prop_readMicro3 = readFixed " 0.1111119" == ( 0.111111 :: Micro) -- Not really nice...
+prop_readMicro4 = readFixed "-0.1111119" == (-0.111112 :: Micro)
+
 -- Interpolation
 prop_interpolate_mid = interpolate (mjd 1 TAI, _1) (mjd 2 TAI, _3) (mjd 1.5 TAI) == _2
 prop_interpolate_0   = interpolate (mjd 1 TAI, _1) (mjd 2 TAI, _3) (mjd 1 TAI) == _1
@@ -46,6 +59,15 @@ prop_UT1_interpolate_mid arr = mkUT1Table arr tai == (x0 + x1) / _2
 main = do
   arr <- readFile "eop_test.txt" >>= return . mkEOPArray . parseEOPData
 
+  onceCheck prop_readPico1
+  onceCheck prop_readPico2
+  onceCheck prop_readPico3
+  onceCheck prop_readPico4
+  onceCheck prop_readMicro1
+  onceCheck prop_readMicro2
+  onceCheck prop_readMicro3
+  onceCheck prop_readMicro4
+
   onceCheck prop_interpolate_mid
   onceCheck prop_interpolate_0
   onceCheck prop_interpolate_1
@@ -62,5 +84,6 @@ main = do
   onceCheck $ prop_UT1_interpolate1 arr
   onceCheck $ prop_UT1_interpolate_mid arr
 
-  print $ convertToUT1 (mkUT1Table arr) (clock 2008 10 27 0 0 0 TAI)
+  -- print $ convertToUT1 (mkUT1Table arr) (clock 2008 10 27 0 0 0 TAI)
+
 
