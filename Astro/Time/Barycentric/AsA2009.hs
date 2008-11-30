@@ -10,7 +10,7 @@
 
 An implementation of TDB conversions based on the formula on page
 B7 of the Astronomical Almanac for the year 2009. The formula
-reportedly have a maximum error in the conversions of about 30
+reportedly has a maximum error in the conversions of about 30
 microseconds over the period 1980 to 2050.
 
 This module exports no data types or functions, it only provides additional

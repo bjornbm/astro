@@ -39,6 +39,7 @@ module Astro.Time (
   , convert
   -- * Terrestrial Time Scales
   -- ** International Atomic Time (TAI)
+  -- $tai
   , TAI (TAI)
   , wrapTAI
   , unwrapTAI
@@ -125,8 +126,15 @@ infixl 6 .+, .-
 -- * Time Representations
 -- ** Clock dates
 --    -----------
--- | Define an epoch using "clock time" and time scale. 
-clock :: Integer -> Int -> Int -> Int -> Int -> Pico -> t -> E t
+-- | Define an epoch using "clock time" and time scale.
+clock :: Integer  -- ^ Year
+      -> Int      -- ^ Month
+      -> Int      -- ^ Day (of month)
+      -> Int      -- ^ Hour
+      -> Int      -- ^ Minute
+      -> Pico     -- ^ Second, including fraction
+      -> t        -- ^ Time scale
+      -> E t      -- ^ Epoch
 clock y m d h min s _ = E $ utcToTAITime (const 0) $
   UTCTime (fromGregorian y m d) (timeOfDayToTime $ TimeOfDay h min s)
 
@@ -204,6 +212,12 @@ context will dictate which time scale is appropriate. [C179]
 
 -- ** International Atomic Time (TAI)
 --    -------------------------------
+{- $tai
+For practical applications, International Atomic Time (TAI) is a commonly
+used time scale based on the SI second on the Earth's surface at sea level
+(specifically, the rotating geoid). TAI is the most precisely determined
+time scale that is now available for astronomical use. [C179]
+-}
 data TAI = TAI; instance Show TAI where show _ = "TAI"
 
 -- | Converts a 'Data.Time.Clock.TAI.AbsoluteTime' into this module's
