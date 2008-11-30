@@ -18,7 +18,6 @@ additional 'Astro.Time.Convert' instances.
 -}
 module Astro.Time.Barycentric.Kaplan2005 () where
 
-import Astro.References
 import Astro.Time
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude

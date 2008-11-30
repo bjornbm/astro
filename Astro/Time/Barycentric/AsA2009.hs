@@ -18,7 +18,6 @@ This module exports no data types or functions, it only provides additional
 -}
 module Astro.Time.Barycentric.AsA2009 () where
 
-import Astro.References
 import Astro.Time
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
