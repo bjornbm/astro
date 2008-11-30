@@ -141,6 +141,10 @@ mkUT1Table a t = if d < i then get i else if d >= j then get j
     utcDayToTAI d = convertFromUTC lst (UTCTime d 0) :: E TAI
     get n = ut1MinusUTC (a!n) - fromInteger (deltaAT (a!n)) *~ second
 
+
+-- The following are subject to extraction to a util module if they
+-- turn out to be useful elsewhere.
+
 -- | Linear interpolation between two points.
 interpolate :: (Mul DOne d d, Fractional a) => (E t, Quantity d a) -> (E t, Quantity d a) -> E t -> Quantity d a
 interpolate (t0, x0) (t1, x1) t = (t .- t0) / (t1 .- t0) * (x1 - x0) + x0
