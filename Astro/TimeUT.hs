@@ -165,5 +165,5 @@ readFixed :: HasResolution a => String -> Fixed a
 readFixed s = fromRational $ int % (10 P.^ decimals)
     where
       int      = read $ filter (/='.') s
-      decimals = length $ takeWhile (/='.') $ dropWhile isSpace $ reverse s
+      decimals = if elem '.' s then length $ takeWhile (/='.') $ dropWhile isSpace $ reverse s else 0
 

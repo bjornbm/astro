@@ -17,7 +17,10 @@ trace x = D.trace (show x) x
 
 -- Properties
 -- ==========
--- readPico
+-- readFixed
+prop_readInt1 = readFixed " 1   " == (1 :: Pico)
+prop_readInt2 = readFixed "-2\t" == (-2 :: Micro)
+
 prop_readPico1 = readFixed "  0.1 " == ( 0.1 :: Pico)
 prop_readPico2 = readFixed " -0.1 " == (-0.1 :: Pico)
 prop_readPico3 = readFixed "  12.123456789999\t\n" == ( 12.123456789999 :: Pico)
@@ -59,6 +62,8 @@ prop_UT1_interpolate_mid arr = mkUT1Table arr tai == (x0 + x1) / _2
 main = do
   arr <- readFile "eop_test.txt" >>= return . mkEOPArray . parseEOPData
 
+  onceCheck prop_readInt1
+  onceCheck prop_readInt2
   onceCheck prop_readPico1
   onceCheck prop_readPico2
   onceCheck prop_readPico3
