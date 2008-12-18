@@ -1,7 +1,7 @@
 {-
 [1] http://books.google.com/books?id=PJLlWzMBKjkC&pg=RA1-PA197
 -}
-
+module Astro.TestTime where
 
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude

@@ -41,8 +41,6 @@ module Astro.Time (
   -- ** International Atomic Time (TAI)
   -- $tai
   , TAI (TAI)
-  , fromAbsoluteTime
-  , toAbsoluteTime
   -- ** Terrestial Time (TT)
   -- $tt
   , TT  (TT)
@@ -50,6 +48,9 @@ module Astro.Time (
   -- ** Geocentric Coordinate Time (TCG)
   -- $tcg
   , TCG (TCG)
+  -- ** Universal Time
+  , UT1 (UT1)
+  , UTC (UTC)
   -- * Barycentric Time Scales
   -- ** Barycentric Dynamical Time (TDB)
   -- $tdb
@@ -216,16 +217,6 @@ time scale that is now available for astronomical use. [C179]
 -}
 data TAI = TAI; instance Show TAI where show _ = "TAI"
 
--- | Converts a 'Data.Time.Clock.TAI.AbsoluteTime' into this module's
--- representation of an epoch. (Perhaps the use of \"wrap\" in the function
--- name is inappropriate as it leaks/implies implementation details.)
-fromAbsoluteTime :: AbsoluteTime -> E TAI
-fromAbsoluteTime = E
-
--- | Converts this module's representation of a TAI epoch into a
--- 'Data.Time.Clock.TAI.AbsoluteTime'.
-toAbsoluteTime :: E TAI -> AbsoluteTime
-toAbsoluteTime (E t) = t
 
 -- | The epoch at which TT, TCG and TDB all read 1977-01-01T00:00:32.184.
 convergenceEpochTAI :: E TAI
@@ -420,6 +411,13 @@ tcbToTDB tcb@(E t) = E $ addTime t (tdbMinusTCB tcb)
 tdbToTCB :: E TDB -> E TCB
 tdbToTCB tdb@(E t) = E $ addTime t (tcbMinusTDB tdb)
 
+
+-- Universal Time
+-- ==============
+
+data UT1 = UT1; instance Show UT1 where show _ = "UT1"
+
+data UTC = UTC; instance Show UTC where show _ = "UTC"
 
 
 -- Conversion

@@ -4,6 +4,7 @@ module Astro.TimeUT where
 
 import Numeric.Units.Dimensional.Prelude
 import Astro.Time
+import Astro.Time.Interop
 import Data.Fixed (HasResolution, Fixed, Micro, Pico)
 import Data.Char (isSpace)
 import Data.Ratio
@@ -17,18 +18,6 @@ import Data.Array.IArray
 
 -- UTC
 -- ===
-
-data UTC = UTC; instance Show UTC where show _ = "UTC"
-
--- | Convert a UTC epoch into a 'Data.Time.Clock.UTCTime'.
-toUTCTime :: E UTC -> UTCTime
-toUTCTime (E t) = taiToUTCTime (const 0) t
-
--- | Convert a 'Data.Time.Clock.UTCTime' into a UTC epoch.
-fromUTCTime :: UTCTime -> E UTC
-fromUTCTime = E . utcToTAITime (const 0)
-
-
 
 utcToTAI :: LeapSecondTable -> E UTC -> E TAI
 utcToTAI lst = fromAbsoluteTime . utcToTAITime lst . toUTCTime
@@ -45,17 +34,6 @@ convertFromUTC lst = convert . utcToTAI lst
 
 -- UT1
 -- ===
-
-data UT1 = UT1; instance Show UT1 where show _ = "UT1"
-
--- | Convert a UT1 epoch into a 'Data.Time.Clock.UniversalTime'.
-toUniversalTime :: E UT1 -> UniversalTime
-toUniversalTime (E t) = ModJulianDate $ (P./ 86400) $ toRational $ diffAbsoluteTime t taiEpoch
-
--- | Convert a 'Data.Time.Clock.UniversalTime' into a UT1 epoch.
-fromUniversalTime :: UniversalTime -> E UT1
-fromUniversalTime t = mjd (getModJulianDate t) UT1
-
 
 -- | Function which for a given TAI epoch calculates the instantaneous
 -- difference @UT1-TAI@.

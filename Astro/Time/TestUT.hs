@@ -1,7 +1,9 @@
+module Astro.Time.TestUT where
 
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import Astro.Time
+import Astro.Time.Interop
 import Astro.TimeUT
 import Test.QuickCheck
 import Data.Time hiding (utc)
