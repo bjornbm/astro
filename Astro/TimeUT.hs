@@ -7,6 +7,7 @@ import Astro.Time
 import Data.Fixed (HasResolution, Fixed, Micro, Pico)
 import Data.Char (isSpace)
 import Data.Ratio
+import Data.List (isPrefixOf)
 import Data.Time
 import Data.Time.Clock.TAI
 import qualified Prelude as P
@@ -16,21 +17,29 @@ import Data.Array.IArray
 
 -- UTC
 -- ===
--- Just a bunch of wrappers for conversions. Use the regular UTCTime data
--- type and 'NominalDiffTime' et al for arithmetic. (We don't bother with
--- bringing UTC under the 'E' umbrella since no astrodynamics algoritms
--- rely on UTC, it is only relevant for inputs and outputs.)
 
-utcToTAI :: LeapSecondTable -> UTCTime -> E TAI
-utcToTAI lst = wrapTAI . utcToTAITime lst
+data UTC = UTC; instance Show UTC where show _ = "UTC"
 
-taiToUTC :: LeapSecondTable -> E TAI -> UTCTime
-taiToUTC lst = taiToUTCTime lst . unwrapTAI
+-- | Convert a UTC epoch into a 'Data.Time.Clock.UTCTime'.
+toUTCTime :: E UTC -> UTCTime
+toUTCTime (E t) = taiToUTCTime (const 0) t
 
-convertToUTC :: Convert t TAI => LeapSecondTable -> E t -> UTCTime
+-- | Convert a 'Data.Time.Clock.UTCTime' into a UTC epoch.
+fromUTCTime :: UTCTime -> E UTC
+fromUTCTime = E . utcToTAITime (const 0)
+
+
+
+utcToTAI :: LeapSecondTable -> E UTC -> E TAI
+utcToTAI lst = fromAbsoluteTime . utcToTAITime lst . toUTCTime
+
+taiToUTC :: LeapSecondTable -> E TAI -> E UTC
+taiToUTC lst = fromUTCTime . taiToUTCTime lst . toAbsoluteTime
+
+convertToUTC :: Convert t TAI => LeapSecondTable -> E t -> E UTC
 convertToUTC lst = taiToUTC lst . convert
 
-convertFromUTC :: Convert TAI t => LeapSecondTable -> UTCTime -> E t
+convertFromUTC :: Convert TAI t => LeapSecondTable -> E UTC -> E t
 convertFromUTC lst = convert . utcToTAI lst
 
 
@@ -38,20 +47,30 @@ convertFromUTC lst = convert . utcToTAI lst
 -- ===
 
 data UT1 = UT1; instance Show UT1 where show _ = "UT1"
-type UT1MinusTAI = E TAI -> Time Pico
-type TAIMinusUT1 = E UT1 -> Time Pico
+
+-- | Convert a UT1 epoch into a 'Data.Time.Clock.UniversalTime'.
+toUniversalTime :: E UT1 -> UniversalTime
+toUniversalTime (E t) = ModJulianDate $ (P./ 86400) $ toRational $ diffAbsoluteTime t taiEpoch
+
+-- | Convert a 'Data.Time.Clock.UniversalTime' into a UT1 epoch.
+fromUniversalTime :: UniversalTime -> E UT1
+fromUniversalTime t = mjd (getModJulianDate t) UT1
+
 
 -- | Function which for a given TAI epoch calculates the instantaneous
 -- difference @UT1-TAI@.
-type UT1Table = E TAI -> Time Pico
+type UT1MinusTAI = E TAI -> Time Pico
+-- | Function which for a given UT1 epoch calculates the instantaneous
+-- difference @TAI-UT1@. TODO potentially unnecessary?
+type TAIMinusUT1 = E UT1 -> Time Pico
 
+
+-- | Convert a UT1 epoch into a TAI epoch.
 ut1ToTAI :: TAIMinusUT1 -> E UT1 -> E TAI
 ut1ToTAI f ut1@(E t) = E $ t `addTime` f ut1
 
--- taiToUT1 :: UT1MinusTAI -> E TAI -> E UT1
--- taiToUT1 f tai@(E t) = E $ t `addTime` f tai
-
-taiToUT1 :: UT1Table -> E TAI -> E UT1
+-- | Convert a TAI epoch into a UT1 epoch.
+taiToUT1 :: UT1MinusTAI -> E TAI -> E UT1
 taiToUT1 f tai@(E t) = E $ t `addTime` f tai
 
 convertToUT1 :: Convert t TAI => UT1MinusTAI -> E t -> E UT1
@@ -60,8 +79,6 @@ convertToUT1 f = taiToUT1 f . convert
 convertFromUT1 :: Convert TAI t => TAIMinusUT1 -> E UT1 -> E t
 convertFromUT1 f = convert . ut1ToTAI f
 
-makeUT1Tables :: LeapSecondTable -> UT1Table -> (UT1MinusTAI, TAIMinusUT1)
-makeUT1Tables = undefined
 
 
 -- Celestrak
@@ -104,10 +121,10 @@ parseEOPData :: (Read a, Floating a) => String -> EOPList a
 parseEOPData file = map parseEOPLine (observed ++ predicted)
   where
     a = lines file
-    b = tail $ dropWhile  (/= "BEGIN OBSERVED\r")  a
-    observed = takeWhile  (/= "END OBSERVED\r")    b
-    c = tail $ dropWhile  (/= "BEGIN PREDICTED\r") b
-    predicted = takeWhile (/= "END PREDICTED\r")   c
+    b = tail $ dropWhile  (not . isPrefixOf "BEGIN OBSERVED")  a
+    observed = takeWhile  (not . isPrefixOf "END OBSERVED")    b
+    c = tail $ dropWhile  (not . isPrefixOf "BEGIN PREDICTED") b
+    predicted = takeWhile (not . isPrefixOf "END PREDICTED")   c
 
 -- | Creates and EOPArray from an EOPList. Assumes that the EOPList is
 -- complete, i.e. there is one element per day and that the first and last
@@ -126,10 +143,10 @@ mkLeapSecondTable a d = if d <= i then get i else if d >= j then get j else get 
 
 -- | Returns the UTC day that the epoch occurs on.
 getUTCDay :: Convert t TAI => LeapSecondTable -> E t -> Day
-getUTCDay lst = utctDay . convertToUTC lst
+getUTCDay lst = utctDay . taiToUTCTime lst . toAbsoluteTime . convert
 
 -- | Creates a 'UT1Table' from an 'EOPArray'.
-mkUT1Table :: (Fractional a) => EOPArray a -> UT1Table
+mkUT1Table :: (Fractional a) => EOPArray a -> UT1MinusTAI
 mkUT1Table a t = if d < i then get i else if d >= j then get j
   else interpolate (t0, get d) (t1, get $ succ d) t
   where
@@ -138,7 +155,7 @@ mkUT1Table a t = if d < i then get i else if d >= j then get j
     d = getUTCDay lst t
     t0 = utcDayToTAI d
     t1 = utcDayToTAI (succ d)
-    utcDayToTAI d = convertFromUTC lst (UTCTime d 0) :: E TAI
+    utcDayToTAI d = fromAbsoluteTime $ utcToTAITime lst (UTCTime d 0)
     get n = ut1MinusUTC (a!n) - fromInteger (deltaAT (a!n)) *~ second
 
 
@@ -166,4 +183,5 @@ readFixed s = fromRational $ int % (10 P.^ decimals)
     where
       int      = read $ filter (/='.') s
       decimals = if elem '.' s then length $ takeWhile (/='.') $ dropWhile isSpace $ reverse s else 0
+      --decimals = length $ takeWhile (/='.') $ dropWhile isSpace $ reverse s
 

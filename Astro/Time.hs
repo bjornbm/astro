@@ -41,8 +41,8 @@ module Astro.Time (
   -- ** International Atomic Time (TAI)
   -- $tai
   , TAI (TAI)
-  , wrapTAI
-  , unwrapTAI
+  , fromAbsoluteTime
+  , toAbsoluteTime
   -- ** Terrestial Time (TT)
   -- $tt
   , TT  (TT)
@@ -138,10 +138,6 @@ clock :: Integer  -- ^ Year
 clock y m d h min s _ = E $ utcToTAITime (const 0) $
   UTCTime (fromGregorian y m d) (timeOfDayToTime $ TimeOfDay h min s)
 
--- | A helper function. Identical to 'clock' but the time scale comes first.
-clock' :: t -> Integer -> Int -> Int -> Int -> Int -> Pico -> E t
-clock' t y m d h min s = clock y m d h min s t
-
 -- | Show an epoch as a clock time. This function is used by the @Show@
 -- instance. TODO: should change this to use ISO8601 format.
 showClock :: forall t. Show t => E t -> String
@@ -223,13 +219,13 @@ data TAI = TAI; instance Show TAI where show _ = "TAI"
 -- | Converts a 'Data.Time.Clock.TAI.AbsoluteTime' into this module's
 -- representation of an epoch. (Perhaps the use of \"wrap\" in the function
 -- name is inappropriate as it leaks/implies implementation details.)
-wrapTAI :: AbsoluteTime -> E TAI
-wrapTAI = E
+fromAbsoluteTime :: AbsoluteTime -> E TAI
+fromAbsoluteTime = E
 
 -- | Converts this module's representation of a TAI epoch into a
 -- 'Data.Time.Clock.TAI.AbsoluteTime'.
-unwrapTAI :: E TAI -> AbsoluteTime
-unwrapTAI (E t) = t
+toAbsoluteTime :: E TAI -> AbsoluteTime
+toAbsoluteTime (E t) = t
 
 -- | The epoch at which TT, TCG and TDB all read 1977-01-01T00:00:32.184.
 convergenceEpochTAI :: E TAI
