@@ -6,7 +6,8 @@ A collection of astrodynamics functionality.
 > import Numeric.Units.Dimensional.NonSI (revolution)
 > import Data.Time
 > import Data.Time.Clock.TAI
-> import Time
+> import Astro.Time
+> import Astro.TimeUT
 > import Prelude 
 >   ( fromIntegral, toRational, properFraction
 >   , Fractional, RealFloat, Num, realToFrac
@@ -54,15 +55,9 @@ The Greenwich Right Ascension reference epoch and angle (Soop p. 128).
 These should ideally be updated on a yearly basis. TODO: Investigate
 options.
 
-> greenwichRefEpoch = utcToTTTime (const 33)  -- Valid for 2008.
->                   $ UTCTime (fromGregorian 2008 01 01) midnight'
+> greenwichRefEpoch = clock 2008 1 1 0 0 0 UT1
 > greenwichRefAngle :: Floating a => Angle a
 > greenwichRefAngle = 100.029 *~ degree
-
-The epoch J2000.0. Definition from Wikipedia[1].
-
-> j2000 = UTCTime (fromGregorian 2000 01 01) (timeOfDayToTime time)
->   where time = TimeOfDay 11 58 55.816
 
 The ideal geostationary radius and velocity.
 
@@ -86,7 +81,7 @@ Calculates the right ascension of the Greenwich meridian at the epoch.
 
 > greenwichRA t = greenwichRefAngle + phi * dt
 >   where
->       dt = ttToDimensional t - ttToDimensional greenwichRefEpoch
+>       dt = diffEpoch t greenwichRefEpoch
 
 Calculates the right ascension of the longitude at the epoch. This 
 This function is often used with a 'MeanLongitude' instead of a 
@@ -101,7 +96,8 @@ ascension twice only the first occurence will be returned.
 
 > longitudeToD l ra d = dayFractionToTimeOfDay . toRational $ dt /~ day
 >   where
->       t   = utcToTTTime (const 33) (UTCTime d midnight')
+>       --t   = utcToTTTime (const 33) (UTCTime d midnight')
+>       t   = mjd (fromInteger $ toModifiedJulianDay d) UT1
 >       -- Greenwich Right Ascension at midnight.
 >       ra0 = longitudeRA t l
 >       dra = angleMod (ra - ra0)
@@ -123,25 +119,6 @@ Calculate the semi-major axis of an orbit based on the mean angular motion.
 
 Utility functions
 =================
-
-Convert an 'AbsoluteTime' to a 'Dimensional' representing the time
-elapsed since MJD reference epoch. Leapseconds are not an issue
-since TAI has none.
-
-> taiToDimensional :: (Fractional a) => AbsoluteTime -> Time a
-> taiToDimensional t = fromDiffTime dt where
->   dt = diffAbsoluteTime t taiEpoch
-
-Same for 'TerrestrialTime'.
-
-> ttToDimensional :: (Fractional a) => TerrestrialTime -> Time a
-> ttToDimensional = taiToDimensional . ttToTAITime
-
-Convert a UTCTime to a Dimensional representing the time elapsed since
-MJD reference epoch. Leapseconds are not honored.
-
-> utcToDimensional :: (Fractional a) => UTCTime -> Time a
-> utcToDimensional  = taiToDimensional . utcToTAITime (const 33)
 
 Limit an angle to within 0 and 2 pi.
 
