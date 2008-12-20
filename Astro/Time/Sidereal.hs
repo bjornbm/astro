@@ -1,6 +1,7 @@
 module Astro.Time.Sidereal where
 
 import Astro.Time
+import IAU2000.IAU2000A2
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.NonSI (revolution)
 import qualified Prelude as P
@@ -37,32 +38,13 @@ gmst ut1 tt = era ut1 + gmst_p tt
 
 -- | Greenwich apparent sidereal time (GAST) expressed as an angle.
 gast :: RealFloat a => E UT1 -> E TT -> Angle a
-gast ut1 tt = gmst ut1 tt + ee tt
+gast ut1 tt = gmst ut1 tt + equationOfEquinoxes tt -- = era - equationOfOrigins??
 
 -- | Equation of the equinoxes.
-ee :: E TT -> Angle a
-ee tt = undefined
+equationOfEquinoxes :: Floating a => E TT -> Angle a
+equationOfEquinoxes tt = nutationInLongitude tt * cos (meanObliquityOfEcliptic tt) + undefined
 
 -- | Equation of origins.
-eo :: RealFloat a => E TT -> Angle a
-eo tt = negate (gmst_p tt + ee tt)
-
--- | Mean obliquity of the ecliptic (the angle between the mean equator and
--- ecliptic, or equivalently, between the ecliptic pole and the mean
--- celestial pole of date).
---
--- Formula (5.12) of [Kaplan2005].
-ea :: Floating a => E TT -> Angle a
-ea tt = ea0 - 46.836769  *~(arcsecond/century)      * t
-            - 0.0001831  *~(arcsecond/century^pos2) * t ^ pos2
-            + 0.00200340 *~(arcsecond/century^pos3) * t ^ pos3
-            - 0.000000576*~(arcsecond/century^pos4) * t ^ pos4
-            - 4.34e-8    *~(arcsecond/century^pos5) * t ^ pos5
-          where 
-            t   = diffEpoch tt j2000
-            ea0 = 84381.406*~arcsecond
-
--- | Nutation in longitude.
-delta_phi :: E TT -> Angle a
-delta_phi = undefined
+equationOfOrigins :: RealFloat a => E TT -> Angle a
+equationOfOrigins tt = negate (gmst_p tt + equationOfEquinoxes tt) 
 
