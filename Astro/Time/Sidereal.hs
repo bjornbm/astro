@@ -1,7 +1,7 @@
 module Astro.Time.Sidereal where
 
 import Astro.Time
-import IAU2000.IAU2000A2
+import IAU2000.IAU2000A
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.NonSI (revolution)
 import qualified Prelude as P
@@ -40,9 +40,6 @@ gmst ut1 tt = era ut1 + gmst_p tt
 gast :: RealFloat a => E UT1 -> E TT -> Angle a
 gast ut1 tt = gmst ut1 tt + equationOfEquinoxes tt -- = era - equationOfOrigins??
 
--- | Equation of the equinoxes.
-equationOfEquinoxes :: Floating a => E TT -> Angle a
-equationOfEquinoxes tt = nutationInLongitude tt * cos (meanObliquityOfEcliptic tt) + undefined
 
 -- | Equation of origins.
 equationOfOrigins :: RealFloat a => E TT -> Angle a
