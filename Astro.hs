@@ -1,3 +1,5 @@
+{-# LANGUAGE MultiParamTypeClasses #-}
+
 module Astro where
 
 import Astro.Time hiding (Convert)
