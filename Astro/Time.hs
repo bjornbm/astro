@@ -50,7 +50,6 @@ module Astro.Time (
   , TCG (TCG)
   -- ** Universal Time
   , UT1 (UT1)
-  , UTC (UTC)
   -- * Barycentric Time Scales
   -- ** Barycentric Dynamical Time (TDB)
   -- $tdb
@@ -416,8 +415,6 @@ tdbToTCB tdb@(E t) = E $ addTime t (tcbMinusTDB tdb)
 -- ==============
 
 data UT1 = UT1; instance Show UT1 where show _ = "UT1"
-
-data UTC = UTC; instance Show UTC where show _ = "UTC"
 
 
 -- Conversion

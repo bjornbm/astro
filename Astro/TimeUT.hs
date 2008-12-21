@@ -16,22 +16,6 @@ import Data.Ix
 import Data.Array.IArray
 
 
--- UTC
--- ===
-
-utcToTAI :: LeapSecondTable -> E UTC -> E TAI
-utcToTAI lst = fromAbsoluteTime . utcToTAITime lst . toUTCTime
-
-taiToUTC :: LeapSecondTable -> E TAI -> E UTC
-taiToUTC lst = fromUTCTime . taiToUTCTime lst . toAbsoluteTime
-
-convertToUTC :: Convert t TAI => LeapSecondTable -> E t -> E UTC
-convertToUTC lst = taiToUTC lst . convert
-
-convertFromUTC :: Convert TAI t => LeapSecondTable -> E UTC -> E t
-convertFromUTC lst = convert . utcToTAI lst
-
-
 -- UT1
 -- ===
 
