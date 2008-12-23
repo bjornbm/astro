@@ -39,6 +39,7 @@ parseTab53aLine line  =
   , (c *~ milli arcsecond, c_dot *~ (milli arcsecond / century), s' *~ milli arcsecond)
   ) where
     m10:m11:m12:m13:m14:period:s:s_dot:c:c_dot:c':c_dot':s':s_dot':[] = fmap read (words line)
+    century = prefix 36525 day
 
 
 -- | Parses a line from an @tab5.3b.txt@ file.
@@ -63,13 +64,13 @@ printTab53a (ms, phis, epss) = unlines
   , "import qualified Prelude"
   , ""
   , "luniSolarMultipliers :: Fractional a => [[Dimensionless a]]"
-  , "luniSolarMultipliers = " ++ intercalate " :\n  " (fmap showMs ms) ++ " :[]"
+  , "luniSolarMultipliers =\n  " ++ intercalate " :\n  " (fmap showMs ms) ++ " :[]"
   , ""
   , "luniSolarPhiCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]"
-  , "luniSolarPhiCoeffs = " ++ intercalate " :\n  " (fmap showLSCoeffs phis) ++ " :[]"
+  , "luniSolarPhiCoeffs =\n  " ++ intercalate " :\n  " (fmap showLSCoeffs phis) ++ " :[]"
   , ""
   , "luniSolarEpsCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]"
-  , "luniSolarEpsCoeffs = " ++ intercalate " :\n  " (fmap showLSCoeffs epss) ++ " :[]"
+  , "luniSolarEpsCoeffs =\n  " ++ intercalate " :\n  " (fmap showLSCoeffs epss) ++ " :[]"
   , ""
   ]
 
@@ -86,13 +87,13 @@ printTab53b (ms, phis, epss) = unlines
   , "import qualified Prelude"
   , ""
   , "planetaryMultipliers :: Fractional a => [[Dimensionless a]]"
-  , "planetaryMultipliers = " ++ intercalate " :\n  " (fmap showMs ms) ++ " :[]"
+  , "planetaryMultipliers =\n  " ++ intercalate " :\n  " (fmap showMs ms) ++ " :[]"
   , ""
-  , "planetaryPhiCoeffs :: Floating a => [(Angle a, Angle a)]"
-  , "planetaryPhiCoeffs = " ++ intercalate " :\n  " (fmap showPCoeffs phis) ++ " :[]"
+  , "planetaryPhiCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]"
+  , "planetaryPhiCoeffs =\n  " ++ intercalate " :\n  " (fmap showPCoeffs phis) ++ " :[]"
   , ""
-  , "planetaryEpsCoeffs :: Floating a => [(Angle a, Angle a)]"
-  , "planetaryEpsCoeffs = " ++ intercalate " :\n  " (fmap showPCoeffs epss) ++ " :[]"
+  , "planetaryEpsCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]"
+  , "planetaryEpsCoeffs =\n  " ++ intercalate " :\n  " (fmap showPCoeffs epss) ++ " :[]"
   , ""
   ]
 
@@ -109,7 +110,7 @@ showLSCoeffs :: Show a => LuniSolarCoeffs a -> String
 showLSCoeffs (a, a_dot, b) = "(" ++ showDim a ++", "++ showDim a_dot ++ ", " ++ showDim b ++ ")"
 
 showPCoeffs :: Show a => PlanetaryCoeffs a -> String
-showPCoeffs  (a, b) = "(" ++ showDim a ++", " ++ showDim b ++ ")"
+showPCoeffs  (a, b)        = "(" ++ showDim a ++", "++ showDim _0    ++ ", " ++ showDim b ++ ")"
 
 
 -- | Converts the content of an @tab5.3a.txt@ file into compilable Haskell module code.

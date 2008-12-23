@@ -26,49 +26,19 @@ import IAU2000.FundamentalArguments (fundamentalArguments)
 import Control.Monad.Reader
 import qualified Prelude
 
--- TODO: Was it stupid to split luni-solar and planetary terms? Classic
--- case of premature optimusation? Certainly fuglified the truncated
--- series...
-
-
--- Luni-Solar Terms
--- ================
-
--- | Returns pairs of sines and cosines of the 678 luni-solar @Phi_i@ terms
--- from [1]. The @Phi_i@ terms are calculated according to eq (5.16).
-luniSolarTrigTerms :: Floating a => E TT -> [(Dimensionless a, Dimensionless a)]
-luniSolarTrigTerms tt = fmap ((\x -> (sin x, cos x)) . sum . zipWith (*) args) luniSolarMultipliers
-  where args = fundamentalArguments tt
-
--- | Returns the pair @(DeltaPhi_ls, DeltaEps_ls)@ at the given time.
--- The @Int@ argument is the number of terms to use.
-luniSolarNutationContribution :: Floating a => Int -> E TT -> (Angle a, Angle a)
-luniSolarNutationContribution n tt = (sum $ take n deltaPhiTerms, sum $ take n deltaEpsTerms) where
-  deltaPhiTerms = zipWith (\(s, s_dot, c') (sinPhi, cosPhi) -> (s + s_dot * t) * sinPhi + c' * cosPhi)  luniSolarPhiCoeffs (luniSolarTrigTerms tt)
-  deltaEpsTerms = zipWith (\(c, c_dot, s') (sinPhi, cosPhi) -> (c + c_dot * t) * cosPhi + s' * sinPhi)  luniSolarEpsCoeffs (luniSolarTrigTerms tt)
-  t = sinceJ2000 tt
-
-
--- Planetary Terms
--- ===============
-
--- | Returns pairs of sines and cosines of the 687 planetary @Phi_i@ terms
--- from [1]. The @Phi_i@ terms are calculated according to eq (5.16).
-planetaryTrigTerms :: Floating a => E TT -> [(Dimensionless a, Dimensionless a)]
-planetaryTrigTerms tt = fmap ((\x -> (sin x, cos x)) . sum . zipWith (*) args) planetaryMultipliers
-  where args = fundamentalArguments tt
-
--- | Returns the pair @(DeltaPhi_p, DeltaEps_p)@ at the given time.
--- The @Int@ argument is the number of terms to use.
-planetaryNutationContribution :: Floating a => Int -> E TT -> (Angle a, Angle a)
-planetaryNutationContribution n tt = (sum $ take n deltaPhiTerms, sum $ take n deltaEpsTerms) where
-  deltaPhiTerms = zipWith (\(s, c') (sinPhi, cosPhi) -> s * sinPhi + c' * cosPhi)  planetaryPhiCoeffs (planetaryTrigTerms tt)
-  deltaEpsTerms = zipWith (\(c, s') (sinPhi, cosPhi) -> c * cosPhi + s' * sinPhi)  planetaryEpsCoeffs (planetaryTrigTerms tt)
-
 
 -- Full Series
 -- ===========
--- Here we finally combine the contributions from luni-solar and planetary terms.
+
+-- | Returns pairs of sines and cosines of the 678 luni-solar and 687
+-- planetary @Phi_i@ terms from [1]. The @Phi_i@ terms are calculated
+-- according to eq (5.16).
+trigTerms :: Floating a => E TT -> [(Dimensionless a, Dimensionless a)]
+trigTerms tt = fmap (toXY . sum . zipWith (*) args) multipliers
+  where
+    toXY x = (sin x, cos x)
+    args = fundamentalArguments tt
+    multipliers = luniSolarMultipliers ++ planetaryMultipliers
 
 -- | Returns the nutation angles @(DeltaPhi, DeltaEps)@ at the given epoch.
 -- @DeltaPhi@ is the nutation in longitude and @DeltaEps@ is the nutation
@@ -76,9 +46,16 @@ planetaryNutationContribution n tt = (sum $ take n deltaPhiTerms, sum $ take n d
 -- chapter 5.4.2 of [2].
 -- The @Int@ argument is the number of terms to use in the nutation series.
 nutationAngles :: Floating a => Int -> E TT -> (Angle a, Angle a)
-nutationAngles n tt = (dp_ls + dp_p, de_ls + de_p) where
-  (dp_ls, de_ls) = luniSolarNutationContribution n tt
-  (dp_p , de_p ) = planetaryNutationContribution (n Prelude.- 678) tt
+nutationAngles n tt = (sum $ take n deltaPhiTerms, sum $ take n deltaEpsTerms) where
+  deltaPhiTerms = zipWith (\(s, s_dot, c') (sinPhi, cosPhi) -> (s + s_dot * t) * sinPhi + c' * cosPhi)  phiCoeffs (trigTerms tt)
+  deltaEpsTerms = zipWith (\(c, c_dot, s') (sinPhi, cosPhi) -> (c + c_dot * t) * cosPhi + s' * sinPhi)  epsCoeffs (trigTerms tt)
+  phiCoeffs = luniSolarPhiCoeffs ++ planetaryPhiCoeffs
+  epsCoeffs = luniSolarEpsCoeffs ++ planetaryEpsCoeffs
+  t = sinceJ2000 tt
+
+
+-- Variations of the series
+-- ========================
 
 -- | The full IAU 2000A nutation series. Calculates the direction of the
 -- celestial pole in the GCRS with an accuracy of 0.2 mas ([Kaplamn2005]

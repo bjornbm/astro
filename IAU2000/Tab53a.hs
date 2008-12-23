@@ -7,7 +7,8 @@ import Numeric.Units.Dimensional (Dimensional (Dimensional))
 import qualified Prelude
 
 luniSolarMultipliers :: Fractional a => [[Dimensionless a]]
-luniSolarMultipliers = [Dimensional (0.0), Dimensional (0.0), Dimensional (0.0), Dimensional (0.0), Dimensional (1.0)] :
+luniSolarMultipliers =
+  [Dimensional (0.0), Dimensional (0.0), Dimensional (0.0), Dimensional (0.0), Dimensional (1.0)] :
   [Dimensional (0.0), Dimensional (0.0), Dimensional (2.0), Dimensional (-2.0), Dimensional (2.0)] :
   [Dimensional (0.0), Dimensional (0.0), Dimensional (2.0), Dimensional (0.0), Dimensional (2.0)] :
   [Dimensional (0.0), Dimensional (0.0), Dimensional (0.0), Dimensional (0.0), Dimensional (2.0)] :
@@ -687,7 +688,8 @@ luniSolarMultipliers = [Dimensional (0.0), Dimensional (0.0), Dimensional (0.0),
   [Dimensional (2.0), Dimensional (0.0), Dimensional (2.0), Dimensional (4.0), Dimensional (1.0)] :[]
 
 luniSolarPhiCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]
-luniSolarPhiCoeffs = (Dimensional (-8.341905928143387e-5), Dimensional (-2.6833620561981342e-17), Dimensional (1.6185989557522972e-8)) :
+luniSolarPhiCoeffs =
+  (Dimensional (-8.341905928143387e-5), Dimensional (-2.6833620561981342e-17), Dimensional (1.6185989557522972e-8)) :
   (Dimensional (-6.385435421407676e-6), Dimensional (-2.5732720988239696e-19), Dimensional (-6.640008176476206e-9)) :
   (Dimensional (-1.1036361662556024e-6), Dimensional (-3.594899529103337e-20), Dimensional (1.355539052382263e-9)) :
   (Dimensional (1.0057721614005126e-6), Dimensional (3.180103429591413e-20), Dimensional (-3.383999494144562e-10)) :
@@ -1367,7 +1369,8 @@ luniSolarPhiCoeffs = (Dimensional (-8.341905928143387e-5), Dimensional (-2.68336
   (Dimensional (-1.4544410433286082e-12), Dimensional (0.0), Dimensional (0.0)) :[]
 
 luniSolarEpsCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]
-luniSolarEpsCoeffs = (Dimensional (4.462822944682346e-5), Dimensional (1.3958656889501246e-18), Dimensional (7.454979974421337e-9)) :
+luniSolarEpsCoeffs =
+  (Dimensional (4.462822944682346e-5), Dimensional (1.3958656889501246e-18), Dimensional (7.454979974421337e-9)) :
   (Dimensional (2.7781452901544945e-6), Dimensional (-4.631889777883145e-19), Dimensional (-2.223840355249442e-9)) :
   (Dimensional (4.7437030960475557e-7), Dimensional (-7.45096697271418e-20), Dimensional (6.661339978445026e-10)) :
   (Dimensional (-4.351164002863598e-7), Dimensional (7.220524695207556e-20), Dimensional (-1.41080781202875e-10)) :
