@@ -125,7 +125,7 @@ convertTab53a = printTab53a . unzip3 . fmap parseTab53aLine . takeWhile (not . c
 
 -- | Converts the content of an @tab5.3a.txt@ file into compilable Haskell module code.
 convertTab53b :: String -> String
-convertTab53b = printTab53b . unzip3 . fmap parseTab53bLine . drop 5 . lines
+convertTab53b = printTab53b . unzip3 . fmap parseTab53bLine . reverse . drop 5 . lines
 
 
 -- | Converts files @IAU2000/tab5.3a.txt@ and @IAU2000/tab5.3b.txt@ into 
