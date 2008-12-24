@@ -20,8 +20,7 @@ module IAU2000.Nutation where
 import Astro
 import Astro.Time
 import Numeric.Units.Dimensional.Prelude
-import IAU2000.Tab53a
-import IAU2000.Tab53b
+import IAU2000.Tab53
 import IAU2000.FundamentalArguments (fundamentalArguments)
 import Control.Monad.Reader
 import qualified Prelude
@@ -38,7 +37,6 @@ trigTerms tt = fmap (toXY . sum . zipWith (*) args) multipliers
   where
     toXY x = (sin x, cos x)
     args = fundamentalArguments tt
-    multipliers = luniSolarMultipliers ++ planetaryMultipliers
 
 -- | Returns the nutation angles @(DeltaPhi, DeltaEps)@ at the given epoch.
 -- @DeltaPhi@ is the nutation in longitude and @DeltaEps@ is the nutation
@@ -49,8 +47,6 @@ nutationAngles :: Floating a => Int -> E TT -> (Angle a, Angle a)
 nutationAngles n tt = (sum $ take n deltaPhiTerms, sum $ take n deltaEpsTerms) where
   deltaPhiTerms = zipWith (\(s, s_dot, c') (sinPhi, cosPhi) -> (s + s_dot * t) * sinPhi + c' * cosPhi)  phiCoeffs (trigTerms tt)
   deltaEpsTerms = zipWith (\(c, c_dot, s') (sinPhi, cosPhi) -> (c + c_dot * t) * cosPhi + s' * sinPhi)  epsCoeffs (trigTerms tt)
-  phiCoeffs = luniSolarPhiCoeffs ++ planetaryPhiCoeffs
-  epsCoeffs = luniSolarEpsCoeffs ++ planetaryEpsCoeffs
   t = sinceJ2000 tt
 
 

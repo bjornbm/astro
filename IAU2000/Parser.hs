@@ -18,6 +18,15 @@ datastructures omitting unnecessary coefficients.
 
 -}
 
+{-
+TODO: Instead of converting strings to Dimensionals maybe we should
+just write out the strings and the units. The main reason for this
+is to maintain full precision in the Tab53x modules. The current
+version will imply the precision of the Num representation (Double).
+
+Also, homogenize tables into one.
+-}
+
 import Data.List
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional (Dimensional (Dimensional))
@@ -25,12 +34,11 @@ import qualified Prelude
 
 
 -- | Helper types
-type LuniSolarCoeffs a = (Angle a, AngularVelocity a, Angle a)
-type PlanetaryCoeffs a = (Angle a, Angle a)
+type Coeffs a = (Angle a, AngularVelocity a, Angle a)
 
 
 -- | Parses a line from an @tab5.3a.txt@ file.
-parseTab53aLine :: (Floating a, Read a) => String -> ([Dimensionless a], LuniSolarCoeffs a, LuniSolarCoeffs a)
+parseTab53aLine :: (Floating a, Read a) => String -> ([Dimensionless a], Coeffs a, Coeffs a)
 parseTab53aLine ""    = error "Line is empty"
 parseTab53aLine ('*':comment) = error $ "Line is a comment:" ++ comment
 parseTab53aLine line  = 
@@ -43,17 +51,40 @@ parseTab53aLine line  =
 
 
 -- | Parses a line from an @tab5.3b.txt@ file.
-parseTab53bLine :: (Floating a, Read a) => String -> ([Dimensionless a], PlanetaryCoeffs a, PlanetaryCoeffs a)
+parseTab53bLine :: (Floating a, Read a) => String -> ([Dimensionless a], Coeffs a, Coeffs a)
 parseTab53bLine line  = 
   ( [m10,m11,m12,m13,m14,m1,m2,m3,m4,m5,m6,m7,m8,m9] *~~ one
-  , (s *~ milli arcsecond, c' *~ milli arcsecond)
-  , (c *~ milli arcsecond, s' *~ milli arcsecond)
+  , (s *~ milli arcsecond, 0 *~ (radian / second), c' *~ milli arcsecond)
+  , (c *~ milli arcsecond, 0 *~ (radian / second), s' *~ milli arcsecond)
   ) where
     [term,m10,m11,m12,m13,m14,m1,m2,m3,m4,m5,m6,m7,m8,m9,period,s,c',s',c,amp] = fmap read (words line)
 
 
 -- | Prints a compilable Haskell module for table 5.3a.
-printTab53a :: Show a => ([[Dimensionless a]], [LuniSolarCoeffs a], [LuniSolarCoeffs a]) -> String
+printTab53 :: Show a => ([[Dimensionless a]], [Coeffs a], [Coeffs a]) -> String
+printTab53 (ms, phis, epss) = unlines
+  [ "-- This module was automatically generated."
+  , ""
+  , "module IAU2000.Tab53 where"
+  , ""
+  , "import Numeric.Units.Dimensional.Prelude"
+  , "import Numeric.Units.Dimensional (Dimensional (Dimensional))"
+  , "import qualified Prelude"
+  , ""
+  , "multipliers :: Fractional a => [[Dimensionless a]]"
+  , "multipliers =\n  " ++ intercalate " :\n  " (fmap showMs ms) ++ " :[]"
+  , ""
+  , "phiCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]"
+  , "phiCoeffs =\n  " ++ intercalate " :\n  " (fmap showCoeffs phis) ++ " :[]"
+  , ""
+  , "epsCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]"
+  , "epsCoeffs =\n  " ++ intercalate " :\n  " (fmap showCoeffs epss) ++ " :[]"
+  , ""
+  ]
+
+
+-- | Prints a compilable Haskell module for table 5.3a.
+printTab53a :: Show a => ([[Dimensionless a]], [Coeffs a], [Coeffs a]) -> String
 printTab53a (ms, phis, epss) = unlines
   [ "-- This module was automatically generated."
   , ""
@@ -67,16 +98,16 @@ printTab53a (ms, phis, epss) = unlines
   , "luniSolarMultipliers =\n  " ++ intercalate " :\n  " (fmap showMs ms) ++ " :[]"
   , ""
   , "luniSolarPhiCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]"
-  , "luniSolarPhiCoeffs =\n  " ++ intercalate " :\n  " (fmap showLSCoeffs phis) ++ " :[]"
+  , "luniSolarPhiCoeffs =\n  " ++ intercalate " :\n  " (fmap showCoeffs phis) ++ " :[]"
   , ""
   , "luniSolarEpsCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]"
-  , "luniSolarEpsCoeffs =\n  " ++ intercalate " :\n  " (fmap showLSCoeffs epss) ++ " :[]"
+  , "luniSolarEpsCoeffs =\n  " ++ intercalate " :\n  " (fmap showCoeffs epss) ++ " :[]"
   , ""
   ]
 
 
 -- | Prints a compilable Haskell module for table 5.3b.
-printTab53b :: Show a => ([[Dimensionless a]], [PlanetaryCoeffs a], [PlanetaryCoeffs a]) -> String
+printTab53b :: Show a => ([[Dimensionless a]], [Coeffs a], [Coeffs a]) -> String
 printTab53b (ms, phis, epss) = unlines
   [ "-- This module was automatically generated."
   , ""
@@ -90,10 +121,10 @@ printTab53b (ms, phis, epss) = unlines
   , "planetaryMultipliers =\n  " ++ intercalate " :\n  " (fmap showMs ms) ++ " :[]"
   , ""
   , "planetaryPhiCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]"
-  , "planetaryPhiCoeffs =\n  " ++ intercalate " :\n  " (fmap showPCoeffs phis) ++ " :[]"
+  , "planetaryPhiCoeffs =\n  " ++ intercalate " :\n  " (fmap showCoeffs phis) ++ " :[]"
   , ""
   , "planetaryEpsCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]"
-  , "planetaryEpsCoeffs =\n  " ++ intercalate " :\n  " (fmap showPCoeffs epss) ++ " :[]"
+  , "planetaryEpsCoeffs =\n  " ++ intercalate " :\n  " (fmap showCoeffs epss) ++ " :[]"
   , ""
   ]
 
@@ -106,16 +137,13 @@ showDim (Dimensional x) = "Dimensional (" ++ show x ++ ")"
 showMs :: Show a => [Dimensionless a] -> String
 showMs ms = "[" ++ intercalate ", " (fmap showDim ms) ++ "]"
 
-showLSCoeffs :: Show a => LuniSolarCoeffs a -> String
-showLSCoeffs (a, a_dot, b) = "(" ++ showDim a ++", "++ showDim a_dot ++ ", " ++ showDim b ++ ")"
-
-showPCoeffs :: Show a => PlanetaryCoeffs a -> String
-showPCoeffs  (a, b)        = "(" ++ showDim a ++", "++ showDim _0    ++ ", " ++ showDim b ++ ")"
+showCoeffs :: Show a => Coeffs a -> String
+showCoeffs (a, a_dot, b) = "(" ++ showDim a ++", "++ showDim a_dot ++ ", " ++ showDim b ++ ")"
 
 
 -- | Converts the content of an @tab5.3a.txt@ file into compilable Haskell module code.
-convertTab53a :: String -> String
-convertTab53a = printTab53a . unzip3 . fmap parseTab53aLine . takeWhile (not . comment) . dropWhile comment . lines
+-- convertTab53a :: String -> [Coeffs a]
+convertTab53a = fmap parseTab53aLine . takeWhile (not . comment) . dropWhile comment . lines
   where
     -- | @True@ is the argument is a comment (begins with @'x'@).
     comment :: String -> Bool
@@ -124,13 +152,14 @@ convertTab53a = printTab53a . unzip3 . fmap parseTab53aLine . takeWhile (not . c
 
 
 -- | Converts the content of an @tab5.3a.txt@ file into compilable Haskell module code.
-convertTab53b :: String -> String
-convertTab53b = printTab53b . unzip3 . fmap parseTab53bLine . reverse . drop 5 . lines
+-- convertTab53b :: String -> [Coeffs a]
+convertTab53b = fmap parseTab53bLine . reverse . drop 5 . lines
 
 
 -- | Converts files @IAU2000/tab5.3a.txt@ and @IAU2000/tab5.3b.txt@ into 
 -- modules @IAU2000/Tab53a.hs@ and @IAU2000/Tab53b.hs@ respectively.
 main = do
-  readFile "IAU2000/tab5.3a.txt" >>= writeFile "IAU2000/Tab53a.hs" . convertTab53a
-  readFile "IAU2000/tab5.3b.txt" >>= writeFile "IAU2000/Tab53b.hs" . convertTab53b
+  tab53a <- readFile "IAU2000/tab5.3a.txt" >>= return . convertTab53a
+  tab53b <- readFile "IAU2000/tab5.3b.txt" >>= return . convertTab53b
+  writeFile "IAU2000/Tab53.hs" $ printTab53 $ unzip3 $ tab53a ++ tab53b
 
