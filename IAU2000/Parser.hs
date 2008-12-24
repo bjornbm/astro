@@ -1,16 +1,14 @@
 {- 
 
-This program generates Haskell modules with the IAU2000A nutation
+This program generates a Haskell module with the IAU2000A nutation
 series. The data for the series is read from table files downloaded
-from [1] and [2]. The IAU2000A series has 1365 term where the first
-678 terms are used with luni-solar arguments only and the remaining
-687 use a combination of luni-solar and planetary arguments. Here
-and in the generated modules the first 678 terms are referred to
-as /luni-solar/ and the last 687 as /planetary/ (despite being a
-combination of luni-solar and planetary). The luni-solar and planetary
-terms are separated in [1] and [2] respectively. We maintain this
-\"optimization\" and generate separate modules with separate
-datastructures omitting unnecessary coefficients.
+from [1] and [2]. The IAU2000A series has 1365 term where the first 678
+terms are used with luni-solar arguments only and the remaining 687 use
+a combination of luni-solar and planetary arguments. Here and in the
+generated module the first 678 terms are referred to as /luni-solar/ and
+the last 687 as /planetary/ (despite being a combination of luni-solar
+and planetary). The luni-solar and planetary terms are separated in [1]
+and [2] respectively.
 
 [1] http://maia.usno.navy.mil:80/conv2003/chapter5/tab5.3a.txt
 [2] http://maia.usno.navy.mil:80/conv2003/chapter5/tab5.3b.txt
@@ -21,10 +19,8 @@ datastructures omitting unnecessary coefficients.
 {-
 TODO: Instead of converting strings to Dimensionals maybe we should
 just write out the strings and the units. The main reason for this
-is to maintain full precision in the Tab53x modules. The current
+is to maintain full precision in the Tab53 module. The current
 version will imply the precision of the Num representation (Double).
-
-Also, homogenize tables into one.
 -}
 
 import Data.List
@@ -79,52 +75,6 @@ printTab53 (ms, phis, epss) = unlines
   , ""
   , "epsCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]"
   , "epsCoeffs =\n  " ++ intercalate " :\n  " (fmap showCoeffs epss) ++ " :[]"
-  , ""
-  ]
-
-
--- | Prints a compilable Haskell module for table 5.3a.
-printTab53a :: Show a => ([[Dimensionless a]], [Coeffs a], [Coeffs a]) -> String
-printTab53a (ms, phis, epss) = unlines
-  [ "-- This module was automatically generated."
-  , ""
-  , "module IAU2000.Tab53a where"
-  , ""
-  , "import Numeric.Units.Dimensional.Prelude"
-  , "import Numeric.Units.Dimensional (Dimensional (Dimensional))"
-  , "import qualified Prelude"
-  , ""
-  , "luniSolarMultipliers :: Fractional a => [[Dimensionless a]]"
-  , "luniSolarMultipliers =\n  " ++ intercalate " :\n  " (fmap showMs ms) ++ " :[]"
-  , ""
-  , "luniSolarPhiCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]"
-  , "luniSolarPhiCoeffs =\n  " ++ intercalate " :\n  " (fmap showCoeffs phis) ++ " :[]"
-  , ""
-  , "luniSolarEpsCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]"
-  , "luniSolarEpsCoeffs =\n  " ++ intercalate " :\n  " (fmap showCoeffs epss) ++ " :[]"
-  , ""
-  ]
-
-
--- | Prints a compilable Haskell module for table 5.3b.
-printTab53b :: Show a => ([[Dimensionless a]], [Coeffs a], [Coeffs a]) -> String
-printTab53b (ms, phis, epss) = unlines
-  [ "-- This module was automatically generated."
-  , ""
-  , "module IAU2000.Tab53b where"
-  , ""
-  , "import Numeric.Units.Dimensional.Prelude"
-  , "import Numeric.Units.Dimensional (Dimensional (Dimensional))"
-  , "import qualified Prelude"
-  , ""
-  , "planetaryMultipliers :: Fractional a => [[Dimensionless a]]"
-  , "planetaryMultipliers =\n  " ++ intercalate " :\n  " (fmap showMs ms) ++ " :[]"
-  , ""
-  , "planetaryPhiCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]"
-  , "planetaryPhiCoeffs =\n  " ++ intercalate " :\n  " (fmap showCoeffs phis) ++ " :[]"
-  , ""
-  , "planetaryEpsCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]"
-  , "planetaryEpsCoeffs =\n  " ++ intercalate " :\n  " (fmap showCoeffs epss) ++ " :[]"
   , ""
   ]
 
