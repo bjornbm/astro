@@ -9,18 +9,15 @@ Any reference to chapters, sections, or equations are implicitly
 referring to [1] unless otherwise specified.
 
 [1] http://aa.usno.navy.mil/publications/docs/Circular_179.pdf
-[2]
-[3] http://maia.usno.navy.mil:80/conv2003/chapter5/tab5.3b.txt 
 
 -}
 
--- The exports from this module should fit into AstroData somehow.
 module IAU2000.Nutation where
 
 import Astro
 import Astro.Time
 import Numeric.Units.Dimensional.Prelude
-import IAU2000.Tab53
+import IAU2000.Table53
 import IAU2000.FundamentalArguments (fundamentalArguments)
 import Control.Monad.Reader
 import qualified Prelude
@@ -41,7 +38,7 @@ trigTerms tt = fmap (toXY . sum . zipWith (*) args) multipliers
 -- | Returns the nutation angles @(DeltaPhi, DeltaEps)@ at the given epoch.
 -- @DeltaPhi@ is the nutation in longitude and @DeltaEps@ is the nutation
 -- in obliquity measured in the ecliptic system of date as described in
--- chapter 5.4.2 of [2].
+-- chapter 5.4.2 of [1].
 -- The @Int@ argument is the number of terms to use in the nutation series.
 nutationAngles :: Floating a => Int -> E TT -> (Angle a, Angle a)
 nutationAngles n tt = (sum $ take n deltaPhiTerms, sum $ take n deltaEpsTerms) where
@@ -54,7 +51,7 @@ nutationAngles n tt = (sum $ take n deltaPhiTerms, sum $ take n deltaEpsTerms) w
 -- ========================
 
 -- | The full IAU 2000A nutation series. Calculates the direction of the
--- celestial pole in the GCRS with an accuracy of 0.2 mas ([Kaplamn2005]
+-- celestial pole in the GCRS with an accuracy of 0.2 mas ([Kaplan2005]
 -- p.47).
 nutationAngles2000A :: Floating a => E TT -> (Angle a, Angle a)
 nutationAngles2000A = nutationAngles 1365 -- Could use 'maxBound'.
