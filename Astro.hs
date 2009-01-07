@@ -12,7 +12,9 @@ import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 
 
+--eval :: Astro a (AstroData a -> b -> c) -> b -> Astro a c
 eval f x = asks (($x) . f)
+evalM f x = asks f >>= ($x)
 
 
 data TimeData = TimeData 

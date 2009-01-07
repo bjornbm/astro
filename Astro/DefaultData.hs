@@ -10,15 +10,15 @@ import qualified Astro.TimeUT as UT
 
 defaultTimeData = TimeData
   { leapSecondTable = const 33
-  , taiToUT1 = \(E t)->E t
-  , ut1ToTAI = undefined
+  , taiToUT1 = \(E t) -> E t
+  , ut1ToTAI = \(E t) -> E t
   ,  ttToTDB = convert  -- ttToTDB
   , tdbToTT  = convert  -- tdbToTT
   }
 
 defaultNutationModel = NutationModel
   { angles              = nutationAngles2000A
-  , equationOfEquinoxes = Eq.equationOfEquinoxes'
+  , equationOfEquinoxes = Eq.equationOfEquinoxes
   }
 
 defaultAstroData = AstroData

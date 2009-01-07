@@ -85,3 +85,53 @@ omega = phi_14
 fundamentalArguments :: Floating a => E TT -> [Angle a]
 fundamentalArguments tt = fmap ($tt) [phi_10, phi_11, phi_12, phi_13, phi_14, phi_1, phi_2, phi_3, phi_4, phi_5, phi_6, phi_7, phi_8, phi_9]
 
+
+-- | The arguments @A_k@ used in calculating the equation of the equinoxes
+-- and the CIO locator @s@. Contains the arguments needed to calculate
+-- all terms exceeding 0.5 microarcseconds during the interval 1975-2025.
+a_k :: Floating a => E TT -> [Angle a]
+a_k tt = [                              omega tt
+         ,                         _2 * omega tt
+         , _2 * f tt - _2 * d tt + _3 * omega tt
+         , _2 * f tt - _2 * d tt +      omega tt
+         , _2 * f tt - _2 * d tt + _2 * omega tt
+         , _2 * f tt             + _3 * omega tt
+         , _2 * f tt             +      omega tt
+         ,                         _3 * omega tt
+         , l' tt + omega tt
+         , l' tt - omega tt
+         , l  tt + omega tt
+         , l  tt - omega tt
+         ]
+
+-- | Coefficients required to calculate the CIO locator @s@ terms exceeding
+-- 0.5 microarcseconds during the interval 1975-2025.
+c_k :: Floating a => [Angle a]
+c_k = [ -0.00264073
+      , -0.00006353
+      , -0.00001175
+      , -0.00001121
+      ,  0.00000457
+      ] *~~ arcsecond ++ c_k_shared
+
+-- | Coefficients required to calculate the equation of the equinoxes 
+-- terms exceeding 0.5 microarcseconds during the interval 1975-2025.
+c_k' :: Floating a => [Angle a]
+c_k' = [ -0.00264096
+       , -0.00006352
+       , -0.00001175
+       , -0.00001121
+       ,  0.00000455
+       ] *~~ arcsecond ++ c_k_shared
+
+-- | Higher order coefficients that are identical for 'c_k' and 'c_k''.
+c_k_shared :: Floating a => [Angle a]
+c_k_shared = [ -0.00000202
+             , -0.00000198
+             ,  0.00000172
+             ,  0.00000141
+             ,  0.00000126
+             ,  0.00000063
+             ,  0.00000063
+             ] *~~ arcsecond
+

@@ -18,9 +18,6 @@ analogously to that published in [3].
 -}
 
 import Data.List
-import Numeric.Units.Dimensional.Prelude
-import Numeric.Units.Dimensional (Dimensional (Dimensional))
-import qualified Prelude
 
 
 -- Type synonyms for function signatures.
@@ -73,12 +70,11 @@ printTable53 (ms, phis, epss) = unlines
   , ""
   , "module IAU2000.Table53 (multipliers, phiCoeffs, epsCoeffs) where"
   , ""
+  , "import Astro.Time (century)"
   , "import Numeric.Units.Dimensional.Prelude"
   , "import Numeric.Units.Dimensional (Dimensional (Dimensional))"
   , "import qualified Prelude"
   , ""
-  , "century :: Num a => Unit DTime a"
-  , "century = prefix 36525 day"
   , "mas :: Floating a => Unit DPlaneAngle a"
   , "mas = milli arcsecond"
   , ""
@@ -88,17 +84,17 @@ printTable53 (ms, phis, epss) = unlines
   , "-- of [3]. For the luni-solar terms (the first 678 terms in the series) only"
   , "-- m10 through m14 are provided."
   , "multipliers :: Fractional a => [[Dimensionless a]]"
-  , "multipliers =\n  " ++ intercalate " :\n  " (fmap showMultipliers ms) ++ " :[]"
+  , "multipliers =\n  " ++ showList' (fmap showMultipliers ms)
   , ""
   , "-- | Sine and cosine coefficients @(s, s_dot, c')@ for evaluating the"
   , "-- nutation in longitude (Delta-phi)."
   , "phiCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]"
-  , "phiCoeffs =\n  " ++ intercalate " :\n  " (fmap showCoeffs phis) ++ " :[]"
+  , "phiCoeffs =\n  " ++ showList' (fmap showCoeffs phis)
   , ""
   , "-- | Cosine and sine coefficients @(c, c_dot, s')@ for evaluating the"
   , "-- nutation in obliquity (Delta-epsilon)."
   , "epsCoeffs :: Floating a => [(Angle a, AngularVelocity a, Angle a)]"
-  , "epsCoeffs =\n  " ++ intercalate " :\n  " (fmap showCoeffs epss) ++ " :[]"
+  , "epsCoeffs =\n  " ++ showList' (fmap showCoeffs epss)
   , ""
   ]
 
@@ -109,6 +105,9 @@ showMultipliers ms = "([" ++ intercalate ", " ms ++ "] *~~ one)"
 
 showCoeffs :: Coeffs -> String
 showCoeffs (a, a_dot, b) = "((" ++ a  ++") *~ mas, ("++ a_dot ++ ") *~ (mas / century), (" ++ b ++ ") *~ mas)"
+
+showList' :: [String] -> String
+showList' ss = intercalate " :\n  " ss ++ " :[]"
 
 
 -- | Converts files @IAU2000/tab5.3a.txt@ and @IAU2000/tab5.3b.txt@ into 

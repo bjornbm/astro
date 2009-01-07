@@ -11,12 +11,11 @@ It provides the entire IAU 2000A nutation series on list form.
 
 module IAU2000.Table53 (multipliers, phiCoeffs, epsCoeffs) where
 
+import Astro.Time (century)
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional (Dimensional (Dimensional))
 import qualified Prelude
 
-century :: Num a => Unit DTime a
-century = prefix 36525 day
 mas :: Floating a => Unit DPlaneAngle a
 mas = milli arcsecond
 
