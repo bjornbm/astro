@@ -16,6 +16,7 @@ import Data.Ix
 import Data.Array.IArray
 
 
+
 -- UT1
 -- ===
 
@@ -35,11 +36,13 @@ ut1ToTAI f ut1@(E t) = E $ t `addTime` f ut1
 taiToUT1 :: UT1MinusTAI -> E TAI -> E UT1
 taiToUT1 f tai@(E t) = E $ t `addTime` f tai
 
+{- Superceeded but 'Convert' instance in Astro.Time.Convert.
 convertToUT1 :: Convert t TAI => UT1MinusTAI -> E t -> E UT1
 convertToUT1 f = taiToUT1 f . convert
 
 convertFromUT1 :: Convert TAI t => TAIMinusUT1 -> E UT1 -> E t
 convertFromUT1 f = convert . ut1ToTAI f
+-}
 
 
 
@@ -104,8 +107,8 @@ mkLeapSecondTable a d = if d <= i then get i else if d >= j then get j else get 
 
 
 -- | Returns the UTC day that the epoch occurs on.
-getUTCDay :: Convert t TAI => LeapSecondTable -> E t -> Day
-getUTCDay lst = utctDay . taiToUTCTime lst . toAbsoluteTime . convert
+getUTCDay :: LeapSecondTable -> E TAI -> Day
+getUTCDay lst = utctDay . taiToUTCTime lst . toAbsoluteTime
 
 -- | Creates a 'UT1Table' from an 'EOPArray'.
 mkUT1Table :: (Fractional a) => EOPArray a -> UT1MinusTAI

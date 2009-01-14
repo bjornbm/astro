@@ -49,12 +49,12 @@ prop_UTC2 arr = mkLeapSecondTable arr (ModifiedJulianDay 53736) == 33
 prop_UT1_extrapolate_first arr = mkUT1Table arr (mjd 0 TAI) == (-0.2894287)*~second - 32*~second
 prop_UT1_extrapolate_last arr  = mkUT1Table arr (mjd 1e6 TAI) == 0.2098306 *~second - 34*~second
 prop_UT1_interpolate0 arr = mkUT1Table arr tai == (-0.5922280)*~second - 33*~second
-  where tai = convertFromUTC (mkLeapSecondTable arr) $ clockUTC 2008 12 31 0 0 0
+  where tai = utcToTAI (mkLeapSecondTable arr) $ clockUTC 2008 12 31 0 0 0
 prop_UT1_interpolate1 arr = mkUT1Table arr tai ==   0.4066064 *~second - 34*~second
-  where tai = convertFromUTC (mkLeapSecondTable arr) $ clockUTC 2009 01 01 0 0 0
+  where tai = utcToTAI (mkLeapSecondTable arr) $ clockUTC 2009 01 01 0 0 0
 prop_UT1_interpolate_mid arr = mkUT1Table arr tai == (x0 + x1) / _2
   where 
-    tai = convertFromUTC (mkLeapSecondTable arr) $ UTCTime (ModifiedJulianDay 54831) 43200.5
+    tai = utcToTAI (mkLeapSecondTable arr) $ UTCTime (ModifiedJulianDay 54831) 43200.5
     x0 = (-0.5922280)*~second - 33*~second
     x1 =   0.4066064 *~second - 34*~second
 

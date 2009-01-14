@@ -35,8 +35,8 @@ module Astro.Time (
 
   -- * Time Scales
   E (E)
-  , Convert
-  , convert
+  --, Convert
+  --, convert
   -- * Terrestrial Time Scales
   -- ** International Atomic Time (TAI)
   -- $tai
@@ -75,6 +75,10 @@ module Astro.Time (
   , diffEpoch
   , addTime
   , century
+  --  * Conversion
+  , taiToTT ,  ttToTAI
+  , tcgToTT ,  ttToTCG
+  , tcbToTDB, tdbToTCB
   ) where
 
 
@@ -354,8 +358,6 @@ The TDB time scale should be used for quantities such as precession
 angles and the fundamental arguments. However, for these quantities,
 the difference between TDB and TT is negligible at the microarcsecond
 level (page B7 of AsA2009).
-
-
 -}
 data TDB = TDB; instance Show TDB where show _ = "TDB"
 
@@ -421,34 +423,6 @@ tdbToTCB tdb@(E t) = E $ addTime t (tcbMinusTDB tdb)
 -- ==============
 
 data UT1 = UT1; instance Show UT1 where show _ = "UT1"
-
-
--- Conversion
--- ==========
-
-class Convert t t' where
-  -- | Convert between time scales. The target of the conversion is
-  -- decided from the expected type (provide a type signature if you
-  -- need to be explicit).
-  convert :: E t -> E t'
-
--- Since the number or time scales is limited we "brute force" the instance
--- definitions instead of trying to get fancy.
-
-instance Convert a a where convert = id  -- Trivial.
-
-instance Convert TAI TT  where convert = taiToTT
-instance Convert TAI TCG where convert = convert . taiToTT
-
-instance Convert TT  TAI where convert =  ttToTAI
-instance Convert TT  TCG where convert =  ttToTCG
-
-instance Convert TCG TAI where convert = convert . tcgToTT
-instance Convert TCG TT  where convert = tcgToTT
-
-instance Convert TDB TCB where convert = tdbToTCB
-
-instance Convert TCB TDB where convert = tcbToTDB
 
 
 -- References

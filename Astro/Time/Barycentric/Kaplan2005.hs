@@ -16,7 +16,7 @@ conversions of about 10 microseconds between the years 1600 and
 This module exports no data types or functions, it only provides
 additional 'Astro.Time.Convert' instances.
 -}
-module Astro.Time.Barycentric.Kaplan2005 () where
+module Astro.Time.Barycentric.Kaplan2005 (tdbToTT, ttToTDB) where
 
 import Astro.Time
 import Numeric.Units.Dimensional.Prelude
@@ -55,25 +55,4 @@ ttToTDB tt@(E t) = E $ addTime t (tdbMinusTT tt)
 -- | Convert a TDB epoch into a TT epoch.
 tdbToTT :: E TDB -> E TT
 tdbToTT tdb@(E t) = E $ addTime t (ttMinusTDB tdb)
-
-
--- Additional Convert instances
--- ============================
-
-instance Convert TAI TDB where convert = convert . (convert :: E TAI -> E TT)
-instance Convert TAI TCB where convert = convert . (convert :: E TAI -> E TT)
-
-instance Convert TT  TDB where convert =  ttToTDB
-instance Convert TT  TCB where convert =  convert . ttToTDB
-
-instance Convert TCG TDB where convert = convert . (convert :: E TCG -> E TT)
-instance Convert TCG TCB where convert = convert . (convert :: E TCG -> E TT)
-
-instance Convert TDB TAI where convert = convert . tdbToTT
-instance Convert TDB TT  where convert = tdbToTT
-instance Convert TDB TCG where convert = convert . tdbToTT
-
-instance Convert TCB TAI where convert = convert . (convert :: E TCB -> E TDB)
-instance Convert TCB TT  where convert = convert . (convert :: E TCB -> E TDB)
-instance Convert TCB TCG where convert = convert . (convert :: E TCB -> E TDB)
 

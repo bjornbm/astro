@@ -4,10 +4,13 @@
 -- library ("Data.Time" module hierarchy).
 module Astro.Time.Interop where
 
+import Astro
 import Astro.Time
+import Astro.Time.Convert
 import Data.Time
 import Data.Time.Clock.TAI
 import Data.Fixed (Pico)
+import Control.Monad.Reader (asks)
 
 
 -- | Converta TAI epoch into a 'Data.Time.Clock.TAI.AbsoluteTime'.
@@ -34,6 +37,7 @@ fromUniversalTime t = mjd (getModJulianDate t) UT1
 -- or outputs but immediately converted to another time scale. For
 -- UTC epochs use 'Data.Time.Clock.UTCTime'.
 
+-- | Convenience function for specifying UTC epochs.
 clockUTC :: Integer  -- ^ Year
          -> Int      -- ^ Month
          -> Int      -- ^ Day (of month)
@@ -43,18 +47,27 @@ clockUTC :: Integer  -- ^ Year
          -> UTCTime  -- ^ Epoch
 clockUTC y m d h min s = UTCTime (fromGregorian y m d) (timeOfDayToTime $ TimeOfDay h min s)
 
-
+-- Conversion
+-- ----------
+-- | Conversion from UTCTime.
 utcToTAI :: LeapSecondTable -> UTCTime -> E TAI
 utcToTAI lst = fromAbsoluteTime . utcToTAITime lst
 
+-- | Conversion to UTCTime.
 taiToUTC :: LeapSecondTable -> E TAI -> UTCTime
 taiToUTC lst = taiToUTCTime lst . toAbsoluteTime
 
+-- | Monadic conversion to UTCTime.
+convertToUTC :: Convert t TAI => E t -> Astro a UTCTime
+convertToUTC t = do
+  lst <- asks (leapSecondTable.time)
+  tai <- convert t
+  return (taiToUTC lst tai)
 
-convertToUTC :: Convert t TAI => LeapSecondTable -> E t -> UTCTime
-convertToUTC lst = taiToUTC lst . convert
-
-convertFromUTC :: Convert TAI t => LeapSecondTable -> UTCTime -> E t
-convertFromUTC lst = convert . utcToTAI lst
+-- | Monadic conversion from UTCTime.
+convertFromUTC :: Convert TAI t => UTCTime -> Astro a (E t)
+convertFromUTC utc = do
+  lst <- asks (leapSecondTable.time)
+  convert (utcToTAI lst utc)
 
 

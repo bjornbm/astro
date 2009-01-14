@@ -3,8 +3,7 @@
 
 module Astro where
 
-import Astro.Time hiding (Convert)
-import qualified Astro.TimeUT as UT
+import Astro.Time
 import Control.Monad.Reader
 import Data.Time.Clock.TAI (LeapSecondTable)
 import Data.Fixed
@@ -51,27 +50,4 @@ data AstroData a = AstroData
 type Astro a = Reader (AstroData a)
 runAstro :: Astro a b -> AstroData a -> b
 runAstro = runReader
-
-
--- Convert epochs.
-class Convert t t' where convertt :: E t -> Astro a (E t')
-
-instance Convert a a where convertt = return  -- Trivial.
-instance Convert TAI UT1 where 
-  convertt tai = asks (taiToUT1 . time) >>= return . ($ tai)
-
-instance Convert TAI TT  where convertt = return . convert
-instance Convert TAI TCG where convertt = return . convert
-
-instance Convert TT  TAI where convertt =  return . convert
-instance Convert TT  TCG where convertt =  return . convert
-
-instance Convert TCG TAI where convertt = return . convert
-instance Convert TCG TT  where convertt = return . convert
-
-instance Convert TDB TCB where convertt = return . convert
-
-instance Convert TCB TDB where convertt = return . convert
-
-
 
