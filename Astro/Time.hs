@@ -79,6 +79,7 @@ module Astro.Time (
   , taiToTT ,  ttToTAI
   , tcgToTT ,  ttToTCG
   , tcbToTDB, tdbToTCB
+  , taiToUT1, ut1ToTAI, UT1MinusTAI, TAIMinusUT1
   ) where
 
 
@@ -423,6 +424,21 @@ tdbToTCB tdb@(E t) = E $ addTime t (tcbMinusTDB tdb)
 -- ==============
 
 data UT1 = UT1; instance Show UT1 where show _ = "UT1"
+
+-- | Function which for a given TAI epoch calculates the instantaneous
+-- difference @UT1-TAI@.
+type UT1MinusTAI = E TAI -> Time Pico
+-- | Function which for a given UT1 epoch calculates the instantaneous
+-- difference @TAI-UT1@. TODO potentially unnecessary?
+type TAIMinusUT1 = E UT1 -> Time Pico
+
+-- | Convert a UT1 epoch into a TAI epoch.
+ut1ToTAI :: TAIMinusUT1 -> E UT1 -> E TAI
+ut1ToTAI f ut1@(E t) = E $ t `addTime` f ut1
+
+-- | Convert a TAI epoch into a UT1 epoch.
+taiToUT1 :: UT1MinusTAI -> E TAI -> E UT1
+taiToUT1 f tai@(E t) = E $ t `addTime` f tai
 
 
 -- References

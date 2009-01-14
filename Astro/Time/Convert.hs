@@ -12,7 +12,7 @@ explicit 'Convert' instances for all combinations of time scales.
 module Astro.Time.Convert where
 
 import Astro
-import Astro.Time
+import Astro.Time hiding (taiToUT1, ut1ToTAI)
 import Control.Monad.Reader
 import Data.Time.Clock.TAI (LeapSecondTable)
 import Data.Fixed

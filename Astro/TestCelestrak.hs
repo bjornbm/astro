@@ -1,10 +1,10 @@
-module Astro.Time.TestUT where
+module Astro.TestCelestrak where
 
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import Astro.Time
 import Astro.Time.Interop
-import Astro.TimeUT
+import Astro.Celestrak
 import Test.QuickCheck
 import Data.Time hiding (utc)
 import Data.Time.Clock.TAI
