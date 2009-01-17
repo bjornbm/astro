@@ -2,6 +2,7 @@ module Astro.Time.Sidereal where
 
 import Astro
 import Astro.Time
+import Astro.Time.Convert
 import Control.Monad.Reader
 import IAU2000.Nutation
 import Numeric.Units.Dimensional.Prelude
@@ -45,7 +46,7 @@ gmst' ut1 tt = era ut1 + gmst_p tt
 -- | Greenwich mean sidereal time (GMST) as a function of TT epoch.
 gmst :: RealFloat a => E TT -> Astro a (Angle a)
 gmst tt = do
-  ut1 <- convertt (convert tt :: E TAI)
+  ut1 <- convert tt
   return $ gmst' ut1 tt
 
 -- | Greenwich apparent sidereal time (GAST) expressed as an angle.

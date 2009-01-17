@@ -1,0 +1,34 @@
+Name:                astro
+Version:             0.1
+License:             BSD3
+License-File:        LICENSE
+Copyright:           Bjorn Buckwalter 2008-2009
+Author:              Bjorn Buckwalter 
+Maintainer:          bjorn.buckwalter@gmail.com
+Stability:           Unstable
+Synopsis:            Time scales and Earth orientation parameters for astrodynamics.
+Description:
+    Time scales and time conversion facilities relevant to astrodynamics.
+Category:            Physics
+Build-Type:          Simple
+Build-Depends:       base, time, dimensional, mtl, array
+Exposed-Modules:     Astro,
+                     Astro.DefaultData,
+                     Astro.Time,
+                     Astro.Time.Barycentric.AsA2009,
+                     Astro.Time.Barycentric.Kaplan2005,
+                     Astro.Time.Barycentric.TT,
+                     Astro.Time.Convert,
+                     Astro.Time.Interop,
+                     Astro.Time.Sidereal,
+                     Astro.Celestrak,
+                     IAU2000.FundamentalArguments,
+                     IAU2000.Table53,
+                     IAU2000.Nutation,
+                     IAU2000.Equations
+Extra-source-files:  README,
+                     Test.lhs,
+                     Astro/TestTime.hs,
+                     Astro/TestCelestrak.hs,
+                     Astro/Time/Barycentric/TestAsA2009.hs
+ 
