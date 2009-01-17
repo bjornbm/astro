@@ -11,7 +11,7 @@ Description:
     Time scales and time conversion facilities relevant to astrodynamics.
 Category:            Physics
 Build-Type:          Simple
-Build-Depends:       base, time, dimensional, mtl, array
+Build-Depends:       base, time, dimensional, mtl, array, leapseconds-announced
 Exposed-Modules:     Astro,
                      Astro.DefaultData,
                      Astro.Time,
