@@ -66,3 +66,62 @@ equationOfOrigins tt = do
   ee <- evalM (equationOfEquinoxes.nutation) tt
   return $ negate (gmst_p tt + ee) 
 
+
+
+-- Local sideral time
+-- ==================
+
+-- | Computes the longitude measured aroung the axis of the CIP from the TIO.
+longitudeCIP :: Floating a
+             => Angle a  -- ^ Geodetic (ITRS) longitude.
+             -> Angle a  -- ^ Geodetic (ITRS) latitude.
+             -> Astro a (Angle a)
+longitudeCIP long lat = do
+  xp <- undefined :: Astro a (Angle a) -- TODO
+  yp <- undefined :: Astro a (Angle a) -- TODO
+  return $ long + (xp * sin long + yp * cos long) * tan lat
+
+-- | Local mean sidereal time (LMST). The first argument is the longitude
+-- of the location of interest as measured from around the axis of the CIP
+-- from the TIO (see [Kaplan2005]). This longitude is not the same as the
+-- geodetic (ITRS) longitude, see 'longitudeCIP'!
+lmstCIP :: RealFloat a
+        => Angle a  -- ^ The longitude measured around CIP from TIO. 
+        -> E TT 
+        -> Astro a (Angle a)
+lmstCIP long tt = do
+  gmst <- gmst tt
+  return (gmst + long)
+
+-- | Local mean sidereal time (LMST).
+lmstITRS :: RealFloat a
+         => Angle a  -- ^ Geodetic (ITRS) longitude.
+         -> Angle a  -- ^ Geodetic (ITRS) latitude.
+         -> E TT 
+         -> Astro a (Angle a)
+lmstITRS long lat tt = do
+  longCIP <- longitudeCIP long lat
+  lmstCIP longCIP tt
+
+-- | Local apparent sidereal time (LAST). The first argument is the longitude
+-- of the location of interest as measured from around the axis of the CIP
+-- from the TIO (see [Kaplan2005]). This longitude is not the same as the
+-- geodetic (ITRS) longitude, see 'longitudeCIP'!
+lastCIP :: RealFloat a
+        => Angle a  -- ^ The longitude measured around CIP from TIO. 
+        -> E TT 
+        -> Astro a (Angle a)
+lastCIP long tt = do
+  gast <- gast tt
+  return (gast + long)
+
+-- | Local apparent sidereal time (LAST).
+lastITRS :: RealFloat a
+         => Angle a  -- ^ Geodetic (ITRS) longitude.
+         -> Angle a  -- ^ Geodetic (ITRS) latitude.
+         -> E TT 
+         -> Astro a (Angle a)
+lastITRS long lat tt = do
+  longCIP <- longitudeCIP long lat
+  lastCIP longCIP tt
+
