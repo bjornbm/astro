@@ -11,9 +11,11 @@ Description:
     Time scales and time conversion facilities relevant to astrodynamics.
 Category:            Physics
 Build-Type:          Simple
-Build-Depends:       base, time, dimensional, mtl, array, leapseconds-announced
+Build-Depends:       base, time, dimensional, mtl, array, leapseconds-announced, dimensional-vectors
 Exposed-Modules:     Astro,
                      Astro.DefaultData,
+                     Astro.Place,
+                     Astro.ReferenceEllipsoid,
                      Astro.Time,
                      Astro.Time.Barycentric.AsA2009,
                      Astro.Time.Barycentric.Kaplan2005,

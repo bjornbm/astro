@@ -3,13 +3,15 @@ module Astro.ReferenceEllipsoid where
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 
-type Flattening = Dimensionless
+type EquatorialRadius  = Length
+type PolarRadius       = Length
+type Flattening        = Dimensionless
 type InverseFlattening = Dimensionless
 
 
 data ReferenceEllipsoid a = ReferenceEllipsoid
-  { equatorialRadius :: Length a
-  , polarRadius      :: Length a
+  { equatorialRadius :: EquatorialRadius a
+  , polarRadius      :: PolarRadius a
   } deriving (Show, Eq)
 
 flattening :: Fractional a => ReferenceEllipsoid a -> Flattening a
@@ -20,7 +22,7 @@ inverseFlattening e = _1 / flattening e
 
 -- | Creates a reference ellipsoid based on the given equatorial radius
 -- and inverse flattening.
-referenceEllipsoid' :: Fractional a => Length a -> InverseFlattening a -> ReferenceEllipsoid a
+referenceEllipsoid' :: Fractional a => EquatorialRadius a -> InverseFlattening a -> ReferenceEllipsoid a
 --  g = 1 / f  and  f = 1 - b / a  ==>  b = a * (1 - 1 / g) = a - a / g
 referenceEllipsoid' a g = ReferenceEllipsoid a b where b = a - a / g
 

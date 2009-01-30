@@ -1,6 +1,7 @@
 module Astro.DefaultData where
 
 import Astro
+import Astro.ReferenceEllipsoid
 import Astro.Time hiding (taiToUT1, ut1ToTAI)
 import qualified Astro.Time.Barycentric.Kaplan2005 as TDB
 import IAU2000.Nutation
@@ -22,7 +23,8 @@ defaultNutationModel = NutationModel
   }
 
 defaultAstroData = AstroData
-  { time     = defaultTimeData
-  , nutation = defaultNutationModel
+  { time         = defaultTimeData
+  , nutation     = defaultNutationModel
+  , refEllipsoid = iers2003
   }
 

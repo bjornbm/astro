@@ -3,6 +3,7 @@
 
 module Astro where
 
+import Astro.ReferenceEllipsoid
 import Astro.Time
 import Control.Monad.Reader
 import Data.Time.Clock.TAI (LeapSecondTable)
@@ -37,8 +38,9 @@ data NutationModel a = NutationModel
 -- Naval Observatory. For example we store the leap second table in this
 -- data structure.
 data AstroData a = AstroData
-  { time     :: TimeData
-  , nutation :: NutationModel a
+  { time         :: TimeData
+  , nutation     :: NutationModel a
+  , refEllipsoid :: ReferenceEllipsoid a
   }
 
 
