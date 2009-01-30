@@ -1,4 +1,4 @@
-module Astro.ReferenceEllipsoid where
+module Astro.Place.ReferenceEllipsoid where
 
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude

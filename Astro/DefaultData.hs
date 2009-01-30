@@ -1,7 +1,7 @@
 module Astro.DefaultData where
 
 import Astro
-import Astro.ReferenceEllipsoid
+import Astro.Place.ReferenceEllipsoid
 import Astro.Time hiding (taiToUT1, ut1ToTAI)
 import qualified Astro.Time.Barycentric.Kaplan2005 as TDB
 import IAU2000.Nutation

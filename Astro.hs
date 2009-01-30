@@ -3,7 +3,7 @@
 
 module Astro where
 
-import Astro.ReferenceEllipsoid
+import Astro.Place.ReferenceEllipsoid
 import Astro.Time
 import Control.Monad.Reader
 import Data.Time.Clock.TAI (LeapSecondTable)
