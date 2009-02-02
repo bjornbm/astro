@@ -81,6 +81,18 @@ getUTCDay :: LeapSecondTable -> E TAI -> Day
 getUTCDay lst = utctDay . taiToUTCTime lst . toAbsoluteTime
 
 -- | Creates a 'UT1Table' from an 'EOPArray'.
+{- 
+TODO: The IERS explanatory supplement
+<http://hpiers.obspm.fr/iers/bul/bulb/explanatory.html> says:
+
+  "There are short-periodic (diurnal, semi-diurnal) variations in UT1 due
+  to ocean tides that are treated similarly to polar motion (the IERS
+  publishes the daily values from which these terms have been removed,
+  and they are to be added back after the interpolation)."
+
+Suitable interpolation method and addition of tides are described at
+<http://maia.usno.navy.mil/iers-gaz13>.
+-}
 mkUT1Table :: (Fractional a) => EOPArray a -> UT1MinusTAI
 mkUT1Table a t = if d < i then get i else if d >= j then get j
   else interpolate (t0, get d) (t1, get $ succ d) t
@@ -96,6 +108,13 @@ mkUT1Table a t = if d < i then get i else if d >= j then get j
 
 -- The following are subject to extraction to a util module if they
 -- turn out to be useful elsewhere.
+
+{-
+Linear interpolation is obviously simplistic. Another method should be
+used, see e.g. <http://maia.usno.navy.mil/iers-gaz13>. This recommendation
+is from 1997. Verify that it is still relevant for IERS2003... perhaps
+the CSSI paper on EOP addresses this? Or AsA2009?
+-}
 
 -- | Linear interpolation between two points.
 interpolate :: (Mul DOne d d, Fractional a) => (E t, Quantity d a) -> (E t, Quantity d a) -> E t -> Quantity d a
