@@ -6,7 +6,7 @@ do.
 module Astro.Place where
 
 import Astro
-import Astro.ReferenceEllipsoid
+import Astro.Place.ReferenceEllipsoid
 import Control.Monad.Reader (asks)
 import Numeric.Units.Dimensional.Prelude
 import Vector
@@ -28,6 +28,15 @@ type CIPLongitude       = Angle
 -- | Latitude measured around the axis of the CIP from the TIO meridian.
 type CIPLatitude        = Angle
 
+-- | Geodetic latitude, longitude and height bundled with a reference
+-- ellipsoid. (Without the context of a reference ellipsoid the geodetic
+-- coordinates aren't of much utility.)
+data GeodeticPlace a = GeodeticPlace
+  { refEllips :: ReferenceEllipsoid a
+  , latitude  :: GeodeticLatitude   a
+  , longitude :: GeoLongitude       a
+  , height    :: GeodeticHeight     a
+  }
 
 -- | Converts geodetic longitude and latitude in the ITRS frame into
 -- geocentric longitude and latitude in the CIP/TIO frame. The formulae
@@ -40,58 +49,52 @@ type CIPLatitude        = Angle
 -- in the CIP/TIO frame is geocentric or geodetic... does the concept
 -- of geodetic exist in that frame?)
 itrsToCIP :: Floating a 
-          =>         (GeoLongitude a, GeodeticLatitude a) 
-          -> Astro a (CIPLongitude a, CIPLatitude a)
-itrsToCIP (long, lat) = do
+          => GeodeticPlace a
+          -> Astro a (CIPLatitude a, CIPLongitude a)
+itrsToCIP p = do
   xp <- undefined :: Astro a (Angle a) -- TODO
   yp <- undefined :: Astro a (Angle a) -- TODO
-  let long' = long + (xp * sin long + yp * cos long) * tan lat
-      lat'  = lat  + (xp * cos long - yp * sin long)
-  return (long',lat')
+  let lat'  = lat  + (xp * cos long - yp * sin long)
+      long' = long + (xp * sin long + yp * cos long) * tan lat
+  return (lat',long')
+  where 
+    lat  = latitude p
+    long = longitude p
 
 
--- | Converts geodetic longitude, latitude and radius into geocentric
--- cartesian coordinates.
+
+-- | Converts a geodetic place into geocentric cartesian coordinates.
+-- From [WP1].
 geodeticToCartesian :: Floating a
-                    => GeoLongitude a
-                    -> GeodeticLatitude a
-                    -> GeodeticHeight a
-                    -> Astro a (CPos a)
-geodeticToCartesian long lat h = do
-  a <- asks (equatorialRadius . refEllipsoid)
-  b <- asks (     polarRadius . refEllipsoid)
-  return $ geodeticToCartesian' a b long lat h
- 
-
--- | Converts geodetic longitude, latitude and height into geocentric
--- cartesian coordinates. From [WP1].
-geodeticToCartesian' :: Floating a
-                     => EquatorialRadius a
-                     -> PolarRadius a
-                     -> GeoLongitude a
-                     -> GeodeticLatitude a
-                     -> GeodeticHeight a
-                     -> CPos a  -- ^ (x,y,z).
-geodeticToCartesian' a b long lat h = fromTuple (x,y,z)
+                    => GeodeticPlace a
+                    -> CPos a
+geodeticToCartesian p = fromTuple (x,y,z)
   where
+    -- Inputs. (Could have pattern-matched instead.)
+    a    = equatorialRadius $ refEllips p
+    b    =      polarRadius $ refEllips p
+    lat  = latitude  p
+    long = longitude p
+    h    = height    p
+    -- Intermediate calculations.
     e  = _1 - b ^ pos2 / a ^ pos2
     xi = sqrt (_1 - e ^ pos2 * sin lat ^ pos2)
-    x  = (a / xi + h) * cos lat * cos long
-    y  = (a / xi + h) * cos lat * sin long
-    z  = (a * (_1 - e^pos2) / xi + h) * sin lat
+    -- Final results.
+    x = (a / xi + h) * cos lat * cos long
+    y = (a / xi + h) * cos lat * sin long
+    z = (a * (_1 - e^pos2) / xi + h) * sin lat
 
+{-
+This function doesn't make much sense. Just use 'c2s'.
 
 -- | Converts geodetic longitude, latitude and height into geocentric
 -- longitude, latitude and radius.
 geodeticToGeocentric :: RealFloat a
-                     => GeoLongitude a
-                     -> GeodeticLatitude a
-                     -> GeodeticHeight a
-                     -> Astro a (GeoLongitude a, GeocentricLatitude a, GeocentricRadius a)
-geodeticToGeocentric long lat h = do
-  c <- geodeticToCartesian long lat h
-  let (r, ra, dec) = toTuple $ c2s c
-  return (ra, dec, r)
+                     => GeodeticPlace a
+                     -> (GeocentricLatitude a, GeoLongitude a, GeocentricRadius a)
+geodeticToGeocentric p = (dec, ra, r)
+  where (r, ra, dec) = toTuple $ c2s $ geodeticToCartesian p
+-}
 
 {- 
 Conversion from geocentric to geodetic is semi-complex. Will implement

@@ -87,13 +87,12 @@ lmstCIP long tt = do
 
 -- | Local mean sidereal time (LMST).
 lmstITRS :: RealFloat a
-         => GeoLongitude a  -- ^ Geodetic (ITRS) longitude.
-         -> GeodeticLatitude a        -- ^ Geodetic (ITRS) latitude.
+         => GeodeticPlace a  -- ^ Geodetic (ITRS) place.
          -> E TT 
          -> Astro a (Angle a)
-lmstITRS long lat tt = do
-  (longCIP, _) <- itrsToCIP (long, lat)
-  lmstCIP longCIP tt
+lmstITRS p tt = do
+  (_,long) <- itrsToCIP p
+  lmstCIP long tt
 
 -- | Local apparent sidereal time (LAST). The first argument is the longitude
 -- of the location of interest as measured from around the axis of the CIP
@@ -109,11 +108,10 @@ lastCIP long tt = do
 
 -- | Local apparent sidereal time (LAST).
 lastITRS :: RealFloat a
-         => GeoLongitude a  -- ^ Geodetic (ITRS) longitude.
-         -> GeodeticLatitude a  -- ^ Geodetic (ITRS) latitude.
+         => GeodeticPlace a  -- ^ Geodetic (ITRS) place.
          -> E TT 
          -> Astro a (Angle a)
-lastITRS long lat tt = do
-  (longCIP, _) <- itrsToCIP (long, lat)
-  lastCIP longCIP tt
+lastITRS p tt = do
+  (_,long) <- itrsToCIP p
+  lastCIP long tt
 
