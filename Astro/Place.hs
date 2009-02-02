@@ -84,6 +84,41 @@ geodeticToCartesian p = fromTuple (x,y,z)
     y = (a / xi + h) * cos lat * sin long
     z = (a * (_1 - e^pos2) / xi + h) * sin lat
 
+-- | Converts geocentric cartesian coordinates into geodetic place using
+-- Kaplan's procedure as described at [WP2].
+cartesianToGeodetic :: RealFloat a
+                    => CPos a
+                    -> ReferenceEllipsoid a
+                    -> GeodeticPlace a
+cartesianToGeodetic cart re = GeodeticPlace re lat long height
+  where
+    -- Inputs. (Could have pattern-matched instead.)
+    (x,y,z) = toTuple cart
+    a = equatorialRadius re
+    b =      polarRadius re
+    -- Intemediate calculations.
+    (r, _, long) = toTuple (c2s cart)
+    e2  = _1 - b^pos2 / a^pos2
+    e'2 = a^pos2 / b^pos2 - _1
+
+    _E2 = a^pos2 - b^pos2
+    f  = 54*~one * b^pos2 * z^pos2
+    g  = r^pos2 + (_1 - e2) * z^pos2 - e2 * _E2
+    c  = e2^pos2 * f * r^pos2 / g^pos3
+    s  = cbrt $ _1 + c + sqrt (c^pos2 + _2 * c)
+    p  = f / (_3 * (s + _1 / s + _1)^pos2 * g^pos2)
+    q  = sqrt $ _1 + _2 * e2^pos2 * p
+    r0 = negate p * e2 * r / (_1 + q)
+       + sqrt ( _1/_2 * a^pos2 * (_1 + _1 / q) 
+              - p * (_1 - e2) * z^pos2 / (q * (_1 + q))
+              - _1/_2 * p * r^pos2 )
+    u  = sqrt $ (r - e2 * r0)^pos2 + z^pos2
+    v  = sqrt $ (r - e2 * r0)^pos2 + (_1 - e2) * z^pos2
+    z0 = b^pos2 * z / (a * v)
+    -- Final results.
+    height = u * (_1 - b^pos2 / (a * v))
+    lat    = atan $ (z + e'2 * z0) / r
+
 {-
 This function doesn't make much sense. Just use 'c2s'.
 
@@ -97,9 +132,6 @@ geodeticToGeocentric p = (dec, ra, r)
 -}
 
 {- 
-Conversion from geocentric to geodetic is semi-complex. Will implement
-only if needed. For details see [WP2].
-
 
 References
 ==========
