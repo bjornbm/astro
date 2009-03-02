@@ -4,7 +4,7 @@ import Numeric.Units.Dimensional.Prelude
 import Vector
 import PosVel
 import Tmp.ForwardAD
-import Tmp.Fad (Dual)
+import Tmp.Lifts
 import qualified Prelude
 
 type Longitude = Angle
@@ -19,8 +19,8 @@ r_GEO :: Num a => Length a
 r_GEO = 42164 *~ kilo meter
 
 
---sensitivity :: RealFloat a => Longitude a -> GeodeticPlace (forall tag. Dual tag a) -> WaveNumber a
---sensitivity l st = _1 / (diff (lift (range st)) l)
+sensitivity :: RealFloat a => Longitude a -> GeodeticPlace a -> WaveNumber a
+sensitivity l st = _1 / diff (range $ lift st) l
 
 st1, st2, fot, pet :: Floating a => GeodeticPlace a
 st1 = GeodeticPlace wgs84 (  15 *~degree) (30*~degree) (150*~meter)
@@ -34,3 +34,4 @@ is706 = 50.25*~degree
 type Station a = (String, GeodeticPlace a)
 
 stations = [pet, fot]
+
