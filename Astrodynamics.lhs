@@ -7,7 +7,7 @@ A collection of astrodynamics functionality.
 > import Data.Time
 > import Data.Time.Clock.TAI
 > import Astro.Time
-> import Astro.TimeUT
+> import Astro.Time.Interop
 > import Prelude 
 >   ( fromIntegral, toRational, properFraction
 >   , Fractional, RealFloat, Num, realToFrac

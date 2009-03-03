@@ -27,7 +27,8 @@ Exposed-Modules:     Astro,
                      IAU2000.FundamentalArguments,
                      IAU2000.Table53,
                      IAU2000.Nutation,
-                     IAU2000.Equations
+                     IAU2000.Equations,
+                     Astrodynamics
 Extra-source-files:  README,
                      Test.lhs,
                      Astro/TestTime.hs,
