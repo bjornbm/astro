@@ -6,6 +6,7 @@ import PosVel
 import Tmp.ForwardAD
 import Tmp.Lifts
 import System (getArgs)
+import System.Console.ParseArgs
 import qualified Prelude
 import Text.Printf
 import Safe
@@ -62,6 +63,8 @@ stations =
   , station "PAT" 21.539184941937  201.965712  0.15297912
   , station "ATL" 33.48657775  275.7267  0.07367
   , station "VAS" 36.23605  244.882  0.586  -- NLV
+  -- , station "MAS" 
+  -- , station "HBK" 
   , station "LK" 43.23281  1.2069  0.23258
   , station "RK" 48.358678  1.7834  0.175
   , station "LD" 33.80421832  241.57466667  0.0046
@@ -81,11 +84,11 @@ showSC long longBias = printSC (long/~degree) (longBias/~degree) (longBias*r_GEO
 
 -- | Construct line describing station sensitivity and estimated bias.
 showStation :: Angle Double -> (String, Maybe (WaveNumber Double)) -> String
-showStation longBias (name, Just s) = printf "%-7s  %9.3f  (%7.1f)  %9.3f" name (s/~(degree/kilo meter)) (s*r_GEO/~one) (longBias/s/~kilo meter)
+showStation longBias (name, Just s) = printf "%-7s  %9.3f  (%8.1f)  %9.3f" name (s/~(degree/kilo meter)) (s*r_GEO/~one) (longBias/s/~kilo meter)
 showStation longBias (name, Nothing) = printf "%-7s           no visibility" name
   
 
-main = do
+main' = do
   [long', station, bias'] <- getArgs
   let !long = readNote "Couldn't parse longitude" long' *~ degree -- :: Angle Double
   let !bias = readNote "Couldn't parse bias"      bias' *~ kilo meter
@@ -96,9 +99,34 @@ main = do
 
   putStrLn $ showSC long longBias
   putStrLn $ ""
-  putStrLn $ "             Sensitivity       Est. Bias" 
-  putStrLn $ "Station  [degE/km]  ([km/km])    [km]"
-  putStrLn $ "-------  ---------  ---------  ---------"
+  putStrLn $ "             Sensitivity        Est. Bias" 
+  putStrLn $ "Station  [degE/km]  ([kmE/km])    [km]"
+  putStrLn $ "-------  ---------  ----------  ---------"
   putStrLn $ unlines $ map (showStation longBias) ss
 
+
+main = do
+  args <- parseArgsIO ArgsComplete 
+    [ arg Long (argDataRequired "longitude" ArgtypeDouble) "Geostationary satellite longitude [degE]"
+    , arg GS   (argDataRequired "GS"        ArgtypeString) "Reference ground station"
+    , arg Bias (argDataRequired "bias"      ArgtypeDouble) "Bias error of reference ground station [km]"
+    ]
+  let !long    = fromJustDef 0  (getArgDouble args Long) *~ degree
+  let !station = fromJustDef "" (getArgString args GS)
+  let !bias    = fromJustDef 0  (getArgDouble args Bias) *~ kilo meter
+
+  let ss = sensitivities long stations
+  let Just s1 = lookupJustDef (Just (0*~meter^neg1)) station ss
+  let longBias = bias * s1  -- This linearization breaks down when SC and GS longitudes coincide.
+
+  putStrLn $ showSC long longBias
+  putStrLn $ ""
+  putStrLn $ "             Sensitivity        Est. Bias" 
+  putStrLn $ "Station  [degE/km]  ([kmE/km])    [km]"
+  putStrLn $ "-------  ---------  ----------  ---------"
+  putStrLn $ unlines $ map (showStation longBias) ss
+
+
+data Options = Long | GS | Bias deriving (Ord, Eq, Show)
+arg i a s = Arg i Nothing Nothing a s
 
