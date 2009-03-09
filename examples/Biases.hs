@@ -1,3 +1,22 @@
+{-
+
+What does it do?
+----------------
+Computes sensitivity of observed SC position due to constant errors
+(biases) in range measurements.
+
+What is it good for?
+--------------------
+If you are doing two-station ranging you can use one antenna as a
+reference and solve for the bias on the other antennae. All other
+things being equal the antenna for which the sensitivity
+(dLongitude/dRange) is least should be chosen as reference. This
+ensures that the impact of any unknown or incorrigible bias errors
+on the antennae is minimized.
+
+-}
+
+
 import Astro.Place
 import Astro.Place.ReferenceEllipsoid
 import Numeric.Units.Dimensional.Prelude
@@ -88,7 +107,7 @@ showStation longBias (name, Just s) = printf "%-7s  %9.3f  (%8.1f)  %9.3f" name 
 showStation longBias (name, Nothing) = printf "%-7s           no visibility" name
   
 
-main' = do
+main = do
   [long', station, bias'] <- getArgs
   let !long = readNote "Couldn't parse longitude" long' *~ degree -- :: Angle Double
   let !bias = readNote "Couldn't parse bias"      bias' *~ kilo meter
@@ -105,11 +124,13 @@ main' = do
   putStrLn $ unlines $ map (showStation longBias) ss
 
 
-main = do
+-- Version of main using parseargs library. Pretty nice except negative
+-- args cannot be used (the are parsed as options/flags).
+main2 = do
   args <- parseArgsIO ArgsComplete 
-    [ arg Long (argDataRequired "longitude" ArgtypeDouble) "Geostationary satellite longitude [degE]"
-    , arg GS   (argDataRequired "GS"        ArgtypeString) "Reference ground station"
-    , arg Bias (argDataRequired "bias"      ArgtypeDouble) "Bias error of reference ground station [km]"
+    [ argument Long (argDataRequired "longitude" ArgtypeDouble) "Geostationary satellite longitude [degE]"     -- Cannot be negative!
+    , argument GS   (argDataRequired "GS"        ArgtypeString) "Reference ground station"
+    , argument Bias (argDataRequired "bias"      ArgtypeDouble) "Bias error of reference ground station [km]"  -- Cannot be negative!
     ]
   let !long    = fromJustDef 0  (getArgDouble args Long) *~ degree
   let !station = fromJustDef "" (getArgString args GS)
@@ -128,5 +149,5 @@ main = do
 
 
 data Options = Long | GS | Bias deriving (Ord, Eq, Show)
-arg i a s = Arg i Nothing Nothing a s
+argument i a s = Arg i Nothing Nothing a s
 
