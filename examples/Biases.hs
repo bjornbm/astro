@@ -25,7 +25,7 @@ import PosVel
 import Tmp.ForwardAD
 import Tmp.Lifts
 import System.SimpleArgs -- System (getArgs)
-import System.Console.ParseArgs
+--import System.Console.ParseArgs
 import qualified Prelude
 import Text.Printf
 import Safe
@@ -74,6 +74,7 @@ stations =
   , station "IEU" 49.92525036  9.92138889  0.192
   , station "FOT" 41.7851274352  13.601003  0.678311064  -- Fucino
   , station "PRE" (-25.73469603)  27.70694152  1.56141
+  , station "HBK" (-25.88694) (360 Prelude.- 332.29242) 1.531
   , station "PET" (-31.634473860195)  115.887672  0.023597616  -- Perth
   , station "KSN" 35.94231031  127.48672289  0.1812
   , station "PAT" 21.539184941937  201.965712  0.15297912
@@ -85,8 +86,7 @@ stations =
   , station "CRK" 39.08885821  255.1931333  2.1183
   , station "ATL" 33.48657775  275.7267  0.07367
   , station "CLK" 39.029938499358  282.729127  0.12095988  -- Clarksburg
-  -- , station "MAS" 
-  -- , station "HBK" 
+  , station "MAS" 27.263  (360 Prelude.- 15.634)  0.167
   ]
 
 -- | Computes sensitivities for a list of ground stations.
@@ -102,7 +102,7 @@ showSC long longBias = printSC (long/~degree) (longBias/~degree) (longBias*r_GEO
 
 -- | Construct line describing station sensitivity and estimated bias.
 showStation :: Angle Double -> (String, Maybe (WaveNumber Double)) -> String
-showStation longBias (name, Just s) = printf "%-7s  %9.3f  (%8.1f)  %9.3f" name (s/~(degree/kilo meter)) (s*r_GEO/~one) (longBias/s/~kilo meter)
+showStation longBias (name, Just s) = printf "%-7s  %9.3f  (%8.1f)  %9.3f" name (s/~(degree/kilo meter)) (s*r_GEO/~one) (negate longBias/s/~kilo meter)
 showStation longBias (name, Nothing) = printf "%-7s           no visibility" name
   
 
@@ -123,6 +123,7 @@ main = do
   putStrLn $ unlines $ map (showStation longBias) ss
 
 
+{-
 -- Version of main using parseargs library. Pretty nice except negative
 -- args cannot be used (the are parsed as options/flags).
 main2 = do
@@ -149,4 +150,5 @@ main2 = do
 
 data Options = Long | GS | Bias deriving (Ord, Eq, Show)
 argument i a s = Arg i Nothing Nothing a s
+-}
 

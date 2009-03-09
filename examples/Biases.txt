@@ -1,0 +1,175 @@
+
+I've written a little toy application for doing some basic analysis of
+ranging station biases and their effect on observed satellite positions.
+
+What does it do?
+----------------
+Computes sensitivity of observed SC position due to constant errors
+(biases) in range measurements.
+
+What is it good for?
+--------------------
+If you are doing two-station ranging you can use one antenna as a
+reference and solve for the bias on the other antennae. All other
+things being equal the antenna for which the sensitivity
+(dLongitude/dRange) is least should be chosen as reference. This
+ensures that the impact of any unknown or incorrigible bias errors
+on the antennae is minimized.
+
+Example
+-------
+One can use this application to, for example, test what a bias on a
+reference station would do to our measured orbit. Lets try a 1 km bias
+on an antenna at Fucino ranging on a SC at 45 degE...
+
+GEO longitude:   45.00   degE
+Error:            0.0211 degE  (15.504 km)
+
+             Sensitivity        Est. Bias
+Station  [degE/km]  ([kmE/km])    [km]
+-------  ---------  ----------  ---------
+LK           0.017  (    12.2)     -1.272
+RK           0.018  (    13.6)     -1.140
+IEU          0.023  (    16.6)     -0.934
+FOT          0.021  (    15.5)     -1.000
+PRE          0.029  (    21.6)     -0.719
+HBK          0.029  (    21.6)     -0.718
+PET         -0.011  (    -8.0)      1.948
+KSN               no visibility
+PAT               no visibility
+NAP               no visibility
+FIL               no visibility
+LD                no visibility
+IPC               no visibility
+VAS               no visibility
+CRK               no visibility
+ATL               no visibility
+CLK               no visibility
+MAS          0.011  (     8.1)     -1.925
+
+Above we see that the 1 km bias would result in a 0.021 degree eastward
+shift of the observed orbit. We can also see what the observed bias on
+a second antenna would be.
+
+
+Case studies
+============
+
+IS-11 @ 316.9 degE
+------------------
+IS-11 is ranged on by CRK-K15 (prime) and ATL-K21 (backup). I normally
+solve for the CRK-K15 bias and it comes out around -0.023 km.
+
+Lets look at IS-11's sensitivities to biases:
+
+GEO longitude:  316.90   degE
+
+             Sensitivity       
+Station  [degE/km]  ([kmE/km]) 
+-------  ---------  ---------- 
+LK          -0.016  (   -12.1) 
+RK          -0.018  (   -13.2) 
+IEU         -0.017  (   -12.2) 
+FOT         -0.014  (   -10.1) 
+PRE         -0.010  (    -7.5) 
+HBK         -0.010  (    -7.5) 
+PET               no visibility
+KSN               no visibility
+PAT               no visibility
+NAP               no visibility
+FIL          0.011  (     8.1) 
+LD           0.011  (     8.1) 
+IPC          0.011  (     8.1) 
+VAS          0.011  (     8.4) 
+CRK          0.013  (     9.2) 
+ATL          0.015  (    11.0) 
+CLK          0.019  (    13.8) 
+MAS         -0.019  (   -14.3) 
+
+From the above we can see that IS-11 is less sensitive to bias errors
+at CRK than at ATL (in general the further the separation in longitude
+between the SC and the GS the lower the sensitivity). So all else being
+equal it would be better to use CRK as the primary station and ATL as the
+backup. The difference in sensitivity is small, however (0.013 degE/km
+vs 0.015 degE/km).
+
+Now, what if CRK-K15 is perfectly calibrated and the observed bias is an
+artifact of a bias error on the reference station (ATL-K21)? If such
+were the case, how wrong if the observed longitude of IS-11 and what is
+the bias error on ATL-K21? Lets rerun the application specifying that CRK
+is the reference station with a bias of 0.023 km...
+
+GEO longitude:  316.90   degE
+Error:           -0.0003 degE  (-0.212 km)
+
+             Sensitivity        Est. Bias
+Station  [degE/km]  ([kmE/km])    [km]
+-------  ---------  ----------  ---------
+LK          -0.016  (   -12.1)     -0.018
+RK          -0.018  (   -13.2)     -0.016
+IEU         -0.017  (   -12.2)     -0.017
+FOT         -0.014  (   -10.1)     -0.021
+PRE         -0.010  (    -7.5)     -0.028
+HBK         -0.010  (    -7.5)     -0.028
+PET               no visibility
+KSN               no visibility
+PAT               no visibility
+NAP               no visibility
+FIL          0.011  (     8.1)      0.026
+LD           0.011  (     8.1)      0.026
+IPC          0.011  (     8.1)      0.026
+VAS          0.011  (     8.4)      0.025
+CRK          0.013  (     9.2)      0.023
+ATL          0.015  (    11.0)      0.019
+CLK          0.019  (    13.8)      0.015
+MAS         -0.019  (   -14.3)     -0.015
+
+We see that the difference in observed position is a measly 212 m to
+the West. We also see that the estimated bias for ATL would be 0.019 km.
+These results are consistent with what I get running the OD activity.
+
+
+D7S @ 240.95 degE
+-----------------
+A more interesting case is perhaps D7S. D7S is ranged by LD1 and
+CD7 (CRK) and these antennae carry biases of -1.12 km and -1.685 km
+respectively. The historical reasons for these biases are unknown to me
+but they are signficantly higher than we are used to. The could be the
+result of aligning an observed orbit with a hand-over orbit obtained
+from Boeing.
+
+Lets start by looking only at sensitivities...
+
+GEO longitude:  240.95   degE
+
+             Sensitivity       
+Station  [degE/km]  ([kmE/km]) 
+-------  ---------  ---------- 
+LK                no visibility
+RK                no visibility
+IEU               no visibility
+FOT               no visibility
+PRE               no visibility
+HBK               no visibility
+PET               no visibility
+KSN               no visibility
+PAT          0.014  (    10.1) 
+NAP          0.180  (   132.2) 
+FIL         -3.483  ( -2563.1) 
+LD          -0.871  (  -641.0) 
+IPC         -0.277  (  -203.7) 
+VAS         -0.143  (  -105.5) 
+CRK         -0.042  (   -30.9) 
+ATL         -0.017  (   -12.6) 
+CLK         -0.016  (   -11.8) 
+MAS               no visibility
+
+As you can see the observed longitude of D7S is very sensitive to bias
+errors on LD1. This is because they are separated by less than one degree
+in longitude.
+
+(FIL would be even worse, but note that at degenerated geometries like
+this linerizations fail and the sensitivity (dLong/dRange) cannot be
+used as a scale factor anymore, so the numbers should be taken with a
+grain of salt.)
+

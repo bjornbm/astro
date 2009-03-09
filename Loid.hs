@@ -7,6 +7,7 @@ import Numeric.Units.Dimensional.Prelude
 import Data.Time.Clock (UTCTime)
 import Text.Printf
 import System (getArgs)
+import qualified Prelude
 
 clockUTC y m d h min s = convertToUTC (const 0) (clock y m d h min s TAI)
 
@@ -34,6 +35,8 @@ main = do
   -- | Print seconds since J2000 in the respective time scales.
   printf "SI Seconds since J2000.0 UTC:  %f\n" $
     (diffEpoch (convertUTC utc) (convertUTC j2000utc :: E TAI) /~ second :: Double)
+  printf "Days since J2000.0 UTC:  %f\n" $
+    (diffEpoch (convertUTC utc) (convertUTC j2000utc :: E TAI) /~ day :: Double)
   printf "SI Seconds since J2000.0 TAI:  %f\n" $
     (diffEpoch (convertUTC utc) (j2000x TAI) /~ second :: Double)
   printf "SI Seconds since J2000.0 TT:   %f\n" $
