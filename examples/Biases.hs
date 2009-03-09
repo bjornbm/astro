@@ -24,7 +24,7 @@ import Vector
 import PosVel
 import Tmp.ForwardAD
 import Tmp.Lifts
-import System (getArgs)
+import System.SimpleArgs -- System (getArgs)
 import System.Console.ParseArgs
 import qualified Prelude
 import Text.Printf
@@ -69,25 +69,24 @@ type Station a = (String, GeodeticPlace a)
 station name long lat height = (name, GeodeticPlace wgs84 (long*~degree) (lat*~degree) (height*~kilo meter))
 
 stations =
-  [ station "FOT" 41.7851274352  13.601003  0.678311064  -- Fucino
-  , station "PET" (-31.634473860195)  115.887672  0.023597616  -- Perth
-  , station "CLK" 39.029938499358  282.729127  0.12095988  -- Clarksburg
-  , station "KSN" 35.94231031  127.48672289  0.1812
-  , station "PRE" (-25.73469603)  27.70694152  1.56141
+  [ station "LK" 43.23281  1.2069  0.23258
+  , station "RK" 48.358678  1.7834  0.175
   , station "IEU" 49.92525036  9.92138889  0.192
-  , station "IPC" 33.61775124  242.9107485  0.53508
+  , station "FOT" 41.7851274352  13.601003  0.678311064  -- Fucino
+  , station "PRE" (-25.73469603)  27.70694152  1.56141
+  , station "PET" (-31.634473860195)  115.887672  0.023597616  -- Perth
+  , station "KSN" 35.94231031  127.48672289  0.1812
+  , station "PAT" 21.539184941937  201.965712  0.15297912
   , station "NAP" 38.05804817  237.724  0.00792
   , station "FIL" 34.22691146  241.1071  0.341
-  , station "CRK" 39.08885821  255.1931333  2.1183
-  , station "PAT" 21.539184941937  201.965712  0.15297912
-  , station "ATL" 33.48657775  275.7267  0.07367
+  , station "LD" 33.80421832  241.57466667  0.0046
+  , station "IPC" 33.61775124  242.9107485  0.53508
   , station "VAS" 36.23605  244.882  0.586  -- NLV
+  , station "CRK" 39.08885821  255.1931333  2.1183
+  , station "ATL" 33.48657775  275.7267  0.07367
+  , station "CLK" 39.029938499358  282.729127  0.12095988  -- Clarksburg
   -- , station "MAS" 
   -- , station "HBK" 
-  , station "LK" 43.23281  1.2069  0.23258
-  , station "RK" 48.358678  1.7834  0.175
-  , station "LD" 33.80421832  241.57466667  0.0046
-  , station "AK" 33.48661132  275.72676111  0.384
   ]
 
 -- | Computes sensitivities for a list of ground stations.
@@ -108,9 +107,9 @@ showStation longBias (name, Nothing) = printf "%-7s           no visibility" nam
   
 
 main = do
-  [long', station, bias'] <- getArgs
-  let !long = readNote "Couldn't parse longitude" long' *~ degree -- :: Angle Double
-  let !bias = readNote "Couldn't parse bias"      bias' *~ kilo meter
+  (long', station, bias') <- getArgs
+  let !long = long' *~ degree
+  let !bias = bias' *~ kilo meter
 
   let ss = sensitivities long stations
   let Just s1 = lookupJustDef (Just (0*~meter^neg1)) station ss
