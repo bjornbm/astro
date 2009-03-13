@@ -1,53 +1,52 @@
 Introduction
 ============
-I've written a little toy application for doing some basic analysis
-of ground station (GS) ranging biases and their effect on observed
-satellite positions.
+I've written a little tool for doing some basic analysis of ground
+station (GS) ranging biases and their effect on observed satellite
+positions.
 
 What does it do?
 ----------------
-Computes sensitivity of observed SC position due to constant errors
+Computes sensitivity of observed SC longitude to constant errors
 (biases) in range measurements.
 
 What is it good for?
 --------------------
 If you are doing two-station ranging you can use one antenna as a
-reference and solve for the bias on the other antennae. All other
-things being equal the antenna for which the sensitivity
-(dLongitude/dRange) is least should be chosen as reference. This
-ensures that the impact of any unknown or incorrigible bias errors
-on the antennae is minimized.
+reference and solve for the bias on the other antennae. All other things
+being equal the antenna for which the sensitivity (dLongitude/dRange)
+is least should be chosen as reference. This ensures that the impact of
+any unknown or incorrigible bias errors is minimized.
 
 Example
 -------
-One can use this application to, for example, test what a bias on a
-reference station would do to our measured orbit. Lets try a 1 km bias
-on an antenna at Fucino ranging on a SC at 45 degE...
+One can use this application to, for example, test what a bias error on
+a reference station would do to our measured orbit. Lets try a 1 km bias
+error on an antenna at Fucino ranging on a SC at 45 degE...
 
-GEO longitude:   45.00   degE
-Error:            0.0211 degE  (15.504 km)
-
-             Sensitivity        Est. Bias
-Station  [degE/km]  ([kmE/km])    [km]
--------  ---------  ----------  ---------
-LK           0.017  (    12.2)     -1.272
-RK           0.018  (    13.6)     -1.140
-IEU          0.023  (    16.6)     -0.934
-FOT          0.021  (    15.5)     -1.000
-PRE          0.029  (    21.6)     -0.719
-HBK          0.029  (    21.6)     -0.718
-PET         -0.011  (    -8.0)      1.948
-KSN               no visibility
-PAT               no visibility
-NAP               no visibility
-FIL               no visibility
-LD                no visibility
-IPC               no visibility
-VAS               no visibility
-CRK               no visibility
-ATL               no visibility
-CLK               no visibility
-MAS          0.011  (     8.1)     -1.925
+  GEO longitude:   45.00   degE
+  Error:            0.0211 degE  (15.504 km)
+  
+               Sensitivity        Est. Bias
+  Station  [degE/km]  ([kmE/km])    [km]
+  -------  ---------  ----------  ---------
+  LK           0.017  (    12.2)     -1.272
+  RK           0.018  (    13.6)     -1.140
+  IEU          0.023  (    16.6)     -0.934
+  FOT          0.021  (    15.5)     -1.000
+  PRE          0.029  (    21.6)     -0.719
+  HBK          0.029  (    21.6)     -0.718
+  PET         -0.011  (    -8.0)      1.948
+  KSN               no visibility
+  PAT               no visibility
+  NAP               no visibility
+  FIL               no visibility
+  LD                no visibility
+  IPC               no visibility
+  VAS               no visibility
+  CRK               no visibility
+  ATL               no visibility
+  CLK               no visibility
+  MAS          0.011  (     8.1)     -1.925
 
 Above we see that the 1 km bias would result in a 0.021 degree eastward
 shift of the observed orbit. We can also see what the observed bias on
@@ -64,67 +63,67 @@ solve for the CRK-K15 bias and it comes out around -0.023 km.
 
 Lets look at IS-11's sensitivities to biases:
 
-GEO longitude:  316.90   degE
-
-             Sensitivity       
-Station  [degE/km]  ([kmE/km]) 
--------  ---------  ---------- 
-LK          -0.016  (   -12.1) 
-RK          -0.018  (   -13.2) 
-IEU         -0.017  (   -12.2) 
-FOT         -0.014  (   -10.1) 
-PRE         -0.010  (    -7.5) 
-HBK         -0.010  (    -7.5) 
-PET               no visibility
-KSN               no visibility
-PAT               no visibility
-NAP               no visibility
-FIL          0.011  (     8.1) 
-LD           0.011  (     8.1) 
-IPC          0.011  (     8.1) 
-VAS          0.011  (     8.4) 
-CRK          0.013  (     9.2) 
-ATL          0.015  (    11.0) 
-CLK          0.019  (    13.8) 
-MAS         -0.019  (   -14.3) 
-
+  GEO longitude:  316.90   degE
+  
+               Sensitivity       
+  Station  [degE/km]  ([kmE/km]) 
+  -------  ---------  ---------- 
+  LK          -0.016  (   -12.1) 
+  RK          -0.018  (   -13.2) 
+  IEU         -0.017  (   -12.2) 
+  FOT         -0.014  (   -10.1) 
+  PRE         -0.010  (    -7.5) 
+  HBK         -0.010  (    -7.5) 
+  PET               no visibility
+  KSN               no visibility
+  PAT               no visibility
+  NAP               no visibility
+  FIL          0.011  (     8.1) 
+  LD           0.011  (     8.1) 
+  IPC          0.011  (     8.1) 
+  VAS          0.011  (     8.4) 
+  CRK          0.013  (     9.2) 
+  ATL          0.015  (    11.0) 
+  CLK          0.019  (    13.8) 
+  MAS         -0.019  (   -14.3) 
+  
 From the above we can see that IS-11 is less sensitive to bias errors
 at CRK than at ATL (in general the further the separation in longitude
-between the SC and the GS the lower the sensitivity). So all else being
+between the SC and the GS the lower the sensitivity), so all else being
 equal it would be better to use CRK as the primary station and ATL as the
 backup. The difference in sensitivity is small, however (0.013 degE/km
 vs 0.015 degE/km).
 
 Now, what if CRK-K15 is perfectly calibrated and the observed bias is an
-artifact of a bias error on the reference station (ATL-K21)? If such
-were the case, how wrong if the observed longitude of IS-11 and what is
+artifact of a bias error on the reference station (ATL-K21)? If this
+is the case, how wrong is the observed longitude of IS-11 and what is
 the bias error on ATL-K21? Lets rerun the application specifying that CRK
-is the reference station with a bias of 0.023 km...
+is the reference station with a bias of -0.023 km...
 
-GEO longitude:  316.90   degE
-Error:           -0.0003 degE  (-0.212 km)
-
-             Sensitivity        Est. Bias
-Station  [degE/km]  ([kmE/km])    [km]
--------  ---------  ----------  ---------
-LK          -0.016  (   -12.1)     -0.018
-RK          -0.018  (   -13.2)     -0.016
-IEU         -0.017  (   -12.2)     -0.017
-FOT         -0.014  (   -10.1)     -0.021
-PRE         -0.010  (    -7.5)     -0.028
-HBK         -0.010  (    -7.5)     -0.028
-PET               no visibility
-KSN               no visibility
-PAT               no visibility
-NAP               no visibility
-FIL          0.011  (     8.1)      0.026
-LD           0.011  (     8.1)      0.026
-IPC          0.011  (     8.1)      0.026
-VAS          0.011  (     8.4)      0.025
-CRK          0.013  (     9.2)      0.023
-ATL          0.015  (    11.0)      0.019
-CLK          0.019  (    13.8)      0.015
-MAS         -0.019  (   -14.3)     -0.015
+  GEO longitude:  316.90   degE
+  Error:           -0.0003 degE  (-0.212 km)
+  
+               Sensitivity        Est. Bias
+  Station  [degE/km]  ([kmE/km])    [km]
+  -------  ---------  ----------  ---------
+  LK          -0.016  (   -12.1)     -0.018
+  RK          -0.018  (   -13.2)     -0.016
+  IEU         -0.017  (   -12.2)     -0.017
+  FOT         -0.014  (   -10.1)     -0.021
+  PRE         -0.010  (    -7.5)     -0.028
+  HBK         -0.010  (    -7.5)     -0.028
+  PET               no visibility
+  KSN               no visibility
+  PAT               no visibility
+  NAP               no visibility
+  FIL          0.011  (     8.1)      0.026
+  LD           0.011  (     8.1)      0.026
+  IPC          0.011  (     8.1)      0.026
+  VAS          0.011  (     8.4)      0.025
+  CRK          0.013  (     9.2)      0.023
+  ATL          0.015  (    11.0)      0.019
+  CLK          0.019  (    13.8)      0.015
+  MAS         -0.019  (   -14.3)     -0.015
 
 We see that the difference in observed position is a measly 212 m to
 the West. We also see that the estimated bias for ATL would be 0.019 km.
@@ -136,115 +135,115 @@ D7S @ 240.95 degE
 A more interesting case is perhaps D7S. D7S is ranged by LD1 and
 CD7 (CRK) and these antennae carry biases of -1.12 km and -1.685 km
 respectively. The historical reasons for these biases are unknown to me
-but they are signficantly higher than we are used to. The could be the
+but they are signficantly higher than we are used to. This could be the
 result of aligning an observed orbit with a hand-over orbit obtained
-from Boeing.
+from SS/L.
 
 Lets start by looking only at sensitivities...
 
-GEO longitude:  240.95   degE
-
-             Sensitivity       
-Station  [degE/km]  ([kmE/km]) 
--------  ---------  ---------- 
-LK                no visibility
-RK                no visibility
-IEU               no visibility
-FOT               no visibility
-PRE               no visibility
-HBK               no visibility
-PET               no visibility
-KSN               no visibility
-PAT          0.014  (    10.1) 
-NAP          0.180  (   132.2) 
-FIL         -3.483  ( -2563.1) 
-LD          -0.871  (  -641.0) 
-IPC         -0.277  (  -203.7) 
-VAS         -0.143  (  -105.5) 
-CRK         -0.042  (   -30.9) 
-ATL         -0.017  (   -12.6) 
-CLK         -0.016  (   -11.8) 
-MAS               no visibility
-
-As you can see the observed longitude of D7S is very sensitive to bias
-errors on LD1. This is because they are separated by less than one degree
-in longitude.
+  GEO longitude:  240.95   degE
+  
+               Sensitivity       
+  Station  [degE/km]  ([kmE/km]) 
+  -------  ---------  ---------- 
+  LK                no visibility
+  RK                no visibility
+  IEU               no visibility
+  FOT               no visibility
+  PRE               no visibility
+  HBK               no visibility
+  PET               no visibility
+  KSN               no visibility
+  PAT          0.014  (    10.1) 
+  NAP          0.180  (   132.2) 
+  FIL         -3.483  ( -2563.1) 
+  LD          -0.871  (  -641.0) 
+  IPC         -0.277  (  -203.7) 
+  VAS         -0.143  (  -105.5) 
+  CRK         -0.042  (   -30.9) 
+  ATL         -0.017  (   -12.6) 
+  CLK         -0.016  (   -11.8) 
+  MAS               no visibility
+  
+As you can see the observed longitude of D7S would be very sensitive to
+bias errors on LD1, were it used as reference. This is because they are
+separated by less than one degree in longitude.
 
 (FIL would be even worse, but note that at degenerated geometries like
-this linerizations fail and the sensitivity (dLong/dRange) cannot be
-used as a scale factor anymore, so the numbers should be taken with a
-grain of salt.)
+this linerizations fail and the sensitivity (dLongitude/dRange) cannot
+be interpreted as a scale factor anymore.)
 
 From the above sensitivities it is pretty clear that we should be using
 CD7 as our reference and solve for the bias of LD1.
 
 Lets look at the longitude shift corresponding to the bias of CD7...
 
-GEO longitude:  240.95   degE
-Error:            0.0707 degE  (51.998 km)
-
-             Sensitivity        Est. Bias
-Station  [degE/km]  ([kmE/km])    [km]
--------  ---------  ----------  ---------
-LK                no visibility
-RK                no visibility
-IEU               no visibility
-FOT               no visibility
-PRE               no visibility
-HBK               no visibility
-PET               no visibility
-KSN               no visibility
-PAT          0.014  (    10.1)     -5.133
-NAP          0.180  (   132.2)     -0.393
-FIL         -3.483  ( -2563.1)      0.020
-LD          -0.871  (  -641.0)      0.081
-IPC         -0.277  (  -203.7)      0.255
-VAS         -0.143  (  -105.5)      0.493
-CRK         -0.042  (   -30.9)      1.685
-ATL         -0.017  (   -12.6)      4.143
-CLK         -0.016  (   -11.8)      4.422
-MAS               no visibility
+  GEO longitude:  240.95   degE
+  Error:            0.0707 degE  (51.998 km)
+  
+               Sensitivity        Est. Bias
+  Station  [degE/km]  ([kmE/km])    [km]
+  -------  ---------  ----------  ---------
+  LK                no visibility
+  RK                no visibility
+  IEU               no visibility
+  FOT               no visibility
+  PRE               no visibility
+  HBK               no visibility
+  PET               no visibility
+  KSN               no visibility
+  PAT          0.014  (    10.1)     -5.133
+  NAP          0.180  (   132.2)     -0.393
+  FIL         -3.483  ( -2563.1)      0.020
+  LD          -0.871  (  -641.0)      0.081
+  IPC         -0.277  (  -203.7)      0.255
+  VAS         -0.143  (  -105.5)      0.493
+  CRK         -0.042  (   -30.9)      1.685
+  ATL         -0.017  (   -12.6)      4.143
+  CLK         -0.016  (   -11.8)      4.422
+  MAS               no visibility
 
 More than half a longitude box! Let's hope that bias we're using is real
 because if it's not we're flying in the box of Echostar 7, and boy would
 they be upset if we were to hit them!
 
 And note that the existence of a -1.685 km bias on CD7 only causes a 81 m
-observed bias difference on LD1, which means that a severe bias problem on
-CD7 would be barely noticable on LD1. It also gives some confidence that
-the bias of LD1 is indeed near -1.1 km even if the CD7 bias is incorrect.
+observed bias difference on LD1, which means that a severe bias problem
+on CD7 would be barely noticable on LD1. It also gives some confidence
+that the bias of LD1 is indeed near -1.1 km regardless of whether the
+CD7 bias is correct.
 
-To complete this exampel lets look at the effect of a -1.685 km bias
-on LD1...
+To complete this example lets look at the effect of a -1.685 km bias
+error on LD1...
 
-GEO longitude:  240.95   degE
-Error:            0.9755 degE  (717.865 km)
-
-             Sensitivity        Est. Bias
-Station  [degE/km]  ([kmE/km])    [km]
--------  ---------  ----------  ---------
-LK                no visibility
-RK                no visibility
-IEU               no visibility
-FOT               no visibility
-PRE               no visibility
-HBK               no visibility
-PET               no visibility
-KSN               no visibility
-PAT          0.014  (    10.1)    -70.864
-NAP          0.180  (   132.2)     -5.431
-FIL         -3.483  ( -2563.1)      0.280
-LD          -0.871  (  -641.0)      1.120
-IPC         -0.277  (  -203.7)      3.524
-VAS         -0.143  (  -105.5)      6.804
-CRK         -0.042  (   -30.9)     23.263
-ATL         -0.017  (   -12.6)     57.200
-CLK         -0.016  (   -11.8)     61.048
-MAS               no visibility
+  GEO longitude:  240.95   degE
+  Error:            0.9755 degE  (717.865 km)
+  
+               Sensitivity        Est. Bias
+  Station  [degE/km]  ([kmE/km])    [km]
+  -------  ---------  ----------  ---------
+  LK                no visibility
+  RK                no visibility
+  IEU               no visibility
+  FOT               no visibility
+  PRE               no visibility
+  HBK               no visibility
+  PET               no visibility
+  KSN               no visibility
+  PAT          0.014  (    10.1)    -70.864
+  NAP          0.180  (   132.2)     -5.431
+  FIL         -3.483  ( -2563.1)      0.280
+  LD          -0.871  (  -641.0)      1.120
+  IPC         -0.277  (  -203.7)      3.524
+  VAS         -0.143  (  -105.5)      6.804
+  CRK         -0.042  (   -30.9)     23.263
+  ATL         -0.017  (   -12.6)     57.200
+  CLK         -0.016  (   -11.8)     61.048
+  MAS               no visibility
 
 These number are obviously pretty wild due to the degerate geometry. We
 can at least tell that if the bias was wrong by this much we should be
-observing a 23 km bias on CRK. The fact that we are not confirms that
+observing a very large bias on CRK. The fact that we are not confirms that
 the LD1 bias is at the very least ballparkish.
 
 
@@ -254,57 +253,55 @@ I strongly suspect that I have a bias problem on G-11. Either that or
 something else is bad. It is ranged from MAS-K01 and HBK-K09 and the
 innovations (kalman-filter-speak for residuals, not exactly equivalent to
 WLS residuals but same idea) for both are consistently off and dragging
-to one side. Both antenna are new and to my knowledge their biases were
+to one side. Both antennae are new and to my knowledge their biases were
 determined by Miro trying to fit observations to the best known orbit
 coming off of other antennae. The station biases are 0 for MAS-K01 and
 -0.820 km for HBK-K09.  Lets see what kind of difference that HBK-K09
 bias might make...
 
-GEO longitude:   32.80   degE
-Error:           -0.0800 degE  (-58.841 km)
-
-             Sensitivity        Est. Bias
-Station  [degE/km]  ([kmE/km])    [km]
--------  ---------  ----------  ---------
-LK           0.022  (    15.8)      3.718
-RK           0.024  (    17.8)      3.305
-IEU          0.033  (    24.3)      2.426
-FOT          0.033  (    24.3)      2.426
-PRE          0.097  (    71.6)      0.821
-HBK          0.098  (    71.8)      0.820
-PET               no visibility
-KSN               no visibility
-PAT               no visibility
-NAP               no visibility
-FIL               no visibility
-LD                no visibility
-IPC               no visibility
-VAS               no visibility
-CRK               no visibility
-ATL               no visibility
-CLK               no visibility
-MAS          0.012  (     9.1)      6.442
+  GEO longitude:   32.80   degE
+  Error:           -0.0800 degE  (-58.841 km)
+  
+               Sensitivity        Est. Bias
+  Station  [degE/km]  ([kmE/km])    [km]
+  -------  ---------  ----------  ---------
+  LK           0.022  (    15.8)      3.718
+  RK           0.024  (    17.8)      3.305
+  IEU          0.033  (    24.3)      2.426
+  FOT          0.033  (    24.3)      2.426
+  PRE          0.097  (    71.6)      0.821
+  HBK          0.098  (    71.8)      0.820
+  PET               no visibility
+  KSN               no visibility
+  PAT               no visibility
+  NAP               no visibility
+  FIL               no visibility
+  LD                no visibility
+  IPC               no visibility
+  VAS               no visibility
+  CRK               no visibility
+  ATL               no visibility
+  CLK               no visibility
+  MAS          0.012  (     9.1)      6.442
 
 Yuck! Another large longitude shift. Lets hope this bias is real. If it's
 not the numbers above kind of imply that the MAS-K01 has a bias error of
 6.4 km (while unlikely it isn't totally out of question: HBK-K09 had a
-10 km bias until we did an IF Cal last week). But that's not necessarily
-true since the kalman filter isn't solving for biases. I'll have to look
-into doing a WLS and see what I get if I solve for biases.
+10 km bias until we did an IF Cal last week). But this analysis is not
+necessarily valid since the kalman filter isn't solving for biases. I'll
+have to look into doing a WLS and see what I get if I solve for biases.
 
 
 Notes and Conclusions
 =====================
 If you have a fishy looking bias that you're not completely comfortable
-the tool will tell you whether investigating further (e.g. arranging to
-have a third station range on the SC) is warranted.
+with the tool can tell you whether investigating further (e.g. arranging
+to have a third station range on the SC) is warranted.
 
-One take away is that, all else being equal, use the GS furthest separated
-from your SC as the reference station. While this is not novel (see e.g.
-Soop 1994) it is something that I needed to be reminded of.
-
-Note that the tool doesn't say anything about statistical uncertainties
-(in the covarianve sense).
+One general take away is that, all else being equal, use the GS furthest
+separated in longitude from your SC as the reference station. While this
+is not novel (and makes sense intuitively once you start thinking about
+it) it is something that I needed to be reminded of.
 
 A lot of the above analysis can be done running the WLS activity
 repeatedly with difference bias settings and checking the OD
@@ -313,11 +310,14 @@ tool is much faster. The tool can also be used to evaluate GS/longitude
 configurations that we aren't currently using (and thus have no range
 data to use with the WLS activity, although I suppose we could simulate?).
 
+Note that the tool doesn't say anything about statistical uncertainties
+(in the covarianve sense). Use the WLS for this.
+
 I'd like to add SC delay error to the tool. An SC delay error wouldn't
 change the sensitivity but would affect the longitude error and estimated
 biases.
 
-I'll try to set up a wiki page with usage guidelines so you can try it
-yourself if you're interested.
+Hope you had as much fun as I did. I'll try to set up a wiki page with
+usage guidelines so you can try it yourself if you're interested.
 
 
