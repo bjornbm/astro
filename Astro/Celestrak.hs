@@ -12,6 +12,7 @@ import Data.List (isPrefixOf)
 import Data.Time
 import Data.Time.Clock.TAI
 import qualified Prelude as P
+import Data.Ix
 import Data.Array.IArray
 
 
@@ -119,6 +120,15 @@ the CSSI paper on EOP addresses this? Or AsA2009?
 interpolate :: (Mul DOne d d, Fractional a) => (E t, Quantity d a) -> (E t, Quantity d a) -> E t -> Quantity d a
 interpolate (t0, x0) (t1, x1) t = (t .- t0) / (t1 .- t0) * (x1 - x0) + x0
   where (.-) = diffEpoch
+
+
+
+-- Methinks this should be part of the time package... submit patch!
+instance Ix Day where
+  range (d1, d2) = map ModifiedJulianDay $ range (toModifiedJulianDay d1, toModifiedJulianDay d2)
+  index (d1, d2) d = index (toModifiedJulianDay d1, toModifiedJulianDay d2) (toModifiedJulianDay d)
+  inRange (d1, d2) d = inRange (toModifiedJulianDay d1, toModifiedJulianDay d2) (toModifiedJulianDay d)
+  rangeSize (d1, d2) = rangeSize (toModifiedJulianDay d1, toModifiedJulianDay d2)
 
 -- | Read a 'Data.Fixed.Fixed' value. Note that any decimals beyond the
 -- resolution of the target type are "floored" (as opposed to rounded).
