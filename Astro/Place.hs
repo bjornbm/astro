@@ -77,12 +77,12 @@ geodeticToCartesian p = fromTuple (x,y,z)
     long = longitude p
     h    = height    p
     -- Intermediate calculations.
-    e  = _1 - b ^ pos2 / a ^ pos2
-    xi = sqrt (_1 - e ^ pos2 * sin lat ^ pos2)
+    e2 = _1 - b^pos2 / a^pos2
+    xi = sqrt (_1 - e2 * sin lat ^ pos2)
     -- Final results.
     x = (a / xi + h) * cos lat * cos long
     y = (a / xi + h) * cos lat * sin long
-    z = (a * (_1 - e^pos2) / xi + h) * sin lat
+    z = (a * (_1 - e2) / xi + h) * sin lat
 
 -- | Converts geocentric cartesian coordinates into geodetic place using
 -- Kaplan's procedure as described at [WP2].
@@ -97,9 +97,9 @@ cartesianToGeodetic cart re = GeodeticPlace re lat long height
     a = equatorialRadius re
     b =      polarRadius re
     -- Intemediate calculations.
-    (r, _, long) = toTuple (c2s cart)
-    e2  = _1 - b^pos2 / a^pos2
-    e'2 = a^pos2 / b^pos2 - _1
+    r    = sqrt $ x^pos2 + y^pos2
+    e2   = _1 - b^pos2 / a^pos2
+    e'2  = a^pos2 / b^pos2 - _1
 
     _E2 = a^pos2 - b^pos2
     f  = 54*~one * b^pos2 * z^pos2
@@ -118,6 +118,7 @@ cartesianToGeodetic cart re = GeodeticPlace re lat long height
     -- Final results.
     height = u * (_1 - b^pos2 / (a * v))
     lat    = atan $ (z + e'2 * z0) / r
+    long   = atan2 y x -- azimuth (c2s cart)
 
 {-
 This function doesn't make much sense. Just use 'c2s'.
