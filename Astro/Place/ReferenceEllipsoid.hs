@@ -36,7 +36,8 @@ krasovsky1940     = referenceEllipsoid' (6378245    *~meter) (298.3*~one)       
 grs80             = referenceEllipsoid' (6378137.0  *~meter) (298.257222101*~one)  -- [wp].
 wgs84             = referenceEllipsoid' (6378137.0  *~meter) (298.257223563*~one)  -- [WGS84].
 iers2003          = referenceEllipsoid' (6378136.6  *~meter) (298.25642*~one)  -- Zero tide, [IERS2003].
-sphere6371km      = ReferenceEllipsoid r r  where r = 6371000 *~ meter
+sphere6371km :: Num a => ReferenceEllipsoid a
+sphere6371km = ReferenceEllipsoid r r  where r = 6371000 *~ meter
 
 {-
 References

@@ -36,7 +36,7 @@ data GeodeticPlace a = GeodeticPlace
   , latitude  :: GeodeticLatitude   a
   , longitude :: GeoLongitude       a
   , height    :: GeodeticHeight     a
-  }
+  } deriving (Show, Eq)
 
 -- | Converts geodetic longitude and latitude in the ITRS frame into
 -- geocentric longitude and latitude in the CIP/TIO frame. The formulae
