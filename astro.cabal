@@ -11,7 +11,8 @@ Description:
     Time scales and time conversion facilities relevant to astrodynamics.
 Category:            Physics
 Build-Type:          Simple
-Build-Depends:       base, time, dimensional, mtl, array, leapseconds-announced, dimensional-vectors, fad
+Build-Depends:       base, time, mtl, array, leapseconds-announced,
+                     dimensional, dimensional-vectors, astro-tables, fad
 Exposed-Modules:     Astro,
                      Astro.DefaultData,
                      Astro.Place,
@@ -25,7 +26,6 @@ Exposed-Modules:     Astro,
                      Astro.Time.Sidereal,
                      Astro.Celestrak,
                      IAU2000.FundamentalArguments,
-                     IAU2000.Table53,
                      IAU2000.Nutation,
                      IAU2000.Equations,
                      Astrodynamics
