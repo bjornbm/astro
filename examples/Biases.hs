@@ -16,6 +16,9 @@ on the antennae is minimized.
 
 -}
 
+{-
+Requires safe, simpleargs.
+-}
 
 import Astro.Place
 import Astro.Place.ReferenceEllipsoid
