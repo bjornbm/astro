@@ -11,23 +11,24 @@ import Data.Time
 import Data.Time.Clock.TAI
 import Data.Fixed (Pico)
 import Control.Monad.Reader (asks)
+import Numeric.Units.Dimensional.SIUnits
 
 
 -- | Converta TAI epoch into a 'Data.Time.Clock.TAI.AbsoluteTime'.
-toAbsoluteTime :: E TAI -> AbsoluteTime
-toAbsoluteTime (E t) = t
+toAbsoluteTime :: (Real a, Fractional a) => E TAI a -> AbsoluteTime
+toAbsoluteTime (E t) = addAbsoluteTime (toDiffTime t) taiEpoch
 
 -- | Converts a 'Data.Time.Clock.TAI.AbsoluteTime' into a TAI epoch.
-fromAbsoluteTime :: AbsoluteTime -> E TAI
-fromAbsoluteTime = E
+fromAbsoluteTime :: Fractional a => AbsoluteTime -> E TAI a
+fromAbsoluteTime t = E $ fromDiffTime $ diffAbsoluteTime t taiEpoch
 
 -- | Convert a UT1 epoch into a 'Data.Time.Clock.UniversalTime'.
-toUniversalTime :: E UT1 -> UniversalTime
-toUniversalTime (E t) = ModJulianDate $ (/ 86400) $ toRational $ diffAbsoluteTime t taiEpoch
+toUniversalTime :: (Real a, Fractional a) => E UT1 a -> UniversalTime
+toUniversalTime t = ModJulianDate $ (/ 86400) $ toRational $ diffAbsoluteTime (toAbsoluteTime $ coerce t) taiEpoch
 
 -- | Convert a 'Data.Time.Clock.UniversalTime' into a UT1 epoch.
-fromUniversalTime :: UniversalTime -> E UT1
-fromUniversalTime t = mjd (getModJulianDate t) UT1
+fromUniversalTime :: RealFrac a => UniversalTime -> E UT1 a
+fromUniversalTime t = mjd (fromRational $ getModJulianDate t) UT1
 
 
 -- UTC
@@ -50,22 +51,22 @@ clockUTC y m d h min s = UTCTime (fromGregorian y m d) (timeOfDayToTime $ TimeOf
 -- Conversion
 -- ----------
 -- | Conversion from UTCTime.
-utcToTAI :: LeapSecondTable -> UTCTime -> E TAI
+utcToTAI :: Fractional a => LeapSecondTable -> UTCTime -> E TAI a
 utcToTAI lst = fromAbsoluteTime . utcToTAITime lst
 
 -- | Conversion to UTCTime.
-taiToUTC :: LeapSecondTable -> E TAI -> UTCTime
+taiToUTC :: (Real a, Fractional a) => LeapSecondTable -> E TAI a -> UTCTime
 taiToUTC lst = taiToUTCTime lst . toAbsoluteTime
 
 -- | Monadic conversion to UTCTime.
-convertToUTC :: Convert t TAI => E t -> Astro a UTCTime
+convertToUTC :: (Convert t TAI, Real a, Fractional a) => E t a -> Astro a UTCTime
 convertToUTC t = do
   lst <- asks (leapSecondTable.time)
   tai <- convert t
   return (taiToUTC lst tai)
 
 -- | Monadic conversion from UTCTime.
-convertFromUTC :: Convert TAI t => UTCTime -> Astro a (E t)
+convertFromUTC :: (Convert TAI t, Fractional a) => UTCTime -> Astro a (E t a)
 convertFromUTC utc = do
   lst <- asks (leapSecondTable.time)
   convert (utcToTAI lst utc)

@@ -5,7 +5,6 @@ module Astro.Celestrak where
 import Numeric.Units.Dimensional.Prelude
 import Astro.Time
 import Astro.Time.Interop
-import Data.Fixed (HasResolution, Fixed, Micro, Pico)
 import Data.Char (isSpace)
 import Data.Ratio
 import Data.List (isPrefixOf)
@@ -22,7 +21,7 @@ import Data.Array.IArray
 data EOPData a = EOPData
   { x           :: Angle a
   , y           :: Angle a
-  , ut1MinusUTC :: Time Pico
+  , ut1MinusUTC :: Time a
   , lod         :: Time a
   , dPsi        :: Angle a
   , dEpsilon    :: Angle a
@@ -39,7 +38,7 @@ type EOPArray a = Array Day (EOPData a)
 parseEOPLine :: (Read a, Floating a) => String -> (Day, EOPData a)
 parseEOPLine s = ( ModifiedJulianDay (read mjd)
                  , EOPData (readAngle x) (readAngle y)
-                           (readPicoTime ut1MinusUTC) (readTime lod)
+                           (readTime ut1MinusUTC) (readTime lod)
                            (readAngle dPsi) (readAngle dEpsilon)
                            (readAngle dX) (readAngle dY)
                            (read deltaAT)
@@ -47,7 +46,6 @@ parseEOPLine s = ( ModifiedJulianDay (read mjd)
   where
     [_, _, _, mjd, x, y, ut1MinusUTC, lod, dPsi, dEpsilon, dX, dY, deltaAT] = words s
     readTime     = (*~ second) . read
-    readPicoTime = (*~ second) . readFixed -- fromRational . toRational . (read :: String -> Double)
     readAngle    = (*~ arcsecond) . read
 
 -- | Parse a file of Celestrak EOP data into a list.
@@ -76,7 +74,7 @@ mkLeapSecondTable a d = if d <= i then get i else if d >= j then get j else get 
 
 
 -- | Returns the UTC day that the epoch occurs on.
-getUTCDay :: LeapSecondTable -> E TAI -> Day
+getUTCDay :: (Real a, Fractional a) => LeapSecondTable -> E TAI a -> Day
 getUTCDay lst = utctDay . taiToUTCTime lst . toAbsoluteTime
 
 -- | Creates a 'UT1Table' from an 'EOPArray'.
@@ -92,7 +90,7 @@ TODO: The IERS explanatory supplement
 Suitable interpolation method and addition of tides are described at
 <http://maia.usno.navy.mil/iers-gaz13>.
 -}
-mkUT1Table :: (Fractional a) => EOPArray a -> UT1MinusTAI
+mkUT1Table :: (Real a, Fractional a) => EOPArray a -> UT1MinusTAI a
 mkUT1Table a t = if d < i then get i else if d >= j then get j
   else interpolate (t0, get d) (t1, get $ succ d) t
   where
@@ -116,17 +114,7 @@ the CSSI paper on EOP addresses this? Or AsA2009?
 -}
 
 -- | Linear interpolation between two points.
-interpolate :: (Mul DOne d d, Fractional a) => (E t, Quantity d a) -> (E t, Quantity d a) -> E t -> Quantity d a
+interpolate :: (Mul DOne d d, Fractional a) => (E t a, Quantity d a) -> (E t a, Quantity d a) -> E t a -> Quantity d a
 interpolate (t0, x0) (t1, x1) t = (t .- t0) / (t1 .- t0) * (x1 - x0) + x0
   where (.-) = diffEpoch
-
-
--- | Read a 'Data.Fixed.Fixed' value. Note that any decimals beyond the
--- resolution of the target type are "floored" (as opposed to rounded).
-readFixed :: HasResolution a => String -> Fixed a
-readFixed s = fromRational $ int % (10 P.^ decimals)
-    where
-      int      = read $ filter (/='.') s
-      decimals = if elem '.' s then length $ takeWhile (/='.') $ dropWhile isSpace $ reverse s else 0
-      --decimals = length $ takeWhile (/='.') $ dropWhile isSpace $ reverse s
 
