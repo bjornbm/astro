@@ -22,8 +22,8 @@ import qualified Prelude
 
 -- ConvertTT
 class ConvertTT t where 
-  toTT   :: E t  -> Astro a (E TT)
-  fromTT :: E TT -> Astro a (E t)
+  toTT   :: Fractional a => E t  a -> Astro a (E TT a)
+  fromTT :: Fractional a => E TT a -> Astro a (E t  a)
 
 -- All time scales should be able to convert to/from TT.
 instance ConvertTT TCG where 
@@ -43,10 +43,10 @@ instance ConvertTT UT1 where
   fromTT t = fromTT t >>= eval (taiToUT1.time)
 
 -- General epoch conversion.
-class Convert t t' where convert :: E t -> Astro a (E t')
+class Convert t t' where convert :: Fractional a => E t a -> Astro a (E t' a)
 
 -- Trivial 'id' version. Perhaps this shouldn't be provided??
-instance Convert a  a  where convert = return  -- Trivial.
+instance Convert t  t  where convert = return  -- Trivial.
 instance Convert TT TT where convert = return  -- Trivial, needed for specificity.
 
 -- Conversion from TT.

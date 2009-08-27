@@ -15,7 +15,7 @@ import qualified Prelude
 -- celestial pole of date).
 --
 -- Formula (5.12) of [Kaplan2005] or page B52 of [AsA2009].
-meanObliquityOfEcliptic :: Floating a => E TT -> Angle a
+meanObliquityOfEcliptic :: Floating a => E TT a -> Angle a
 meanObliquityOfEcliptic tt = ea_0 
   - 46.836769   *~ (arcsecond / century)      * t
   -  0.0001831  *~ (arcsecond / century^pos2) * t^pos2
@@ -35,7 +35,7 @@ meanObliquityOfEcliptic tt = ea_0
 -- accurate formulae are used for 'nutationInLongitude' and 
 -- 'meanObliquityOfEcliptic'). 
 -- From [AsA2009] page B10.
-equationOfEquinoxes :: Floating a => E TT -> Astro a (Angle a)
+equationOfEquinoxes :: Floating a => E TT a -> Astro a (Angle a)
 equationOfEquinoxes tt = do
   nuts <- eval (angles.nutation) tt
   return $ fst nuts * cos (meanObliquityOfEcliptic tt)
@@ -47,7 +47,7 @@ equationOfEquinoxes tt = do
 -- twenty microarcseconds (assuming accurate formulae are used for
 -- 'nutationInLongitude' and 'meanObliquityOfEcliptic').
 -- From [AsA2009] page B10.
-equationOfEquinoxes' :: Floating a => E TT -> Astro a (Angle a)
+equationOfEquinoxes' :: Floating a => E TT a -> Astro a (Angle a)
 equationOfEquinoxes' tt = do
   nuts <- eval (angles.nutation) tt
   return $ fst nuts * cos (meanObliquityOfEcliptic tt)

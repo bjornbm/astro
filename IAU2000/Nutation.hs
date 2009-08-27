@@ -29,7 +29,7 @@ import qualified Prelude
 -- | Returns pairs of sines and cosines of the 678 luni-solar and 687
 -- planetary @Phi_i@ terms from [1]. The @Phi_i@ terms are calculated
 -- according to eq (5.16).
-trigTerms :: Floating a => E TT -> [(Dimensionless a, Dimensionless a)]
+trigTerms :: Floating a => E TT a -> [(Dimensionless a, Dimensionless a)]
 trigTerms tt = fmap (toXY . sum . zipWith (*) args) multipliers
   where
     toXY x = (sin x, cos x)
@@ -40,7 +40,7 @@ trigTerms tt = fmap (toXY . sum . zipWith (*) args) multipliers
 -- in obliquity measured in the ecliptic system of date as described in
 -- chapter 5.4.2 of [1].
 -- The @Int@ argument is the number of terms to use in the nutation series.
-nutationAngles :: Floating a => Int -> E TT -> (Angle a, Angle a)
+nutationAngles :: Floating a => Int -> E TT a -> (Angle a, Angle a)
 nutationAngles n tt = (sum $ take n deltaPhiTerms, sum $ take n deltaEpsTerms) where
   deltaPhiTerms = zipWith (\(s, s_dot, c') (sinPhi, cosPhi) -> (s + s_dot * t) * sinPhi + c' * cosPhi)  phiCoeffs (trigTerms tt)
   deltaEpsTerms = zipWith (\(c, c_dot, s') (sinPhi, cosPhi) -> (c + c_dot * t) * cosPhi + s' * sinPhi)  epsCoeffs (trigTerms tt)
@@ -53,19 +53,19 @@ nutationAngles n tt = (sum $ take n deltaPhiTerms, sum $ take n deltaEpsTerms) w
 -- | The full IAU 2000A nutation series. Calculates the direction of the
 -- celestial pole in the GCRS with an accuracy of 0.2 mas ([Kaplan2005]
 -- p.47).
-nutationAngles2000A :: Floating a => E TT -> (Angle a, Angle a)
+nutationAngles2000A :: Floating a => E TT a -> (Angle a, Angle a)
 nutationAngles2000A = nutationAngles 1365 -- Could use 'maxBound'.
 
 -- | The truncated IAU 2000B nutation series. Duplicates the full series
 -- ('nutationAngles2000A') to within a milliarcsecond for input epochs
 -- between 1995 and 2050 ([Kaplan2005] p.47).
-nutationAngles2000B :: Floating a => E TT -> (Angle a, Angle a)
+nutationAngles2000B :: Floating a => E TT a -> (Angle a, Angle a)
 nutationAngles2000B = nutationAngles 77
 
 -- | A truncated nutation series with 488 terms. Duplicates the full series'
 -- ('nutationAngles2000A') to within 0.1 milliarcsecond accuracy between
 -- 1700 and 2300. This emulates a subroutine provided by NOVAS
 -- ([Kaplan2005] p.47).
-nutationAngles488 :: Floating a => E TT -> (Angle a, Angle a)
+nutationAngles488 :: Floating a => E TT a -> (Angle a, Angle a)
 nutationAngles488 = nutationAngles 488
 

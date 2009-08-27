@@ -25,7 +25,7 @@ import qualified Prelude
 
 -- | The difference between the TDB and TT time scales as a function of
 -- TT epoch.
-tdbMinusTT :: Floating a => E TT -> Time a
+tdbMinusTT :: Floating a => E TT a -> Time a
 tdbMinusTT tt = 0.001657*~second * sin ( 628.3076 *~rpc * t + 6.2401 *~radian)
               + 0.000022*~second * sin ( 575.3385 *~rpc * t + 4.2970 *~radian)
               + 0.000014*~second * sin (1256.6152 *~rpc * t + 6.1969 *~radian)
@@ -44,15 +44,15 @@ the 10 microsecond accuracy inherent in the formula in the first place).
 -}
 -- | The difference between the TDB and TT time scales as a function of
 -- TT epoch.
-ttMinusTDB :: Floating a => E TDB -> Time a
-ttMinusTDB (E t) = negate $ tdbMinusTT (E t)
+ttMinusTDB :: Floating a => E TDB a -> Time a
+ttMinusTDB = negate . tdbMinusTT . coerce
 
 
 -- | Convert a TT epoch into a TDB epoch.
-ttToTDB :: E TT -> E TDB
-ttToTDB tt@(E t) = E $ addTime t (tdbMinusTT tt)
+ttToTDB :: Floating a => E TT a -> E TDB a
+ttToTDB tt = coerce $ addTime tt (tdbMinusTT tt)
 
 -- | Convert a TDB epoch into a TT epoch.
-tdbToTT :: E TDB -> E TT
-tdbToTT tdb@(E t) = E $ addTime t (ttMinusTDB tdb)
+tdbToTT :: Floating a => E TDB a -> E TT a
+tdbToTT tdb = coerce $ addTime tdb (ttMinusTDB tdb)
 

@@ -17,18 +17,18 @@ eval f x = asks (($x) . f)
 evalM f x = asks f >>= ($x)
 
 
-data TimeData = TimeData 
+data TimeData a = TimeData 
   { leapSecondTable :: LeapSecondTable
-  , taiToUT1 :: E TAI -> E UT1
-  , ut1ToTAI :: E UT1 -> E TAI
-  ,  ttToTDB :: E TT  -> E TDB
-  , tdbToTT  :: E TDB -> E TT
+  , taiToUT1 :: E TAI a -> E UT1 a
+  , ut1ToTAI :: E UT1 a -> E TAI a
+  ,  ttToTDB :: E TT a  -> E TDB a
+  , tdbToTT  :: E TDB a -> E TT a
   }
 
 
 data NutationModel a = NutationModel
-  { angles      :: E TT -> (Angle a, Angle a)
-  , equationOfEquinoxes :: E TT -> Astro a (Angle a)
+  { angles      :: E TT a -> (Angle a, Angle a)
+  , equationOfEquinoxes :: E TT a -> Astro a (Angle a)
   }
 
 -- | The 'AstroData' data structure holds all astrophysical
@@ -38,7 +38,7 @@ data NutationModel a = NutationModel
 -- Naval Observatory. For example we store the leap second table in this
 -- data structure.
 data AstroData a = AstroData
-  { time         :: TimeData
+  { time         :: TimeData a
   , nutation     :: NutationModel a
   , refEllipsoid :: ReferenceEllipsoid a
   }

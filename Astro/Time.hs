@@ -35,6 +35,7 @@ module Astro.Time (
 
   -- * Time Scales
   E (E)
+  , coerce
   --, Convert
   --, convert
   -- * Terrestrial Time Scales
@@ -71,7 +72,6 @@ module Astro.Time (
   , mjd
   , showMJD
   -- * Subject To Change
-  , DiffEpoch
   , diffEpoch
   , addTime
   , century
@@ -97,34 +97,30 @@ century = prefix 36525 day
 
 
 -- | Representation of an epoch parameterized by time scale.
-newtype E t = E AbsoluteTime deriving (Eq, Ord)
-instance Show t => Show (E t) where show = showClock
+newtype E t a = E (Time a) deriving (Eq, Ord)
+instance (Show t, Show a, Real a, Fractional a) 
+  => Show (E t a) where show = showClock
 
 
-class DiffEpoch t where 
-  -- | Obtain the difference in seconds between two epochs. Beware that if
-  -- the epochs' time scale isn't based on SI seconds the result won't be
-  -- in SI seconds.
-  diffEpoch :: Fractional a => t -> t -> Time a
-  -- | Add time to an epoch.
-  addTime   :: RealFrac   a => t -> Time a -> t
-  -- | Subtract time from an epoch.
-  subTime   :: RealFrac   a => t -> Time a -> t
-  subTime e = addTime e . negate
-instance DiffEpoch AbsoluteTime where
-  diffEpoch t t' = fromDiffTime $ diffAbsoluteTime t t'
-  addTime   t dt = addAbsoluteTime (toDiffTime dt) t
-instance DiffEpoch (E t) where 
-  diffEpoch (E t) (E t') = diffEpoch t t'
-  addTime   (E t)    dt  = E $ addTime t dt
+-- | Obtain the difference in seconds between two epochs. Beware that if
+-- the epochs' time scale isn't based on SI seconds the result won't be
+-- in SI seconds.
+diffEpoch :: Num a => E t a -> E t a -> Time a
+diffEpoch (E t) (E t') = t - t'
+-- | Add time to an epoch.
+addTime   :: Num a => E t a -> Time a -> E t a
+addTime   (E t)    dt  = E $ t + dt
+-- | Subtract time from an epoch.
+subTime   :: Num a => E t a -> Time a -> E t a
+subTime e = addTime e . negate
 
 
 -- Convenience operators. These allow our function definitions to more
 -- closely resemble the formulae they implement.
 infixl 6 .+, .-
-(.+) :: (DiffEpoch t, RealFrac a) => t -> Time a -> t
+(.+) :: (RealFrac a) => E t a -> Time a -> E t a
 (.+) = addTime
-(.-) :: (DiffEpoch t, Fractional a) => t -> t ->  Time a
+(.-) :: (Fractional a) => E t a -> E t a ->  Time a
 (.-) = diffEpoch
 
 
@@ -133,23 +129,28 @@ infixl 6 .+, .-
 -- ** Clock dates
 --    -----------
 -- | Define an epoch using "clock time" and time scale.
-clock :: Integer  -- ^ Year
+clock :: Fractional a
+      => Integer  -- ^ Year
       -> Int      -- ^ Month
       -> Int      -- ^ Day (of month)
       -> Int      -- ^ Hour
       -> Int      -- ^ Minute
       -> Pico     -- ^ Second, including fraction
       -> t        -- ^ Time scale
-      -> E t      -- ^ Epoch
-clock y m d h min s _ = E $ utcToTAITime (const 0) $
+      -> E t a    -- ^ Epoch
+clock y m d h min s _ = E $ f $ utcToTAITime (const 0) $
   UTCTime (fromGregorian y m d) (timeOfDayToTime $ TimeOfDay h min s)
+  where f t = fromDiffTime $ diffAbsoluteTime t taiEpoch
+
 
 -- | Show an epoch as a clock time. This function is used by the @Show@
 -- instance. TODO: should change this to use ISO8601 format.
-showClock :: forall t. Show t => E t -> String
-showClock (E t) = show (utcToLocalTime Data.Time.utc (taiToUTCTime (const 0) t)) 
+showClock :: forall t a. (Show t, Show a, Real a, Fractional a) 
+          => E t a -> String
+showClock (E t) = show (utcToLocalTime Data.Time.utc (taiToUTCTime (const 0) t')) 
                ++ ' ':show (undefined::t)
-
+  where t' = addAbsoluteTime (toDiffTime t) taiEpoch
+--  addTime   t dt = addAbsoluteTime (toDiffTime dt) t
 
 -- ** Julian Date (JD)
 --    ----------------
@@ -166,16 +167,16 @@ in other time scales.
 -}
 
 -- | The epoch of JD 0.0 as an AbsoluteTime.
-jdEpoch :: AbsoluteTime
+jdEpoch :: Fractional a => E t a
 jdEpoch  = subTime mjdEpoch (2400000.5 *~ day)
 
 -- | Define an epoch by specifying a JD and time scale.
-jd :: RealFrac a => a -> t -> E t
-jd d _ = E (addTime jdEpoch (d *~ day))
+jd :: RealFrac a => a -> t -> E t a
+jd d _ = addTime jdEpoch (d *~ day)
 
 -- | Show an epoch as JD on the format \"JD 0.0 TAI\".
-showJD :: forall t. Show t => E t -> String
-showJD (E t) = "JD " ++ show (diffEpoch t jdEpoch /~ day) ++ " " ++ show (undefined::t)
+showJD :: forall t a. (Show t, Show a, Fractional a) => E t a -> String
+showJD e = "JD " ++ show (diffEpoch e jdEpoch /~ day) ++ " " ++ show (undefined::t)
 
 
 -- ** Modified Julian Date (MJD)
@@ -186,16 +187,16 @@ an initial epoch of 1858-11-17 00:00.
 -}
 
 -- | The epoch of MJD 0.0 as an AbsoluteTime.
-mjdEpoch :: AbsoluteTime
-mjdEpoch = taiEpoch
+mjdEpoch :: Num a => E t a
+mjdEpoch = E $ 0*~second  -- taiEpoch
 
 -- | Define an epoch by specifying a MJD and time scale.
-mjd :: RealFrac a => a -> t -> E t
-mjd d _ = E (addTime mjdEpoch (d *~ day))
+mjd :: RealFrac a => a -> t -> E t a
+mjd d _ = addTime mjdEpoch (d *~ day)
 
 -- | Show an epoch as MJD on the format \"MJD 0.0 TAI\".
-showMJD :: forall t. Show t => E t -> String
-showMJD (E t) = "MJD " ++ show (diffEpoch t mjdEpoch /~ day) ++ " " ++ show (undefined::t)
+showMJD :: forall t a. (Show t, Show a, Fractional a) => E t a -> String
+showMJD e = "MJD " ++ show (diffEpoch e mjdEpoch /~ day) ++ " " ++ show (undefined::t)
 
 
 
@@ -224,10 +225,13 @@ data TAI = TAI; instance Show TAI where show _ = "TAI"
 
 
 -- | The epoch at which TT, TCG and TDB all read 1977-01-01T00:00:32.184.
-convergenceEpochTAI :: E TAI
+convergenceEpochTAI :: Fractional a => E TAI a
 convergenceEpochTAI = clock 1977 01 01 00 00 00.000 TAI
+convergenceEpochTT :: Fractional a => E TT a
 convergenceEpochTT  = clock 1977 01 01 00 00 32.184 TT
+convergenceEpochTCG :: Fractional a => E TCG a
 convergenceEpochTCG = clock 1977 01 01 00 00 32.184 TCG
+convergenceEpochTCB :: Fractional a => E TCB a
 convergenceEpochTCB = clock 1977 01 01 00 00 32.184 TCB
 
 
@@ -248,24 +252,25 @@ data TT  = TT ; instance Show TT  where show _ = "TT"
 
 -- | The "standard epoch" J2000.0 (2000-01-01 12:00 TT or JD 2451545.0 TT).
 -- Page 9 of [1], page 34 of [2].
+j2000 :: Fractional a => E TT a
 j2000 = clock 2000 01 01 12 00 00.000 TT
 
 -- | The difference in seconds between the given epoch and J2000.0. Will
 -- be negative if the given epoch preceeds J2000.0.
-sinceJ2000 :: Fractional a => E TT -> Time a
+sinceJ2000 :: Fractional a => E TT a -> Time a
 sinceJ2000 tt = diffEpoch tt j2000
 
 -- | The difference between TAI and TT.
-ttMinusTAI :: Time Pico
+ttMinusTAI :: Fractional a => Time a
 ttMinusTAI = 32.184 *~ second  -- (2.4)
 
 -- | Convert a TAI epoch into a TT epoch.
-taiToTT :: E TAI -> E TT
-taiToTT (E t) = E $ addTime t ttMinusTAI
+taiToTT :: Fractional a => E TAI a -> E TT a
+taiToTT e = coerce $ addTime e ttMinusTAI
 
 -- | Convert a TT epoch into a TAI epoch.
-ttToTAI :: E TT -> E TAI
-ttToTAI (E t) = E $ subTime t ttMinusTAI
+ttToTAI :: Fractional a => E TT a -> E TAI a
+ttToTAI e = coerce $ subTime e ttMinusTAI
 
 
 -- ** Geocentric Coordinate Time (TCG)
@@ -283,8 +288,8 @@ l_G = 6.969290134e-10 *~ (second / second)
 
 -- | The difference between the TT and TCG time scales as a function of
 -- TCG epoch. The formula used is exact, barring numerical errors.
-ttMinusTCG :: Fractional a => E TCG -> Time a
-ttMinusTCG tcg = negate l_G * (tcg .- convergenceEpochTCG)
+ttMinusTCG :: Fractional a => E TCG a -> Time a
+ttMinusTCG tcg = negate l_G * (diffEpoch tcg convergenceEpochTCG)
 
 {-
 The exact mathematical expression for TCG with TT as the free variable is
@@ -310,16 +315,16 @@ insignificant.
 
 -- | The difference between the TCG and TT time scales as a function of
 -- TT epoch. This function implements Eq (27) of [dav].
-tcgMinusTT :: Fractional a => E TT -> Time a
+tcgMinusTT :: Fractional a => E TT a -> Time a
 tcgMinusTT tt = (tt .- convergenceEpochTT) * (l_G + l_G^pos2)  -- (27) of [dav].
 
 -- | Convert a TCG epoch into a TT epoch.
-tcgToTT :: E TCG -> E TT
-tcgToTT tcg@(E t) = E $ addTime t (ttMinusTCG tcg)
+tcgToTT :: Fractional a => E TCG a -> E TT a
+tcgToTT tcg = coerce $ addTime tcg (ttMinusTCG tcg)
 
 -- | Convert a TT epoch into a TCG epoch.
-ttToTCG :: E TT -> E TCG
-ttToTCG tt@(E t) = E $ addTime t (tcgMinusTT tt)
+ttToTCG :: Fractional a => E TT a -> E TCG a
+ttToTCG tt = coerce $ addTime tt (tcgMinusTT tt)
 
 
 -- * Barycentric time-scales
@@ -390,14 +395,15 @@ tdb_0 :: Fractional a => Time a
 tdb_0 = (-6.55e-5) *~ second  -- :: Time Pico
 
 -- | The TDB epoch corresponding to 1977 January 1.0 TAI.
-convergenceEpochTDB :: E TDB
-convergenceEpochTDB = E $ t .+ (tdb_0 :: Time Pico)
-  where
-    E t = convergenceEpochTCG
+convergenceEpochTDB :: Fractional a => E TDB a
+convergenceEpochTDB = coerce $ addTime convergenceEpochTCG tdb_0
+
+coerce :: E t a -> E t' a
+coerce (E t) = E t
 
 -- | The difference between the TDB and TCB time scales as a function of
 -- TCB epoch.
-tdbMinusTCB :: Fractional a => E TCB -> Time a
+tdbMinusTCB :: Fractional a => E TCB a -> Time a
 tdbMinusTCB tcb = tdb_0 - (tcb .- convergenceEpochTCB) * l_B
 
 {-
@@ -408,16 +414,16 @@ the L_B^3 term does have a very small effect.
 
 -- | The difference between the TCB and TDB time scales as a function of
 -- TDB epoch.
-tcbMinusTDB :: Fractional a => E TDB -> Time a
+tcbMinusTDB :: Fractional a => E TDB a -> Time a
 tcbMinusTDB tdb = (tdb .- convergenceEpochTDB) * (l_B + l_B^pos2 + l_B^pos3) - tdb_0
 
 -- | Convert a TCB epoch into a TDB epoch.
-tcbToTDB :: E TCB -> E TDB
-tcbToTDB tcb@(E t) = E $ addTime t (tdbMinusTCB tcb)
+tcbToTDB :: Fractional a =>  E TCB a -> E TDB a
+tcbToTDB tcb@(E t) = E $ t + (tdbMinusTCB tcb)
 
 -- | Convert a TDB epoch into a TCB epoch.
-tdbToTCB :: E TDB -> E TCB
-tdbToTCB tdb@(E t) = E $ addTime t (tcbMinusTDB tdb)
+tdbToTCB :: Fractional a => E TDB a -> E TCB a
+tdbToTCB tdb@(E t) = E $ t + (tcbMinusTDB tdb)
 
 
 -- Universal Time
@@ -427,18 +433,18 @@ data UT1 = UT1; instance Show UT1 where show _ = "UT1"
 
 -- | Function which for a given TAI epoch calculates the instantaneous
 -- difference @UT1-TAI@.
-type UT1MinusTAI = E TAI -> Time Pico
+type UT1MinusTAI a = E TAI a -> Time a
 -- | Function which for a given UT1 epoch calculates the instantaneous
 -- difference @TAI-UT1@. TODO potentially unnecessary?
-type TAIMinusUT1 = E UT1 -> Time Pico
+type TAIMinusUT1 a = E UT1 a -> Time a
 
 -- | Convert a UT1 epoch into a TAI epoch.
-ut1ToTAI :: TAIMinusUT1 -> E UT1 -> E TAI
-ut1ToTAI f ut1@(E t) = E $ t `addTime` f ut1
+ut1ToTAI :: Num a => TAIMinusUT1 a -> E UT1 a -> E TAI a
+ut1ToTAI f ut1@(E t) = E $ t + f ut1
 
 -- | Convert a TAI epoch into a UT1 epoch.
-taiToUT1 :: UT1MinusTAI -> E TAI -> E UT1
-taiToUT1 f tai@(E t) = E $ t `addTime` f tai
+taiToUT1 :: Num a => UT1MinusTAI a -> E TAI a -> E UT1 a
+taiToUT1 f tai@(E t) = E $ t + f tai
 
 
 -- References
