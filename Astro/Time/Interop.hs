@@ -11,7 +11,7 @@ import Data.Time
 import Data.Time.Clock.TAI
 import Data.Fixed (Pico)
 import Control.Monad.Reader (asks)
-import Numeric.Units.Dimensional.SIUnits
+import Numeric.Units.Dimensional.Prelude
 
 
 -- | Converta TAI epoch into a 'Data.Time.Clock.TAI.AbsoluteTime'.
@@ -24,10 +24,10 @@ fromAbsoluteTime t = E $ fromDiffTime $ diffAbsoluteTime t taiEpoch
 
 -- | Convert a UT1 epoch into a 'Data.Time.Clock.UniversalTime'.
 toUniversalTime :: (Real a, Fractional a) => E UT1 a -> UniversalTime
-toUniversalTime t = ModJulianDate $ (/ 86400) $ toRational $ diffAbsoluteTime (toAbsoluteTime $ coerce t) taiEpoch
+toUniversalTime (E t) = ModJulianDate $ toRational (t /~ day)
 
 -- | Convert a 'Data.Time.Clock.UniversalTime' into a UT1 epoch.
-fromUniversalTime :: RealFrac a => UniversalTime -> E UT1 a
+fromUniversalTime :: Fractional a => UniversalTime -> E UT1 a
 fromUniversalTime t = mjd (fromRational $ getModJulianDate t) UT1
 
 

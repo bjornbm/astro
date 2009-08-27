@@ -108,19 +108,19 @@ instance (Show t, Show a, Real a, Fractional a)
 diffEpoch :: Num a => E t a -> E t a -> Time a
 diffEpoch (E t) (E t') = t - t'
 -- | Add time to an epoch.
-addTime   :: Num a => E t a -> Time a -> E t a
-addTime   (E t)    dt  = E $ t + dt
+addTime :: Num a => E t a -> Time a -> E t a
+addTime (E t) dt  = E $ t + dt
 -- | Subtract time from an epoch.
-subTime   :: Num a => E t a -> Time a -> E t a
+subTime :: Num a => E t a -> Time a -> E t a
 subTime e = addTime e . negate
 
 
 -- Convenience operators. These allow our function definitions to more
 -- closely resemble the formulae they implement.
 infixl 6 .+, .-
-(.+) :: (RealFrac a) => E t a -> Time a -> E t a
+(.+) :: Num a => E t a -> Time a -> E t a
 (.+) = addTime
-(.-) :: (Fractional a) => E t a -> E t a ->  Time a
+(.-) :: Num a => E t a -> E t a ->  Time a
 (.-) = diffEpoch
 
 
@@ -171,7 +171,7 @@ jdEpoch :: Fractional a => E t a
 jdEpoch  = subTime mjdEpoch (2400000.5 *~ day)
 
 -- | Define an epoch by specifying a JD and time scale.
-jd :: RealFrac a => a -> t -> E t a
+jd :: Fractional a => a -> t -> E t a
 jd d _ = addTime jdEpoch (d *~ day)
 
 -- | Show an epoch as JD on the format \"JD 0.0 TAI\".
@@ -191,7 +191,7 @@ mjdEpoch :: Num a => E t a
 mjdEpoch = E $ 0*~second  -- taiEpoch
 
 -- | Define an epoch by specifying a MJD and time scale.
-mjd :: RealFrac a => a -> t -> E t a
+mjd :: Num a => a -> t -> E t a
 mjd d _ = addTime mjdEpoch (d *~ day)
 
 -- | Show an epoch as MJD on the format \"MJD 0.0 TAI\".
