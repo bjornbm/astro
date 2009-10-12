@@ -11,8 +11,8 @@ import Data.Time.Clock.AnnouncedLeapSeconds
 
 defaultTimeData = TimeData
   { leapSecondTable = lst
-  , taiToUT1 = \(E t) -> E t  -- Astro.Time.taiToUT1 (const 0) ??
-  , ut1ToTAI = \(E t) -> E t
+  , taiToUT1 = coerce  -- Astro.Time.taiToUT1 (const 0) ??
+  , ut1ToTAI = coerce
   ,  ttToTDB = TDB.ttToTDB
   , tdbToTT  = TDB.tdbToTT
   }
