@@ -20,10 +20,10 @@ module Astro.Time.Barycentric.TT (ttToTDB, tdbToTT) where
 import Astro.Time
 
 -- | Convert a TT epoch into a TDB epoch.
-ttToTDB :: E TT -> E TDB
+ttToTDB :: E TT a -> E TDB a
 ttToTDB (E t) = E t
 
 -- | Convert a TDB epoch into a TT epoch.
-tdbToTT :: E TDB -> E TT
+tdbToTT :: E TDB a -> E TT a
 tdbToTT (E t) = E t
 

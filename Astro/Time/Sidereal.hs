@@ -52,7 +52,7 @@ gmst tt = do
   return $ gmst' ut1 tt
 
 -- | Greenwich apparent sidereal time (GAST) expressed as an angle.
---gast :: RealFloat a => E UT1 -> E TT a -> Angle a
+--gast :: RealFloat a => E UT1 a -> E TT a -> Angle a
 --gast ut1 tt = gmst ut1 tt + equationOfEquinoxes tt -- = era - equationOfOrigins??
 gast :: RealFloat a => E TT a -> Astro a (Angle a)
 gast tt = do  -- = era - equationOfOrigins??

@@ -9,7 +9,9 @@ import Astro
 import Astro.DefaultData
 import Astro.Time
 import Astro.Time.Convert
-import Astro.Time.Barycentric.Kaplan2005
+import qualified Astro.Time.Barycentric.Kaplan2005 as Kaplan2005
+import qualified Astro.Time.Barycentric.AsA2009    as AsA2009
+import qualified Astro.Time.Barycentric.TT         as TT
 --import Astro.Time.Barycentric.TT
 import Test.QuickCheck
 import Data.Time hiding (utc)
@@ -109,6 +111,21 @@ tdb = clock 2004 04 06 7 52 32.5716651154 TDB
 tcb = clock 2004 04 06 7 52 45.9109901113 TCB  -- Incorrect in example, no offset.
 
 
+-- Test TT/TDB conversions
+-- -------------------------------
+-- Test AsA2009 conversion modules.
+-- Should only be testing between 1980 (MJD 44239) and 2050 (MJD 70172).
+prop_bary_AsA2009_1 a = let t = mjd a TDB :: E TDB Double in 
+  cmpE (30*~micro second) (AsA2009.tdbToTT t) (Kaplan2005.tdbToTT t)
+prop_bary_AsA2009_2 a = let t = mjd a TT :: E TT Double in 
+  cmpE (30*~micro second) (AsA2009.ttToTDB t) (Kaplan2005.ttToTDB t)
+
+-- Verify accuracy of TDB = TT.
+prop_bary_TT_1 a = let t = mjd a TDB :: E TDB Double in 
+  cmpE (1.7*~milli second) (TT.tdbToTT t) (Kaplan2005.tdbToTT t)
+prop_bary_TT_2 a = let t = mjd a TT :: E TT Double in 
+  cmpE (1.7*~milli second) (TT.ttToTDB t) (Kaplan2005.ttToTDB t)
+
 -- Driver
 -- ======
 
@@ -132,4 +149,9 @@ main = do
   quickCheck prop_TDB
   quickCheck prop_TCB
   quickCheck prop_TCB'
+  quickCheck prop_bary_AsA2009_1
+  quickCheck prop_bary_AsA2009_2
+  quickCheck prop_bary_TT_1
+  quickCheck prop_bary_TT_2
+ 
 
