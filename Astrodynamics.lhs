@@ -55,6 +55,7 @@ The Greenwich Right Ascension reference epoch and angle (Soop p. 128).
 These should ideally be updated on a yearly basis. TODO: Investigate
 options.
 
+> greenwichRefEpoch :: Fractional a => E UT1 a
 > greenwichRefEpoch = clock 2008 1 1 0 0 0 UT1
 > greenwichRefAngle :: Floating a => Angle a
 > greenwichRefAngle = 100.029 *~ degree
@@ -94,6 +95,7 @@ Calculate the time of day when the longitude has the specified right
 ascension on the given day. On days when the longitude passes the right
 ascension twice only the first occurence will be returned.
 
+> longitudeToD :: RealFloat a => Angle a -> Angle a -> Day -> TimeOfDay
 > longitudeToD l ra d = dayFractionToTimeOfDay . toRational $ dt /~ day
 >   where
 >       --t   = utcToTTTime (const 33) (UTCTime d midnight')
