@@ -5,7 +5,9 @@ module Astro.Time.ForwardAD where
 
 import qualified Prelude
 import Data.HList (HMap)
-import Astro.Time (E (E))
+import Data.HList.HZip
+import MyHList (HZipWith)
+import Astro.Time (E (E), diffEpoch)
 import Numeric.Units.Dimensional.Prelude
 import ForwardAD
 import Vector
@@ -25,6 +27,19 @@ diffVt' :: (Num a, HMap (DivD,DTime) ds ds')
         => (forall tag. E t (Dual tag a) -> Vec ds (Dual tag a))
         -> E t a -> (Vec ds a, Vec ds' a)
 diffVt' f (E x) = diffV' (f . E) x
+
+
+applyLinearAtT :: forall a t ds ds' ds2 ds2' ts l'. (
+                 Real a, Fractional a,
+                 HMap (MulD,DTime) ds' ds,               -- Used in linearization.
+                 HMap (DivD,DTime) ds2 ds2',             -- Used in differentiation.
+                 HZipWith DivD ds ds' ts, Homo ts DTime, -- Necessary to infer t (the dimension w r t which we are differentiating).
+                 HZip ds ds' l', HMap DivD l' ts         -- Needed to use applyLinearAt, not sure why, grr!
+            ) => (forall tag. E t (Dual tag a) -> Vec ds (Dual tag a) -> Vec ds2 (Dual tag a))
+              -> E t a -> (Vec ds a, Vec ds' a) -> (Vec ds2 a, Vec ds2' a)
+applyLinearAtT f (E t) = applyLinearAt (f . E) t
+--applyLinearAtT f (p,v) t = diffVt' (\t' -> f (liftV p `elemAdd` scaleVec (diffEpoch t' (liftT t)) (liftV v)) t') t
+
 
 -- Lift an epoch.
 liftT :: Num a => E t a -> E t (Dual tag a)
