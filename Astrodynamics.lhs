@@ -17,6 +17,7 @@ A collection of astrodynamics functionality.
 > import qualified Prelude as P
 > import Data.List (sort)
 
+> {-
 
 We define type synonyms to make the function signatures clearer.
 
@@ -31,6 +32,7 @@ We define type synonyms to make the function signatures clearer.
 > type Radius = Length
 > type Longitude = Angle
 > type Latitude = Angle
+> ---}
 
 
 Constants
