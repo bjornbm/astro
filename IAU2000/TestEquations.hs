@@ -32,8 +32,8 @@ prop_gast_era_eo :: Double -> Bool
 prop_gast_era_eo t = run $ do
   eo   <- equationOfOrigins tt
   gast <- gast tt
-  era  <- convert tt >>= return . era
-  return $ cmpE eeError gast (era - eo)
+  era' <- convert tt >>= return . era
+  return $ cmpE eeError gast (era' - eo)
   where tt = addTime j2000 (t *~ day)
 
 -- Ee = GAST - GMST

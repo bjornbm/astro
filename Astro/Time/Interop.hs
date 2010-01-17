@@ -33,8 +33,8 @@ fromUniversalTime t = mjd (fromRational $ getModJulianDate t) UT1
 
 -- UTC
 -- ===
--- We do not define a UTC time scale since UTC is generally used in
--- astrodynamics algorithms. Typically UTC is only used for inputs
+-- We do not define a UTC time scale since UTC is generally not used
+-- in astrodynamics algorithms. Typically UTC is only used for inputs
 -- or outputs but immediately converted to another time scale. For
 -- UTC epochs use 'Data.Time.Clock.UTCTime'.
 
