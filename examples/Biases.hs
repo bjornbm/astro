@@ -22,6 +22,7 @@ Requires simpleargs.
 
 import Astro.Place
 import Astro.Place.ReferenceEllipsoid
+import Astro.Util (perfectGEO, r_GEO)
 import Numeric.Units.Dimensional.Prelude
 import Vector
 import PosVel
@@ -35,14 +36,6 @@ import Control.Monad (join)
 import Text.Printf
 
 type Longitude = Angle
-
--- | ECEF position of a perfectly geostationary SC.
-perfectGEO :: RealFloat a => Longitude a -> CPos a
-perfectGEO l = s2c $ fromTuple (r_GEO, 90*~degree, l)
-
--- | Geostationary radius.
-r_GEO :: Num a => Length a
-r_GEO = 42164 *~ kilo meter  -- Close enough.
 
 -- | Computes the range from the given GS to a perfectly geostationary
 -- SC at the given longitude.
@@ -121,7 +114,7 @@ main = do
 
   putStrLn $ showSC long longBias
   putStrLn $ ""
-  putStrLn $ "             Sensitivity        Est. Bias" 
+  putStrLn $ "             Sensitivity        Est. Bias"
   putStrLn $ "Station  [degE/km]  ([kmE/km])    [km]"
   putStrLn $ "-------  ---------  ----------  ---------"
   putStrLn $ unlines $ map (showStation longBias) ss
