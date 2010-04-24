@@ -1,4 +1,6 @@
-A collection of astrodynamics functionality.
+A collection of astrodynamics functionality. This modules is kind of
+legacy and its functionality will hopefully eventually be migrated to
+other modules.
 
 > module Astrodynamics where
 
