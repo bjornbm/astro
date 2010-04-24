@@ -17,7 +17,7 @@ on the antennae is minimized.
 -}
 
 {-
-Requires safe, simpleargs.
+Requires simpleargs.
 -}
 
 import Astro.Place
@@ -30,8 +30,9 @@ import Tmp.Lifts
 import System.SimpleArgs -- System (getArgs)
 --import System.Console.ParseArgs
 import qualified Prelude
+import Data.Maybe (fromMaybe)
+import Control.Monad (join)
 import Text.Printf
-import Safe
 
 type Longitude = Angle
 
@@ -115,7 +116,7 @@ main = do
   let !bias = bias' *~ kilo meter
 
   let ss = sensitivities long stations
-  let Just s1 = lookupJustDef (Just (0*~meter^neg1)) station ss
+  let s1 = fromMaybe (0*~meter^neg1) $ join $ lookup station ss
   let longBias = bias * s1  -- This linearization breaks down when SC and GS longitudes coincide.
 
   putStrLn $ showSC long longBias
