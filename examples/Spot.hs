@@ -19,7 +19,8 @@ is601' = rot601 is601
 eastSpotBeam  = geodeticToCartesian $ GeodeticPlace wgs84 (35.73*~degree) (35.60*~degree) (0*~meter)
 eastSpotBeam' = rot601 eastSpotBeam
 
-x = (elevation diff /~degree, azimuth diff /~degree) 
+x = (declination    diff /~degree,  -- elevation/latitude
+     rightAscension diff /~degree)  -- longitude (perhaps azimuth for some definition...?)
 diff = c2s $ elemSub eastSpotBeam' is601'
 diff' = elemSub eastSpotBeam' is601'
 
