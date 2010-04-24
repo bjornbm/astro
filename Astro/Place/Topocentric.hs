@@ -2,7 +2,7 @@
 This modules provides functions for working with topocentric
 coordinate systems.
 -}
-module Astro.Place.Topocentric (geocentricToTopocentric) where
+module Astro.Place.Topocentric where
 
 import Astro.Place
 import Vector
@@ -22,7 +22,7 @@ type CoordSys a = Homo33 DOne a
 -- by the given geodetic place.
 topocentricX, topocentricY, topocentricZ :: RealFloat a => GeodeticPlace a -> Axis a
 topocentricX p = vNormalize $ diffV (\x -> geodeticToCartesian ((lift p){longitude = x})) (longitude p) --`scaleVec'` (1*~meter)
-topocentricY p = vNormalize $ diffV (\x -> geodeticToCartesian ((lift p){longitude = x})) (latitude  p) --`scaleVec'` (1*~meter)
+topocentricY p = vNormalize $ diffV (\x -> geodeticToCartesian ((lift p){latitude  = x})) (latitude  p) --`scaleVec'` (1*~meter)
 topocentricZ p = vNormalize $ (1*~meter) `scaleVec` diffV (\x -> geodeticToCartesian ((lift p){height    = x})) (height    p)
 
 -- | Calculates the topocentric coordinate system for the given
