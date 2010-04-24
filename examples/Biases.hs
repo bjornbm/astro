@@ -22,6 +22,7 @@ Requires simpleargs.
 
 import Astro.Place
 import Astro.Place.ReferenceEllipsoid
+import Astro.Place.Topocentric
 import Astro.Util (perfectGEO, r_GEO)
 import Numeric.Units.Dimensional.Prelude
 import Vector
@@ -39,8 +40,8 @@ type Longitude = Angle
 
 -- | Computes the range from the given GS to a perfectly geostationary
 -- SC at the given longitude.
-range :: RealFloat a => GeodeticPlace a -> Longitude a -> Length a
-range st l = vNorm $ elemSub (geodeticToCartesian st) (perfectGEO l)
+range :: RealFloat a => GeodeticPlace a -> CPos a -> Length a
+range st = vNorm . elemSub (geodeticToCartesian st)
 
 -- | Determine whether the SC at the given longitude is above the horizon
 -- of the given GS.
@@ -55,7 +56,7 @@ visible st l = dotProduct stC r >= (0*~meter^pos2)
 -- to biases in range measurements from a GS. The arguments are the
 -- geostationary longitude of the SC and the GS.
 sensitivity :: RealFloat a => Longitude a -> GeodeticPlace a -> WaveNumber a
-sensitivity l st = _1 / diff (range $ lift st) l
+sensitivity l st = _1 / diff (range (lift st) . perfectGEO) l
 
 
 -- Ground stations
@@ -63,7 +64,7 @@ sensitivity l st = _1 / diff (range $ lift st) l
 type Station a = (String, GeodeticPlace a)
 
 -- | Convenience function for defining ground stations.
-station name long lat height = (name, GeodeticPlace wgs84 (long*~degree) (lat*~degree) (height*~kilo meter))
+station name lat long height = (name, GeodeticPlace wgs84 (lat*~degree) (long*~degree) (height*~kilo meter))
 
 stations =
   [ station "LK" 43.23281  1.2069  0.23258
@@ -84,7 +85,10 @@ stations =
   , station "ATL" 33.48657775  275.7267  0.07367
   , station "CLK" 39.029938499358  282.729127  0.12095988  -- Clarksburg
   , station "MAS" 27.263  (360 Prelude.- 15.634)  0.167
+  , ("Telkom", cibinong)
   ]
+
+cibinong = GeodeticPlace wgs84 (negate $ 6*~degree + 26*~arcminute + 52*~arcsecond) (106*~degree + 56*~arcminute + 10*~arcsecond) (0*~meter)
 
 -- | Computes sensitivities for a list of ground stations.
 -- If the SC is below the GS's horizon Nothing is returned.
@@ -101,7 +105,7 @@ showSC long longBias = printSC (long/~degree) (longBias/~degree) (longBias*r_GEO
 showStation :: Angle Double -> (String, Maybe (WaveNumber Double)) -> String
 showStation longBias (name, Just s) = printf "%-7s  %9.3f  (%8.1f)  %9.3f" name (s/~(degree/kilo meter)) (s*r_GEO/~one) (negate longBias/s/~kilo meter)
 showStation longBias (name, Nothing) = printf "%-7s           no visibility" name
-  
+
 
 main = do
   (long', station, bias') <- getArgs
@@ -118,7 +122,14 @@ main = do
   putStrLn $ "Station  [degE/km]  ([kmE/km])    [km]"
   putStrLn $ "-------  ---------  ----------  ---------"
   putStrLn $ unlines $ map (showStation longBias) ss
+  putStrLn $ ""
+  putStrLn $ "Station  Range         Azimuth       Elevation"
+  putStrLn $ "-------  ------------  ------------  -----------"
+  putStrLn $ unlines $ map (showAzElRg long) stations
 
+showAzElRg :: Longitude Double -> (String, GeodeticPlace Double) -> String
+showAzElRg long (name, gs) = printf "%-7s  %9.3f km  %8.3f deg  %7.3f deg" name (range gs s/~kilo meter) (azimuth gs s/~degree) (elevation gs s/~degree)
+  where s = perfectGEO long
 
 {-
 -- Version of main using parseargs library. Pretty nice except negative
