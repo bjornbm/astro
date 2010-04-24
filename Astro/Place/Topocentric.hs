@@ -19,11 +19,17 @@ type Axis a = Vec3 DOne DOne DOne a
 type CoordSys a = Homo33 DOne a
 
 -- | Calculates the axis of the topocentric coordinate system defined
--- by the given geodetic place.
+-- by the given geodetic place. The axis definitions are those used by
+-- Soop (p.222):
+--   X -- towards local East,
+--   Y -- towards local North,
+--   Z -- towards local Zenith.
+-- Note that the our Zenith is defined by the reference ellipsod (as
+-- opposed to e.g. the geoid).
 topocentricX, topocentricY, topocentricZ :: RealFloat a => GeodeticPlace a -> Axis a
-topocentricX p = vNormalize $ diffV (\x -> geodeticToCartesian ((lift p){longitude = x})) (longitude p) --`scaleVec'` (1*~meter)
-topocentricY p = vNormalize $ diffV (\x -> geodeticToCartesian ((lift p){latitude  = x})) (latitude  p) --`scaleVec'` (1*~meter)
-topocentricZ p = vNormalize $ (1*~meter) `scaleVec` diffV (\x -> geodeticToCartesian ((lift p){height    = x})) (height    p)
+topocentricX p = vNormalize $ diffV (\x -> geodeticToCartesian (lift p){longitude = x}) (longitude p)
+topocentricY p = vNormalize $ diffV (\x -> geodeticToCartesian (lift p){latitude  = x}) (latitude  p)
+topocentricZ p = vNormalize $ diffV (\x -> geodeticToCartesian (lift p){height    = x}) (height    p)
 
 -- | Calculates the topocentric coordinate system for the given
 -- geodetic place. The returned topocentric coordinate system is
@@ -39,8 +45,13 @@ topocentricCoordSys p = consRow   (topocentricX p)
 geocentricToTopocentric :: RealFloat a => GeodeticPlace a -> CPos a -> CPos a
 geocentricToTopocentric gs sc = topocentricCoordSys gs `matVec` (sc `elemSub` geodeticToCartesian gs)
 
-topocentricAzimuth   gs = azimuth   . c2s . geocentricToTopocentric gs
-topocentricElevation gs = elevation . c2s . geocentricToTopocentric gs
-topocentricRange     gs = radius    . c2s . geocentricToTopocentric gs
+-- | Compute elevation and azimuth in the topocentric coordinate system
+-- defined by the geodetic place.
+elevation, azimuth :: RealFloat a => GeodeticPlace a -> CPos a -> Angle a
+elevation gs = declination . c2s . geocentricToTopocentric gs
+azimuth   gs = azimuth'    . c2s . geocentricToTopocentric gs
+  where azimuth' s = 90*~degree - rightAscension s
+--range gs = radius . c2s . geocentricToTopocentric gs  -- Rather inefficient!
+--range gs = vNorm . elemSub (geodeticToCartesian gs)  -- More efficient.
 
 
