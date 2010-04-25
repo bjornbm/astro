@@ -38,10 +38,6 @@ import Text.Printf
 
 type Longitude = Angle
 
--- | Computes the range from the given GS to a perfectly geostationary
--- SC at the given longitude.
-range :: RealFloat a => GeodeticPlace a -> CPos a -> Length a
-range st = vNorm . elemSub (geodeticToCartesian st)
 
 -- | Determine whether the SC at the given longitude is above the horizon
 -- of the given GS.

@@ -56,6 +56,16 @@ prop_topo2 place p = not (cmpP dblAcc (geodeticToCartesian place) origo) -- Will
   where
     p' = geocentricToTopocentric place $ topocentricToGeocentric place $ p
 
+
+-- | Going to and from az/el/rg observations is id.
+prop_obs place p = True ==> cmpP dblAcc p p'
+  where
+    az = azimuth   place p
+    el = elevation place p
+    rg = range     place p
+    p' = azElRgToGeocentric place az el rg
+
+
 -- Arbitrary instances. Should be moved elsewhere...
 
 instance (Arbitrary a) => Arbitrary (Quantity d a)
@@ -103,3 +113,4 @@ main = do
   onceCheck $ prop_va 172   elevation 16.4
   check1000 prop_topo1
   check1000 prop_topo2
+  check1000 prop_obs

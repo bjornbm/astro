@@ -56,8 +56,18 @@ topocentricToGeocentric gs sc = transpose (topocentricCoordSys gs) `matVec` sc `
 elevation, azimuth :: RealFloat a => GeodeticPlace a -> CPos a -> Angle a
 elevation gs = declination . c2s . geocentricToTopocentric gs
 azimuth   gs = azimuth'    . c2s . geocentricToTopocentric gs
-  where azimuth' s = 90*~degree - rightAscension s
+  where azimuth' s = 90*~degree - rightAscension s  -- From N/Y towards E/X.
+
+-- | Computes the range from the given geodetic place to the given
+-- geocentric position.
+range :: RealFloat a => GeodeticPlace a -> CPos a -> Length a
+range gs = vNorm . elemSub (geodeticToCartesian gs)  -- More efficient.
 --range gs = radius . c2s . geocentricToTopocentric gs  -- Rather inefficient!
---range gs = vNorm . elemSub (geodeticToCartesian gs)  -- More efficient.
+
+-- Convert a tripple of azimuth, elevation, and range observations into
+-- cartesian topocentric coordinates.
+azElRgToGeocentric :: RealFloat a => GeodeticPlace a -> Angle a -> Angle a -> Length a -> CPos a
+azElRgToGeocentric place az el rg = topocentricToGeocentric place $ s2c $ fromTuple (rg, 90*~degree - el, ra)
+  where ra = negate az + 90*~degree
 
 
