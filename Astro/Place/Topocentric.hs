@@ -45,8 +45,14 @@ topocentricCoordSys p = consRow   (topocentricX p)
 geocentricToTopocentric :: RealFloat a => GeodeticPlace a -> CPos a -> CPos a
 geocentricToTopocentric gs sc = topocentricCoordSys gs `matVec` (sc `elemSub` geodeticToCartesian gs)
 
+-- Causes NaNs wher the geodetic place is at the center of the ellipsoid!
+topocentricToGeocentric :: RealFloat a => GeodeticPlace a -> CPos a -> CPos a
+topocentricToGeocentric gs sc = transpose (topocentricCoordSys gs) `matVec` sc `elemAdd` geodeticToCartesian gs
+
+
 -- | Compute elevation and azimuth in the topocentric coordinate system
--- defined by the geodetic place.
+-- defined by the geodetic place. The input position should be defined
+-- in the geocentric coordinate system.
 elevation, azimuth :: RealFloat a => GeodeticPlace a -> CPos a -> Angle a
 elevation gs = declination . c2s . geocentricToTopocentric gs
 azimuth   gs = azimuth'    . c2s . geocentricToTopocentric gs
