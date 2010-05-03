@@ -1,3 +1,5 @@
+module Astro.Time.Barycentric.TestAsA2009 where
+
 -- TODO: Clean out an keep only TDB/TCB test cases.
 
 import Numeric.Units.Dimensional.Prelude
@@ -19,7 +21,7 @@ onceCheck = check (defaultConfig {configMaxTest = 1})
 conv t = runAstro (convert t) defaultAstroData
 
 -- | Comparison allowing for inaccuracy.
-cmpE :: (DiffEpoch t, Fractional a, Ord a) => Time a -> t -> t -> Bool
+cmpE :: (Fractional a, Ord a) => Time a -> E t a -> E t a -> Bool
 cmpE accuracy t t' = abs (diffEpoch t t') < accuracy
 
 -- Accuracies.
@@ -59,22 +61,22 @@ prop_TDBTCB_conv' = cmpE dblError (conv $ clock 1977 01 01 00 00 32.184 TCB) (cl
 -- only good around certain dates.
 prop_TAI, prop_TT, prop_TCG, prop_TDB, prop_TCB, prop_TCB' :: Double -> Bool
 -- These should be exact.
-prop_TAI a = let t =  jd a TAI in t == conv (conv t :: E TAI)  -- ^ Conversion back and forth to TAI.
-          && let t = mjd a TAI in t == conv (conv t :: E TAI)  -- ^ Conversion back and forth to TAI.
-prop_TT  a = let t =  jd a TT  in t == conv (conv t :: E TAI)  -- ^ Conversion back and forth to TAI.
-          && let t = mjd a TT  in t == conv (conv t :: E TAI)  -- ^ Conversion back and forth to TAI.
+prop_TAI a = let t =  jd a TAI in t == conv (conv t :: E TAI Double)  -- ^ Conversion back and forth to TAI.
+          && let t = mjd a TAI in t == conv (conv t :: E TAI Double)  -- ^ Conversion back and forth to TAI.
+prop_TT  a = let t =  jd a TT  in t == conv (conv t :: E TAI Double)  -- ^ Conversion back and forth to TAI.
+          && let t = mjd a TT  in t == conv (conv t :: E TAI Double)  -- ^ Conversion back and forth to TAI.
 -- In the remaining double precision errors come into play.
-prop_TCG a = let t =  jd a TCG in cmpE dblError t (conv (conv t :: E TAI))  -- ^ Conversion back and forth to TAI.
-          && let t = mjd a TCG in cmpE dblError t (conv (conv t :: E TAI))  -- ^ Conversion back and forth to TAI.
+prop_TCG a = let t =  jd a TCG in cmpE dblError t (conv (conv t :: E TAI Double))  -- ^ Conversion back and forth to TAI.
+          && let t = mjd a TCG in cmpE dblError t (conv (conv t :: E TAI Double))  -- ^ Conversion back and forth to TAI.
 -- Accuracy of TDB|TCB <-> TAI is limited by the accuracy of TDB <-> TAI. 
 -- However, the reverse conversion appears to cancels the error nicely.
-prop_TDB a = let t =  jd a TDB in cmpE dblError t (conv (conv t :: E TAI))  -- ^ Conversion back and forth to TAI.
-          && let t = mjd a TDB in cmpE dblError t (conv (conv t :: E TAI))  -- ^ Conversion back and forth to TAI.
-prop_TCB a = let t =  jd a TCB in cmpE dblError t (conv (conv t :: E TAI))  -- ^ Conversion back and forth to TAI.
-          && let t = mjd a TCB in cmpE dblError t (conv (conv t :: E TAI))  -- ^ Conversion back and forth to TAI.
+prop_TDB a = let t =  jd a TDB in cmpE dblError t (conv (conv t :: E TAI Double))  -- ^ Conversion back and forth to TAI.
+          && let t = mjd a TDB in cmpE dblError t (conv (conv t :: E TAI Double))  -- ^ Conversion back and forth to TAI.
+prop_TCB a = let t =  jd a TCB in cmpE dblError t (conv (conv t :: E TAI Double))  -- ^ Conversion back and forth to TAI.
+          && let t = mjd a TCB in cmpE dblError t (conv (conv t :: E TAI Double))  -- ^ Conversion back and forth to TAI.
 -- The accuracy of TCB <-> TDB conversions should be good. (This test is mostly redundant given prop_TCB).
-prop_TCB' a = let t =  jd a TCB in cmpE dblError t (conv (conv t :: E TDB))  -- ^ Conversion back and forth to TDB.
-           && let t = mjd a TCB in cmpE dblError t (conv (conv t :: E TDB))  -- ^ Conversion back and forth to TDB.
+prop_TCB' a = let t =  jd a TCB in cmpE dblError t (conv (conv t :: E TDB Double))  -- ^ Conversion back and forth to TDB.
+           && let t = mjd a TCB in cmpE dblError t (conv (conv t :: E TDB Double))  -- ^ Conversion back and forth to TDB.
 
 
 
