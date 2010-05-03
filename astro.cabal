@@ -37,4 +37,5 @@ Extra-source-files:  README,
                      Astro/TestCelestrak.hs,
                      Astro/Place/TestTopocentric.hs
                      Astro/Time/Barycentric/TestAsA2009.hs
+                     IAU2000/TestEquations.hs
  
