@@ -17,6 +17,7 @@ Exposed-Modules:     Astro,
                      Astro.DefaultData,
                      Astro.Place,
                      Astro.Place.ReferenceEllipsoid,
+                     Astro.Place.Topocentric,
                      Astro.Time,
                      Astro.Time.Barycentric.AsA2009,
                      Astro.Time.Barycentric.Kaplan2005,
@@ -34,5 +35,6 @@ Extra-source-files:  README,
                      Test.lhs,
                      Astro/TestTime.hs,
                      Astro/TestCelestrak.hs,
+                     Astro/Place/TestTopocentric.hs
                      Astro/Time/Barycentric/TestAsA2009.hs
  
