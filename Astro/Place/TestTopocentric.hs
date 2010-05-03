@@ -58,7 +58,8 @@ prop_topo2 place p = not (cmpP dblAcc (geodeticToCartesian place) origo) -- Will
 
 
 -- | Going to and from az/el/rg observations is id.
-prop_obs place p = True ==> cmpP dblAcc p p'
+prop_obs place p = not (cmpP dblAcc (geodeticToCartesian place) origo) -- Will cause NaNs!
+               ==> cmpP dblAcc p p'
   where
     az = azimuth   place p
     el = elevation place p
