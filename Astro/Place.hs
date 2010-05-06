@@ -38,6 +38,18 @@ data GeodeticPlace a = GeodeticPlace
   , height    :: GeodeticHeight     a
   } deriving (Show, Eq)
 
+-- | Returns 'True' if the place is degenerate. We consider a place to
+-- be degenerate if its height is such that an increase in latitude
+-- may cause a reduction (or no change) of its geocentric Z-component.
+-- This case will occur only for negative heights approaching the
+-- negative polar radius of the body. For a spherical body a place at
+-- the center of the body is degenerate. Realistic geodetic places will
+-- never be degenerate.
+degeneratePlace :: (Fractional a, Ord a) => GeodeticPlace a -> Bool
+degeneratePlace place = height place <= negate (b^pos2 / a)
+  where ReferenceEllipsoid a b = refEllips place
+
+
 -- | Converts geodetic longitude and latitude in the ITRS frame into
 -- geocentric longitude and latitude in the CIP/TIO frame. The formulae
 -- used are approximate and should not be used for places at polar

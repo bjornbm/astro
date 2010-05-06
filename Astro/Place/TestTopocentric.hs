@@ -12,6 +12,7 @@ import Astro.Place.Topocentric
 import Astro.Place.ReferenceEllipsoid
 import Astro.Util (perfectGEO)
 import Test.QuickCheck
+import Control.Applicative
 
 
 -- Preliminaries
@@ -45,21 +46,30 @@ prop_va long f x = cmpE e (f cibinong $ perfectGEO $ long*~degree) (x*~degree)
       (0*~meter)
 
 -- | Converting geocentric to topocentric and back should be identity function.
-prop_topo1 place p = not (cmpP dblAcc (geodeticToCartesian place) origo) -- Will cause NaNs!
-                 ==> cmpP dblAcc p p'
+prop_topo1 place p = not (degeneratePlace place) ==> cmpP dblAcc p p'
   where
     p' = topocentricToGeocentric place $ geocentricToTopocentric place $ p
 
 -- | Converting topocentric to geocentric and back should be identity function.
-prop_topo2 place p = not (cmpP dblAcc (geodeticToCartesian place) origo) -- Will cause NaNs!
-                 ==> cmpP dblAcc p p'
+prop_topo2 place p = not (degeneratePlace place) ==> cmpP dblAcc p p'
   where
     p' = geocentricToTopocentric place $ topocentricToGeocentric place $ p
 
 
+{-
+Had a test failure due to degenerate place:
+
+Falsifiable, after 3 tests:
+GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 4.0 m, polarRadius = 3.0 m}, latitude = 0.0, longitude = -5.0, height = -2.25 m}
+< -3.6666666666666665 m, -0.3333333333333333 m, -3.0 m >
+
+Avoided by implementing and using 'degeneratePlace' predicate.
+-}
+prop_degenerate1 = degeneratePlace place where
+  place = GeodeticPlace (ReferenceEllipsoid (4.0*~meter) (3.0*~meter)) _0 _0 ((-2.25)*~meter)
+
 -- | Going to and from az/el/rg observations is id.
-prop_obs place p = not (cmpP dblAcc (geodeticToCartesian place) origo) -- Will cause NaNs!
-               ==> cmpP dblAcc p p'
+prop_obs place p = not (degeneratePlace place) ==> cmpP dblAcc p p'
   where
     az = azimuth   place p
     el = elevation place p
@@ -69,24 +79,23 @@ prop_obs place p = not (cmpP dblAcc (geodeticToCartesian place) origo) -- Will c
 
 -- Arbitrary instances. Should be moved elsewhere...
 
-instance (Arbitrary a) => Arbitrary (Quantity d a)
-  where
-    arbitrary   = arbitrary >>= return . Dimensional
+instance (Arbitrary a) => Arbitrary (Quantity d a) where
+  arbitrary   = Dimensional <$> arbitrary
+  coarbitrary = undefined  -- avoids warning
+
+instance Arbitrary a => Arbitrary (CPos a) where
+    arbitrary = fromTuple <$> arbitrary
     coarbitrary = undefined  -- avoids warning
 
-instance Arbitrary a => Arbitrary (CPos a)
-  where
-    arbitrary = arbitrary >>= return . fromTuple
-    coarbitrary = undefined  -- avoids warning
+instance (Fractional a, Arbitrary a) => Arbitrary (GeodeticPlace a) where
+  arbitrary = arbitrary >>= \e    ->
+              arbitrary >>= \lat  ->
+              arbitrary >>= \long ->
+              arbitrary >>= \h    ->
+              return (GeodeticPlace e lat long h)
+  --arbitrary = GeodeticPlace <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary
+  coarbitrary = undefined  -- avoids warning
 
-instance (Fractional a, Arbitrary a) => Arbitrary (GeodeticPlace a)
-  where
-    arbitrary = arbitrary >>= \e    ->
-                arbitrary >>= \lat  ->
-                arbitrary >>= \long ->
-                arbitrary >>= \h    ->
-                return (GeodeticPlace e lat long h)
-    coarbitrary = undefined  -- avoids warning
 
 instance (Num a, Arbitrary a) => Arbitrary (ReferenceEllipsoid a)
   where
@@ -98,8 +107,6 @@ instance (Num a, Arbitrary a) => Arbitrary (ReferenceEllipsoid a)
       return (ReferenceEllipsoid eq pol)
     coarbitrary = undefined  -- avoids warning
 
-pos x y z = fromTuple (x*~meter, y*~meter, z*~meter)
-origo = pos 0 0 0
 
 main = do
   onceCheck $ prop_va 108   azimuth    9.3
@@ -112,6 +119,7 @@ main = do
   onceCheck $ prop_va 150.5 elevation 39.3
   onceCheck $ prop_va 172   azimuth   87.0
   onceCheck $ prop_va 172   elevation 16.4
+  onceCheck $ prop_degenerate1
   check1000 prop_topo1
   check1000 prop_topo2
   check1000 prop_obs
