@@ -20,7 +20,7 @@ import Data.Time.Clock.TAI
 -- Preliminaries
 -- =============
 
-onceCheck = check (defaultConfig {configMaxTest = 1})
+onceCheck = quickCheckWith stdArgs { maxSuccess = 1 }
 conv t = runAstro (convert t) defaultAstroData
 
 -- | Comparison allowing for inaccuracy.
@@ -75,7 +75,16 @@ prop_TCG a = let t =  jd a TCG in cmpE dblError t (conv (conv t ::  E TAI Double
 -- However, the reverse conversion appears to cancels the error nicely.
 prop_TDB a = let t =  jd a TDB in cmpE dblError t (conv (conv t ::  E TAI Double))  -- ^ Conversion back and forth to TAI.
           && let t = mjd a TDB in cmpE dblError t (conv (conv t ::  E TAI Double))  -- ^ Conversion back and forth to TAI.
+
+
+
 prop_TCB a = let t =  jd a TCB in cmpE dblError t (conv (conv t ::  E TAI Double))  -- ^ Conversion back and forth to TAI.
+{-
+*** Failed! Falsifiable (after 25 tests):  
+26.303659304105857
+-}
+
+
           && let t = mjd a TCB in cmpE dblError t (conv (conv t ::  E TAI Double))  -- ^ Conversion back and forth to TAI.
 -- The accuracy of TCB <-> TDB conversions should be good. (This test is mostly redundant given prop_TCB).
 prop_TCB' a = let t =  jd a TCB in cmpE dblError t (conv (conv t :: E TDB Double))  -- ^ Conversion back and forth to TDB.

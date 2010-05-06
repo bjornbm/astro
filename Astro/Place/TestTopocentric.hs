@@ -18,8 +18,8 @@ import Control.Applicative
 -- Preliminaries
 -- =============
 
-onceCheck = check (defaultConfig {configMaxTest = 1})
-check1000 = check (defaultConfig {configMaxTest = 1000})
+onceCheck = quickCheckWith stdArgs { maxSuccess = 1 }
+check1000 = quickCheckWith stdArgs { maxSuccess = 1000, maxDiscard = 1000 }
 
 -- | Comparison allowing for inaccuracy.
 cmpE :: (Fractional a, Ord a) => Quantity d a -> Quantity d a -> Quantity d a -> Bool
@@ -49,6 +49,12 @@ prop_va long f x = cmpE e (f cibinong $ perfectGEO $ long*~degree) (x*~degree)
 prop_topo1 place p = not (degeneratePlace place) ==> cmpP dblAcc p p'
   where
     p' = topocentricToGeocentric place $ geocentricToTopocentric place $ p
+{-
+*** Failed! Falsifiable (after 996 tests):  
+GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 136781.86798882156 m, polarRadius = 167.72821654743436 m}, latitude = -2243.8289959047747, longitude = 20.39182594235854, height = 13.25536345487733 m}
+< -240.34114081130468 m, 102.79932480283043 m, 186.62064762372555 m >
+-}
+
 
 -- | Converting topocentric to geocentric and back should be identity function.
 prop_topo2 place p = not (degeneratePlace place) ==> cmpP dblAcc p p'
@@ -75,26 +81,31 @@ prop_obs place p = not (degeneratePlace place) ==> cmpP dblAcc p p'
     el = elevation place p
     rg = range     place p
     p' = azElRgToGeocentric place az el rg
+{-
+*** Failed! Falsifiable (after 867 tests):  
+GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 136607.51358690596 m, polarRadius = 155.740741518507 m}, latitude = 79.93674030440873, longitude = 60.60648347976257, height = 58.278163555009634 m}
+< -16.424578194638578 m, -89.47810248383104 m, -1566.516520378069 m >
+*** Failed! Falsifiable (after 295 tests):  
+GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 276733.3457887228 m, polarRadius = 276730.57152002316 m}, latitude = -152.91564055491563, longitude = -94.14913720744624, height = 187.078596831506 m}
+< 95.76534753065962 m, -26.02673518931036 m, -75.65015287140265 m >
+-}
 
 
 -- Arbitrary instances. Should be moved elsewhere...
 
 instance (Arbitrary a) => Arbitrary (Quantity d a) where
   arbitrary   = Dimensional <$> arbitrary
-  coarbitrary = undefined  -- avoids warning
 
 instance Arbitrary a => Arbitrary (CPos a) where
     arbitrary = fromTuple <$> arbitrary
-    coarbitrary = undefined  -- avoids warning
 
 instance (Fractional a, Arbitrary a) => Arbitrary (GeodeticPlace a) where
-  arbitrary = arbitrary >>= \e    ->
+  {-arbitrary = arbitrary >>= \e    ->
               arbitrary >>= \lat  ->
               arbitrary >>= \long ->
               arbitrary >>= \h    ->
-              return (GeodeticPlace e lat long h)
-  --arbitrary = GeodeticPlace <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary
-  coarbitrary = undefined  -- avoids warning
+              return (GeodeticPlace e lat long h)-}
+  arbitrary = GeodeticPlace <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary
 
 
 instance (Num a, Arbitrary a) => Arbitrary (ReferenceEllipsoid a)
@@ -105,7 +116,6 @@ instance (Num a, Arbitrary a) => Arbitrary (ReferenceEllipsoid a)
       d <- arbitrary
       let eq  = pol + abs d       -- Always larger than polar radius.
       return (ReferenceEllipsoid eq pol)
-    coarbitrary = undefined  -- avoids warning
 
 
 main = do

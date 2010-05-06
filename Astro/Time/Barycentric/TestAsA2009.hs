@@ -17,7 +17,7 @@ import Data.Time.Clock.TAI
 -- Preliminaries
 -- =============
 
-onceCheck = check (defaultConfig {configMaxTest = 1})
+onceCheck = quickCheckWith stdArgs { maxSuccess = 1 }
 conv t = runAstro (convert t) defaultAstroData
 
 -- | Comparison allowing for inaccuracy.

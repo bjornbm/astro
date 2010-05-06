@@ -14,7 +14,7 @@ import qualified Debug.Trace as D
 
 -- Preliminaries
 -- =============
-onceCheck = check (defaultConfig {configMaxTest = 1})
+onceCheck = quickCheckWith stdArgs { maxSuccess = 1 }
 trace x = D.trace (show x) x
 
 -- | Comparison allowing for inaccuracy.
