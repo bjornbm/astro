@@ -48,6 +48,24 @@ data GeodeticPlace a = GeodeticPlace
 degeneratePlace :: (Fractional a, Ord a) => GeodeticPlace a -> Bool
 degeneratePlace place = height place <= negate (b^pos2 / a)
   where ReferenceEllipsoid a b = refEllips place
+  -- The limit for a degenerate place is derived from the derivative
+  -- of the ECR z-component with respect to latitude. At the equator
+  -- the derivative is (derived from geodeticToCartesian):
+  --
+  --                   2
+  --    dz |          b
+  --   ----|  =  h + --- ,
+  --    dl |          a
+  --       |l=0
+  --
+  -- and it follows that at the inflection point:
+  --
+  --   h = - b^2 / a .
+  --
+  -- Another option would be to just use:
+  -- diff f (height place) <= _0 where f = vElem pos2 geodeticToCartesian
+  -- instead of bothering to derive it... would be safer in case I
+  -- were to find and fix a bug in geodeticToCartesian...
 
 
 -- | Converts geodetic longitude and latitude in the ITRS frame into
