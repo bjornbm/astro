@@ -51,23 +51,27 @@ topocentricToGeocentric :: RealFloat a => GeodeticPlace a -> Coord Topocentric a
 topocentricToGeocentric gs sc = C $ (transpose (topocentricCoordSys gs) `matVec` c sc) `elemAdd` geodeticToCartesian gs
 
 
--- | Compute elevation and azimuth in the topocentric coordinate system
+-- | Compute elevation in the topocentric coordinate system
 -- defined by the geodetic place. The input position should be defined
 -- in the geocentric coordinate system.
-elevation, azimuth :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Angle a
+elevation :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Angle a
 elevation gs = declination . s . geocentricToTopocentric gs
-azimuth   gs = azimuth'    . s . geocentricToTopocentric gs
+
+-- | Compute azimuth in the topocentric coordinate system
+-- defined by the geodetic place. The input position should be defined
+-- in the geocentric coordinate system.
+azimuth :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Angle a
+azimuth   gs = azimuth' . s . geocentricToTopocentric gs
   where azimuth' s = 90*~degree - rightAscension s  -- From N/Y towards E/X.
 
 -- | Computes the range from the given geodetic place to the given
 -- geocentric position.
 range :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Length a
 range gs = vNorm . elemSub (geodeticToCartesian gs) . c  -- More efficient.
---range gs = radius . c2s . geocentricToTopocentric gs  -- Rather inefficient!
+--range gs = radius . s . geocentricToTopocentric gs  -- Rather inefficient!
 
 -- Convert a tripple of azimuth, elevation, and range observations into
--- cartesian geocentric coordinates.
-azElRgToGeocentric :: RealFloat a => GeodeticPlace a -> Angle a -> Angle a -> Length a -> Coord ECR a
-azElRgToGeocentric place az el rg = topocentricToGeocentric place $ S $ fromTuple (rg, 90*~degree - el, negate az + 90*~degree)
-
--- -}
+-- cartesian coordinates in the topocentric system of the measurement
+-- source.
+azElRgToCoords :: RealFloat a => Angle a -> Angle a -> Length a -> Coord Topocentric a
+azElRgToCoords az el rg = S $ fromTuple (rg, 90*~degree - el, negate az + 90*~degree)

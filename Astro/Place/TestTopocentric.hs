@@ -72,7 +72,7 @@ prop_obs' acc place p = cmpP acc p p'
     az = azimuth   place p
     el = elevation place p
     rg = range     place p
-    p' = azElRgToGeocentric place az el rg
+    p' = topocentricToGeocentric place $ azElRgToCoords az el rg
 
 
 -- Arbitrary instances. Should be moved elsewhere...
