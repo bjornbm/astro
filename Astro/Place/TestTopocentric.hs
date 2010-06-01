@@ -14,6 +14,7 @@ import Astro.Place.ReferenceEllipsoid
 import Astro.Util (perfectGEO)
 import Test.QuickCheck
 import Control.Applicative
+import Data.AEq
 
 
 -- Preliminaries
@@ -24,20 +25,25 @@ onceCheck = quickCheckWith stdArgs { maxSuccess = 1 }
 manyCheck :: (Testable prop) => prop -> IO ()
 manyCheck = quickCheckWith stdArgs { maxSuccess = 1000, maxDiscard = 1000 }
 
--- | Comparison allowing for inaccuracy.
+
+instance AEq a => AEq (Quantity d a) where
+  (Dimensional x) === (Dimensional y) = x === y
+  (Dimensional x) ~== (Dimensional y) = x ~== y
+
+instance (Floating a, AEq a) => AEq (Coord s a) where
+  r1 === r2 = x1 === x2 && y1 === y2 && z1 === z2
+    where
+      (x1,y1,z1) = toTuple $ c r1
+      (x2,y2,z2) = toTuple $ c r2
+  r1 ~== r2 = x1 ~== x2 && y1 ~== y2 && z1 ~== z2
+    where
+      (x1,y1,z1) = toTuple $ c r1
+      (x2,y2,z2) = toTuple $ c r2
+
+
+-- | Comparison allowing for specified inaccuracy.
 cmpE :: (Fractional a, Ord a) => Quantity d a -> Quantity d a -> Quantity d a -> Bool
 cmpE accuracy x y' = abs (x - y') < accuracy
-
-cmpP :: (Floating a, Ord a) => Length a -> Coord s a -> Coord s a -> Bool
-cmpP acc r1 r2 = cmpE acc x1 x2 && cmpE acc y1 y2 && cmpE acc z1 z2
-  where
-    (x1,y1,z1) = toTuple $ c r1
-    (x2,y2,z2) = toTuple $ c r2
-
--- Accuracies.
-dblAcc :: Quantity d Double
-dblAcc = Dimensional 1e-8
-
 
 -- | 3rd party data validation.
 prop_va long f x = cmpE e (f cibinong $ C $ perfectGEO $ long*~degree) (x*~degree)
@@ -49,25 +55,23 @@ prop_va long f x = cmpE e (f cibinong $ C $ perfectGEO $ long*~degree) (x*~degre
       (0*~meter)
 
 -- | Converting geocentric to topocentric and back should be identity function.
-prop_topo1 place p = not (degeneratePlace place) ==> prop_topo1' dblAcc place p
-prop_topo1' acc place p = cmpP acc p p'
+prop_topo1 :: GeodeticPlace Double -> Coord ECR Double -> Property
+prop_topo1 place p = not (degeneratePlace place) ==> p ~== p'
   where
     p' = topocentricToGeocentric place $ geocentricToTopocentric place $ p
 
 
 -- | Converting topocentric to geocentric and back should be identity function.
 prop_topo2 :: GeodeticPlace Double -> Coord Topocentric Double -> Property
-prop_topo2 place p = not (degeneratePlace place) ==> prop_topo2' dblAcc place p
-prop_topo2' acc place p = cmpP acc p p'
+prop_topo2 place p = not (degeneratePlace place) ==> p ~== p'
   where
     p' = geocentricToTopocentric place $ topocentricToGeocentric place $ p
 
 
 
 -- | Going to and from az/el/rg observations is id.
-
-prop_obs place p = not (degeneratePlace place) ==> prop_obs' dblAcc place p
-prop_obs' acc place p = cmpP acc p p'
+prop_obs :: GeodeticPlace Double -> Coord ECR Double -> Property
+prop_obs place p = not (degeneratePlace place) ==> p ~== p'
   where
     az = azimuth   place p
     el = elevation place p
@@ -134,7 +138,7 @@ Not sure what was wrong with this one and what fixed it??
 GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 136781.86798882156 m, polarRadius = 167.72821654743436 m}, latitude = -2243.8289959047747, longitude = 20.39182594235854, height = 13.25536345487733 m}
 < -240.34114081130468 m, 102.79932480283043 m, 186.62064762372555 m >
 -}
-prop_topo1_fail1 = prop_topo1' (1e-6*~meter) place p
+prop_topo1_fail1 = prop_topo1 place p
   where
     p = C $ fromTuple ((-240.34114081130468)*~meter, 102.79932480283043*~meter, 186.62064762372555*~meter)
     place = GeodeticPlace (ReferenceEllipsoid (136781.86798882156*~meter) (167.72821654743436*~meter))
@@ -157,7 +161,7 @@ The poor geometry of the ellipsoid causes the FP error to grow.
 GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 136607.51358690596 m, polarRadius = 155.740741518507 m}, latitude = 79.93674030440873, longitude = 60.60648347976257, height = 58.278163555009634 m}
 < -16.424578194638578 m, -89.47810248383104 m, -1566.516520378069 m >
 -}
-prop_obs_fail1 = prop_obs' (1e-6*~meter) place p
+prop_obs_fail1 = prop_obs place p
   where
     p = C $ fromTuple ((-16.424578194638578)*~meter, (-89.47810248383104)*~meter, (-1566.516520378069)*~meter)
     place = GeodeticPlace (ReferenceEllipsoid (136607.51358690596*~meter) (155.740741518507*~meter))
@@ -169,7 +173,7 @@ This one also has crappy FP problem... why??
 GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 276733.3457887228 m, polarRadius = 276730.57152002316 m}, latitude = -152.91564055491563, longitude = -94.14913720744624, height = 187.078596831506 m}
 < 95.76534753065962 m, -26.02673518931036 m, -75.65015287140265 m >
 -}
-prop_obs_fail2 = prop_obs' (1e-7*~meter) place p
+prop_obs_fail2 = prop_obs place p
   where
     p = C $ fromTuple (95.76534753065962*~meter, (-26.02673518931036)*~meter, (-75.65015287140265)*~meter)
     place = GeodeticPlace (ReferenceEllipsoid (276733.3457887228*~meter) (276730.57152002316*~meter))
@@ -181,7 +185,7 @@ Flat ellipsoid.
 GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 134.15569877277596*~meter, polarRadius = 65.24417626981652*~meter}, latitude = 96.5645385211402*~radian, longitude = (-5.66974812882677)*~radian, height = 174062.2962703866*~meter}
 < -12.670478806591223 m, -7.520050866897443 m, -67.76922633914856 m >
 -}
-prop_obs_fail3 = prop_obs' (1e-6*~meter) place p
+prop_obs_fail3 = prop_obs place p
   where
     p = C $ fromTuple ( (-12.670478806591223)*~meter, (-7.520050866897443)*~meter, (-67.76922633914856)*~meter )
     place = GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 134.15569877277596*~meter, polarRadius = 65.24417626981652*~meter}
