@@ -6,6 +6,7 @@ do.
 module Astro.Place where
 
 import Astro
+import Astro.Coords
 import Astro.Place.ReferenceEllipsoid
 import Control.Monad.Reader (asks)
 import Numeric.Units.Dimensional.Prelude
@@ -95,10 +96,8 @@ itrsToCIP p = do
 
 -- | Converts a geodetic place into geocentric cartesian coordinates.
 -- From [WP1].
-geodeticToCartesian :: Floating a
-                    => GeodeticPlace a
-                    -> CPos a
-geodeticToCartesian p = fromTuple (x,y,z)
+geodeticToECR :: Floating a => GeodeticPlace a -> Coord ECR a
+geodeticToECR p = C $ fromTuple (x,y,z)
   where
     -- Inputs. (Could have pattern-matched instead.)
     a    = equatorialRadius $ refEllips p
@@ -116,14 +115,14 @@ geodeticToCartesian p = fromTuple (x,y,z)
 
 -- | Converts geocentric cartesian coordinates into geodetic place using
 -- Kaplan's procedure as described at [WP2].
-cartesianToGeodetic :: RealFloat a
-                    => CPos a
-                    -> ReferenceEllipsoid a
-                    -> GeodeticPlace a
-cartesianToGeodetic cart re = GeodeticPlace re lat long height
+ecrToGeodetic :: RealFloat a
+              => Coord ECR a
+              -> ReferenceEllipsoid a
+              -> GeodeticPlace a
+ecrToGeodetic coords re = GeodeticPlace re lat long height
   where
     -- Inputs. (Could have pattern-matched instead.)
-    (x,y,z) = toTuple cart
+    (x,y,z) = toTuple $ Astro.Coords.c coords
     a = equatorialRadius re
     b =      polarRadius re
     -- Intemediate calculations.
@@ -150,17 +149,6 @@ cartesianToGeodetic cart re = GeodeticPlace re lat long height
     lat    = atan $ (z + e'2 * z0) / r
     long   = atan2 y x -- azimuth (c2s cart)
 
-{-
-This function doesn't make much sense. Just use 'c2s'.
-
--- | Converts geodetic longitude, latitude and height into geocentric
--- longitude, latitude and radius.
-geodeticToGeocentric :: RealFloat a
-                     => GeodeticPlace a
-                     -> (GeocentricLatitude a, GeoLongitude a, GeocentricRadius a)
-geodeticToGeocentric p = (dec, ra, r)
-  where (r, ra, dec) = toTuple $ c2s $ geodeticToCartesian p
--}
 
 {- 
 
