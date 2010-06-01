@@ -7,6 +7,7 @@ import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import Vector
 import PosVel (CPos)
+import Astro.Coords
 import Astro.Place
 import Astro.Place.Topocentric
 import Astro.Place.ReferenceEllipsoid
@@ -18,18 +19,20 @@ import Control.Applicative
 -- Preliminaries
 -- =============
 
+onceCheck :: (Testable prop) => prop -> IO ()
 onceCheck = quickCheckWith stdArgs { maxSuccess = 1 }
+manyCheck :: (Testable prop) => prop -> IO ()
 manyCheck = quickCheckWith stdArgs { maxSuccess = 1000, maxDiscard = 1000 }
 
 -- | Comparison allowing for inaccuracy.
 cmpE :: (Fractional a, Ord a) => Quantity d a -> Quantity d a -> Quantity d a -> Bool
 cmpE accuracy x y' = abs (x - y') < accuracy
 
-cmpP :: (Fractional a, Ord a) => Length a -> CPos a -> CPos a -> Bool
+cmpP :: (Floating a, Ord a) => Length a -> Coord s a -> Coord s a -> Bool
 cmpP acc r1 r2 = cmpE acc x1 x2 && cmpE acc y1 y2 && cmpE acc z1 z2
   where
-    (x1,y1,z1) = toTuple r1
-    (x2,y2,z2) = toTuple r2
+    (x1,y1,z1) = toTuple $ c r1
+    (x2,y2,z2) = toTuple $ c r2
 
 -- Accuracies.
 dblAcc :: Quantity d Double
@@ -37,7 +40,7 @@ dblAcc = Dimensional 1e-8
 
 
 -- | 3rd party data validation.
-prop_va long f x = cmpE e (f cibinong $ perfectGEO $ long*~degree) (x*~degree)
+prop_va long f x = cmpE e (f cibinong $ C $ perfectGEO $ long*~degree) (x*~degree)
   where
     e = 0.1 *~ degree
     cibinong = GeodeticPlace wgs84
@@ -53,6 +56,7 @@ prop_topo1' acc place p = cmpP acc p p'
 
 
 -- | Converting topocentric to geocentric and back should be identity function.
+prop_topo2 :: GeodeticPlace Double -> Coord Topocentric Double -> Property
 prop_topo2 place p = not (degeneratePlace place) ==> prop_topo2' dblAcc place p
 prop_topo2' acc place p = cmpP acc p p'
   where
@@ -78,6 +82,10 @@ instance (Arbitrary a) => Arbitrary (Quantity d a) where
 
 instance Arbitrary a => Arbitrary (CPos a) where
     arbitrary = fromTuple <$> arbitrary
+
+instance Arbitrary a => Arbitrary (Coord s a)
+  where
+    arbitrary = return . C . fromTuple =<< arbitrary
 
 instance (Fractional a, Arbitrary a) => Arbitrary (GeodeticPlace a) where
   {-arbitrary = arbitrary >>= \e    ->
@@ -128,7 +136,7 @@ GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 136781.8679888
 -}
 prop_topo1_fail1 = prop_topo1' (1e-6*~meter) place p
   where
-    p = fromTuple ((-240.34114081130468)*~meter, 102.79932480283043*~meter, 186.62064762372555*~meter)
+    p = C $ fromTuple ((-240.34114081130468)*~meter, 102.79932480283043*~meter, 186.62064762372555*~meter)
     place = GeodeticPlace (ReferenceEllipsoid (136781.86798882156*~meter) (167.72821654743436*~meter))
                           ((-2243.8289959047747)*~radian) (20.39182594235854*~radian) (13.25536345487733*~meter)
 
@@ -151,7 +159,7 @@ GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 136607.5135869
 -}
 prop_obs_fail1 = prop_obs' (1e-6*~meter) place p
   where
-    p = fromTuple ((-16.424578194638578)*~meter, (-89.47810248383104)*~meter, (-1566.516520378069)*~meter)
+    p = C $ fromTuple ((-16.424578194638578)*~meter, (-89.47810248383104)*~meter, (-1566.516520378069)*~meter)
     place = GeodeticPlace (ReferenceEllipsoid (136607.51358690596*~meter) (155.740741518507*~meter))
                           (79.93674030440873*~radian) (60.60648347976257*~radian) (58.278163555009634*~meter)
 
@@ -163,7 +171,7 @@ GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 276733.3457887
 -}
 prop_obs_fail2 = prop_obs' (1e-7*~meter) place p
   where
-    p = fromTuple (95.76534753065962*~meter, (-26.02673518931036)*~meter, (-75.65015287140265)*~meter)
+    p = C $ fromTuple (95.76534753065962*~meter, (-26.02673518931036)*~meter, (-75.65015287140265)*~meter)
     place = GeodeticPlace (ReferenceEllipsoid (276733.3457887228*~meter) (276730.57152002316*~meter))
                           ((-152.91564055491563)*~radian) ((-94.14913720744624)*~radian) (187.078596831506*~meter)
 
@@ -175,6 +183,6 @@ GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 134.1556987727
 -}
 prop_obs_fail3 = prop_obs' (1e-6*~meter) place p
   where
-    p = fromTuple ( (-12.670478806591223)*~meter, (-7.520050866897443)*~meter, (-67.76922633914856)*~meter )
+    p = C $ fromTuple ( (-12.670478806591223)*~meter, (-7.520050866897443)*~meter, (-67.76922633914856)*~meter )
     place = GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 134.15569877277596*~meter, polarRadius = 65.24417626981652*~meter}
                         , latitude = 96.5645385211402*~radian, longitude = (-5.66974812882677)*~radian, height = 174062.2962703866*~meter}

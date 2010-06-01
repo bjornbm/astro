@@ -4,6 +4,7 @@ coordinate systems.
 -}
 module Astro.Place.Topocentric where
 
+import Astro.Coords
 import Astro.Place
 import Vector
 import Matrix
@@ -42,32 +43,31 @@ topocentricCoordSys p = consRow   (topocentricX p)
 -- | Converts a position in the geocentric rotating coordinate system
 -- to a position in the topocentric coordinate system defined by the
 -- given geodetic place.
-geocentricToTopocentric :: RealFloat a => GeodeticPlace a -> CPos a -> CPos a
-geocentricToTopocentric gs sc = topocentricCoordSys gs `matVec` (sc `elemSub` geodeticToCartesian gs)
+geocentricToTopocentric :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Coord Topocentric a
+geocentricToTopocentric gs sc = C $ topocentricCoordSys gs `matVec` (c sc `elemSub` geodeticToCartesian gs)
 
--- Causes NaNs wher the geodetic place is at the center of the ellipsoid!
-topocentricToGeocentric :: RealFloat a => GeodeticPlace a -> CPos a -> CPos a
-topocentricToGeocentric gs sc = transpose (topocentricCoordSys gs) `matVec` sc `elemAdd` geodeticToCartesian gs
+-- Causes NaNs when the geodetic place is at the center of the ellipsoid!
+topocentricToGeocentric :: RealFloat a => GeodeticPlace a -> Coord Topocentric a -> Coord ECR a
+topocentricToGeocentric gs sc = C $ (transpose (topocentricCoordSys gs) `matVec` c sc) `elemAdd` geodeticToCartesian gs
 
 
 -- | Compute elevation and azimuth in the topocentric coordinate system
 -- defined by the geodetic place. The input position should be defined
 -- in the geocentric coordinate system.
-elevation, azimuth :: RealFloat a => GeodeticPlace a -> CPos a -> Angle a
-elevation gs = declination . c2s . geocentricToTopocentric gs
-azimuth   gs = azimuth'    . c2s . geocentricToTopocentric gs
+elevation, azimuth :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Angle a
+elevation gs = declination . s . geocentricToTopocentric gs
+azimuth   gs = azimuth'    . s . geocentricToTopocentric gs
   where azimuth' s = 90*~degree - rightAscension s  -- From N/Y towards E/X.
 
 -- | Computes the range from the given geodetic place to the given
 -- geocentric position.
-range :: RealFloat a => GeodeticPlace a -> CPos a -> Length a
-range gs = vNorm . elemSub (geodeticToCartesian gs)  -- More efficient.
+range :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Length a
+range gs = vNorm . elemSub (geodeticToCartesian gs) . c  -- More efficient.
 --range gs = radius . c2s . geocentricToTopocentric gs  -- Rather inefficient!
 
 -- Convert a tripple of azimuth, elevation, and range observations into
--- cartesian topocentric coordinates.
-azElRgToGeocentric :: RealFloat a => GeodeticPlace a -> Angle a -> Angle a -> Length a -> CPos a
-azElRgToGeocentric place az el rg = topocentricToGeocentric place $ s2c $ fromTuple (rg, 90*~degree - el, ra)
-  where ra = negate az + 90*~degree
+-- cartesian geocentric coordinates.
+azElRgToGeocentric :: RealFloat a => GeodeticPlace a -> Angle a -> Angle a -> Length a -> Coord ECR a
+azElRgToGeocentric place az el rg = topocentricToGeocentric place $ S $ fromTuple (rg, 90*~degree - el, negate az + 90*~degree)
 
-
+-- -}
