@@ -2,7 +2,6 @@
 
 module Astro.Place.TestTopocentric where
 
-import Numeric.Units.Dimensional (Dimensional (Dimensional))
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import Vector
@@ -13,69 +12,8 @@ import Astro.Place.Topocentric
 import Astro.Place.ReferenceEllipsoid
 import Astro.Util (perfectGEO)
 import Test.QuickCheck
-import Control.Applicative
+import TestUtil
 import Data.AEq
-
-
--- Instances (TODO: move elsewhere)
--- ================================
-
--- Approximate equality
--- --------------------
-
-instance AEq a => AEq (Quantity d a) where
-  (Dimensional x) === (Dimensional y) = x === y
-  (Dimensional x) ~== (Dimensional y) = x ~== y
-
-
-instance (Floating a, AEq a) => AEq (Coord s a) where
-  r1 === r2 = x1 === x2 && y1 === y2 && z1 === z2
-    where
-      (x1,y1,z1) = toTuple $ c r1
-      (x2,y2,z2) = toTuple $ c r2
-  r1 ~== r2 = x1 ~== x2 && y1 ~== y2 && z1 ~== z2
-    where
-      (x1,y1,z1) = toTuple $ c r1
-      (x2,y2,z2) = toTuple $ c r2
-
-
--- Arbitrary instances
--- -------------------
-instance (Arbitrary a) => Arbitrary (Quantity d a) where
-  arbitrary   = Dimensional <$> arbitrary
-
-instance Arbitrary a => Arbitrary (CPos a) where
-    arbitrary = fromTuple <$> arbitrary
-
-instance Arbitrary a => Arbitrary (Coord s a)
-  where
-    arbitrary = return . C . fromTuple =<< arbitrary
-
-instance (Fractional a, Arbitrary a) => Arbitrary (GeodeticPlace a) where
-  arbitrary = GeodeticPlace <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary
-
-
-instance (Num a, Arbitrary a) => Arbitrary (ReferenceEllipsoid a)
-  where
-    arbitrary = do
-      x <- arbitrary
-      let pol = abs x + 1*~meter  -- Prevent zero radius.
-      d <- arbitrary
-      let eq  = pol + abs d       -- Always larger than polar radius.
-      return (ReferenceEllipsoid eq pol)
-
-
--- Helpers
--- =======
-
-onceCheck :: (Testable prop) => prop -> IO ()
-onceCheck = quickCheckWith stdArgs { maxSuccess = 1 }
-manyCheck :: (Testable prop) => prop -> IO ()
-manyCheck = quickCheckWith stdArgs { maxSuccess = 1000, maxDiscard = 1000 }
-
--- | Comparison allowing for specified inaccuracy.
-cmpE :: (Fractional a, Ord a) => Quantity d a -> Quantity d a -> Quantity d a -> Bool
-cmpE accuracy x y' = abs (x - y') < accuracy
 
 
 -- Properties
@@ -199,3 +137,9 @@ prop_obs_fail3 = prop_obs place p
           , latitude = 96.5645385211402*~radian
           , longitude = (-5.66974812882677)*~radian
           , height = 174062.2962703866*~meter}
+
+{-
+*** Failed! Falsifiable (after 903 tests):  
+GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 154314.88808559094 m, polarRadius = 92.02164361899281 m}, latitude = 64.84504602560372, longitude = -12.454605679732511, height = 59.292381438053056 m}
+C < 16.99978234375992 m, -60.30380096338773 m, 4.689191066151387 m >
+-}
