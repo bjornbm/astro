@@ -5,19 +5,22 @@
 module Tmp.ForwardAD (diff, Lift, lift) where
 
 import Numeric.Units.Dimensional (Dimensional (Dimensional), Quantity, Div)
-import Numeric.FAD (Dual)
-import qualified Numeric.FAD (diff, lift)
+import Numeric.AD (AD, Mode)
+import qualified Numeric.AD (diff, lift)
 
 diff :: (Num a, Div d2 d1 d2')
-     => (forall tag. Quantity d1 (Dual tag a) -> Quantity d2 (Dual tag a))
+     => (forall tag. Mode tag => Quantity d1 (AD tag a) -> Quantity d2 (AD tag a))
      -> Quantity d1 a -> Quantity d2' a
-diff f (Dimensional x) = Dimensional (Numeric.FAD.diff f' x)
+{-diff f (Dimensional x) = Dimensional (Numeric.AD.diff f' x)
   where
     f' = undim . f . Dimensional
+    undim (Dimensional a) = a -}
+diff f (Dimensional x) = Dimensional $ Numeric.AD.diff (undim . f . Dimensional) x
+  where
     undim (Dimensional a) = a
 
 
-class Lift w where lift :: Num a => w a -> w (Dual tag a)
-instance Lift (Dimensional v d) where lift (Dimensional x) = Dimensional (Numeric.FAD.lift x)
+class Lift w where lift :: (Num a, Mode tag) => w a -> w (AD tag a)
+instance Lift (Dimensional v d) where lift (Dimensional x) = Dimensional (Numeric.AD.lift x)
 
 

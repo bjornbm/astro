@@ -11,8 +11,16 @@ Description:
     Time scales and time conversion facilities relevant to astrodynamics.
 Category:            Physics
 Build-Type:          Simple
-Build-Depends:       base, time, mtl, array, HList > 0.1, leapseconds-announced,
-                     dimensional, dimensional-vectors, astro-tables, fad
+Build-Depends:       base < 5,
+                     time < 1.3,
+                     mtl < 1.2,
+                     array < 0.4,
+                     HList > 0.1 && < 0.3,
+                     leapseconds-announced,
+                     dimensional < 1.1,
+                     dimensional-vectors < 1.1,
+                     astro-tables < 1.1,
+                     ad < 0.34
 Exposed-Modules:     Astro,
                      Astro.DefaultData,
                      Astro.Place,
@@ -23,7 +31,7 @@ Exposed-Modules:     Astro,
                      Astro.Time.Barycentric.Kaplan2005,
                      Astro.Time.Barycentric.TT,
                      Astro.Time.Convert,
-                     Astro.Time.ForwardAD,
+                     --Astro.Time.ForwardAD,
                      Astro.Time.Interop,
                      Astro.Time.Sidereal,
                      Astro.Celestrak,
