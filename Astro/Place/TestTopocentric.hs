@@ -20,7 +20,7 @@ import Data.AEq
 -- ==========
 
 -- | 3rd party data validation.
-prop_va long f x = cmpE e (f cibinong $ C $ perfectGEO $ long*~degree) (x*~degree)
+prop_va long f x = cmpE e (f cibinong $ perfectGEO $ long*~degree) (x*~degree)
   where
     e = 0.1 *~ degree
     cibinong = GeodeticPlace wgs84
@@ -32,13 +32,13 @@ prop_va long f x = cmpE e (f cibinong $ C $ perfectGEO $ long*~degree) (x*~degre
 prop_topo1 :: GeodeticPlace Double -> Coord ECR Double -> Property
 prop_topo1 place p = not (degeneratePlace place) ==> p ~== p'
   where
-    p' = topocentricToGeocentric place $ geocentricToTopocentric place $ p
+    p' = topocentricToECR place $ ecrToTopocentric place $ p
 
 -- | Converting topocentric to geocentric and back should be identity function.
 prop_topo2 :: GeodeticPlace Double -> Coord Topocentric Double -> Property
 prop_topo2 place p = not (degeneratePlace place) ==> p ~== p'
   where
-    p' = geocentricToTopocentric place $ topocentricToGeocentric place $ p
+    p' = ecrToTopocentric place $ topocentricToECR place $ p
 
 -- | Going to and from az/el/rg observations is id.
 prop_obs :: Coord Topocentric Double -> Bool
@@ -56,7 +56,7 @@ prop_obsECR place p = not (degeneratePlace place) ==> p ~== p'
     az = azimuth'   place p
     el = elevation' place p
     rg = range'     place p
-    p' = topocentricToGeocentric place $ azElRgToCoords az el rg
+    p' = topocentricToECR place $ azElRgToCoords az el rg
 
 
 -- Driver

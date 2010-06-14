@@ -43,12 +43,12 @@ topocentricCoordSys p = consRow   (topocentricX p)
 -- | Converts a position in the geocentric rotating coordinate system
 -- to a position in the topocentric coordinate system defined by the
 -- given geodetic place.
-geocentricToTopocentric :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Coord Topocentric a
-geocentricToTopocentric gs sc = C $ topocentricCoordSys gs `matVec` c (diffCoords sc (geodeticToECR gs))
+ecrToTopocentric :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Coord Topocentric a
+ecrToTopocentric gs sc = C $ topocentricCoordSys gs `matVec` c (diffCoords sc (geodeticToECR gs))
 
 -- Causes NaNs when the geodetic place is at the center of the ellipsoid!
-topocentricToGeocentric :: RealFloat a => GeodeticPlace a -> Coord Topocentric a -> Coord ECR a
-topocentricToGeocentric gs sc = C $ (transpose (topocentricCoordSys gs) `matVec` c sc) `elemAdd` c (geodeticToECR gs)
+topocentricToECR :: RealFloat a => GeodeticPlace a -> Coord Topocentric a -> Coord ECR a
+topocentricToECR gs sc = C $ (transpose (topocentricCoordSys gs) `matVec` c sc) `elemAdd` c (geodeticToECR gs)
 
 
 elevation :: RealFloat a => Coord Topocentric a -> Angle a
@@ -65,20 +65,20 @@ range = radius . s
 -- defined by the geodetic place. The input position should be defined
 -- in the geocentric coordinate system.
 elevation' :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Angle a
-elevation' gs = declination . s . geocentricToTopocentric gs
+elevation' gs = declination . s . ecrToTopocentric gs
 
 -- | Compute azimuth in the topocentric coordinate system
 -- defined by the geodetic place. The input position should be defined
 -- in the geocentric coordinate system.
 azimuth' :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Angle a
-azimuth'   gs = azimuth' . s . geocentricToTopocentric gs
+azimuth'   gs = azimuth' . s . ecrToTopocentric gs
   where azimuth' s = 90*~degree - rightAscension s  -- From N/Y towards E/X.
 
 -- | Computes the range from the given geodetic place to the given
 -- geocentric position.
 range' :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Length a
 range' gs = vNorm . c . diffCoords (geodeticToECR gs)  -- More efficient.
---range gs = radius . s . geocentricToTopocentric gs  -- Rather inefficient!
+--range gs = radius . s . ecrToTopocentric gs  -- Rather inefficient!
 
 -- Convert a tripple of azimuth, elevation, and range observations into
 -- cartesian coordinates in the topocentric system of the measurement
