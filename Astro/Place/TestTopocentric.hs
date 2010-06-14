@@ -41,12 +41,21 @@ prop_topo2 place p = not (degeneratePlace place) ==> p ~== p'
     p' = geocentricToTopocentric place $ topocentricToGeocentric place $ p
 
 -- | Going to and from az/el/rg observations is id.
-prop_obs :: GeodeticPlace Double -> Coord ECR Double -> Property
-prop_obs place p = not (degeneratePlace place) ==> p ~== p'
+prop_obs :: Coord Topocentric Double -> Bool
+prop_obs p = p ~== p'
   where
-    az = azimuth   place p
-    el = elevation place p
-    rg = range     place p
+    az = azimuth   p
+    el = elevation p
+    rg = range     p
+    p' = azElRgToCoords az el rg
+
+-- | Going to and from az/el/rg observations in ECR is id.
+prop_obsECR :: GeodeticPlace Double -> Coord ECR Double -> Property
+prop_obsECR place p = not (degeneratePlace place) ==> p ~== p'
+  where
+    az = azimuth'   place p
+    el = elevation' place p
+    rg = range'     place p
     p' = topocentricToGeocentric place $ azElRgToCoords az el rg
 
 
@@ -54,24 +63,25 @@ prop_obs place p = not (degeneratePlace place) ==> p ~== p'
 -- ======
 
 main = do
-  onceCheck $ prop_va 108   azimuth    9.3
-  onceCheck $ prop_va 108   elevation 82.3 -- TODO 82.0 according to VA...?
-  onceCheck $ prop_va 118   azimuth   60.1
-  onceCheck $ prop_va 118   elevation 75.0
-  onceCheck $ prop_va 142   azimuth   80.9
-  onceCheck $ prop_va 142   elevation 48.7
-  onceCheck $ prop_va 150.5 azimuth   83.3
-  onceCheck $ prop_va 150.5 elevation 39.3
-  onceCheck $ prop_va 172   azimuth   87.0
-  onceCheck $ prop_va 172   elevation 16.4
+  onceCheck $ prop_va 108   azimuth'    9.3
+  onceCheck $ prop_va 108   elevation' 82.3 -- TODO 82.0 according to VA...?
+  onceCheck $ prop_va 118   azimuth'   60.1
+  onceCheck $ prop_va 118   elevation' 75.0
+  onceCheck $ prop_va 142   azimuth'   80.9
+  onceCheck $ prop_va 142   elevation' 48.7
+  onceCheck $ prop_va 150.5 azimuth'   83.3
+  onceCheck $ prop_va 150.5 elevation' 39.3
+  onceCheck $ prop_va 172   azimuth'   87.0
+  onceCheck $ prop_va 172   elevation' 16.4
   onceCheck $ prop_degenerate1
   manyCheck prop_topo1
   onceCheck $ prop_topo1_fail1
   manyCheck prop_topo2
   manyCheck prop_obs
-  onceCheck $ prop_obs_fail1
-  onceCheck $ prop_obs_fail2
-  onceCheck $ prop_obs_fail3
+  manyCheck prop_obsECR
+  onceCheck $ prop_obsECR_fail1
+  onceCheck $ prop_obsECR_fail2
+  onceCheck $ prop_obsECR_fail3
 
 
 -- Prior failures
@@ -103,7 +113,7 @@ prop_topo1_fail1 = prop_topo1 place p
                           (20.39182594235854*~radian)
                           (13.25536345487733*~meter)
 
-prop_obs_fail1 = prop_obs place p
+prop_obsECR_fail1 = prop_obsECR place p
   where
     p = C $ fromTuple ((-16.424578194638578)*~meter
                       , (-89.47810248383104)*~meter
@@ -114,7 +124,7 @@ prop_obs_fail1 = prop_obs place p
                           (60.60648347976257*~radian)
                           (58.278163555009634*~meter)
 
-prop_obs_fail2 = prop_obs place p
+prop_obsECR_fail2 = prop_obsECR place p
   where
     p = C $ fromTuple (95.76534753065962*~meter
                   , (-26.02673518931036)*~meter
@@ -125,7 +135,7 @@ prop_obs_fail2 = prop_obs place p
                           ((-94.14913720744624)*~radian)
                           (187.078596831506*~meter)
 
-prop_obs_fail3 = prop_obs place p
+prop_obsECR_fail3 = prop_obsECR place p
   where
     p = C $ fromTuple ((-12.670478806591223)*~meter
                       , (-7.520050866897443)*~meter

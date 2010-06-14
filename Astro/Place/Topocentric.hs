@@ -51,23 +51,33 @@ topocentricToGeocentric :: RealFloat a => GeodeticPlace a -> Coord Topocentric a
 topocentricToGeocentric gs sc = C $ (transpose (topocentricCoordSys gs) `matVec` c sc) `elemAdd` c (geodeticToECR gs)
 
 
+elevation :: RealFloat a => Coord Topocentric a -> Angle a
+elevation = declination . s
+
+azimuth :: RealFloat a => Coord Topocentric a -> Angle a
+azimuth = az . s
+  where az v = 90*~degree - rightAscension v  -- From N/Y towards E/X.
+
+range :: RealFloat a => Coord Topocentric a -> Length a
+range = radius . s
+
 -- | Compute elevation in the topocentric coordinate system
 -- defined by the geodetic place. The input position should be defined
 -- in the geocentric coordinate system.
-elevation :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Angle a
-elevation gs = declination . s . geocentricToTopocentric gs
+elevation' :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Angle a
+elevation' gs = declination . s . geocentricToTopocentric gs
 
 -- | Compute azimuth in the topocentric coordinate system
 -- defined by the geodetic place. The input position should be defined
 -- in the geocentric coordinate system.
-azimuth :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Angle a
-azimuth   gs = azimuth' . s . geocentricToTopocentric gs
+azimuth' :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Angle a
+azimuth'   gs = azimuth' . s . geocentricToTopocentric gs
   where azimuth' s = 90*~degree - rightAscension s  -- From N/Y towards E/X.
 
 -- | Computes the range from the given geodetic place to the given
 -- geocentric position.
-range :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Length a
-range gs = vNorm . c . diffCoords (geodeticToECR gs)  -- More efficient.
+range' :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Length a
+range' gs = vNorm . c . diffCoords (geodeticToECR gs)  -- More efficient.
 --range gs = radius . s . geocentricToTopocentric gs  -- Rather inefficient!
 
 -- Convert a tripple of azimuth, elevation, and range observations into
