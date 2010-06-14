@@ -2,6 +2,7 @@
 -- for a more appropriate place to live.
 module Astro.Util (r_GEO, perfectGEO) where
 
+import Astro.Coords
 import Astrodynamics (r_GEO)
 import Vector
 import PosVel
@@ -12,5 +13,5 @@ import qualified Prelude
 type Longitude = Angle
 
 -- | ECEF position of a perfectly geostationary SC.
-perfectGEO :: RealFloat a => Longitude a -> CPos a
-perfectGEO l = s2c $ fromTuple (r_GEO, 90*~degree, l)
+perfectGEO :: RealFloat a => Longitude a -> Coord ECR a
+perfectGEO l = S $ fromTuple (r_GEO, 90*~degree, l)

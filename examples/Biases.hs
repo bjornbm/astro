@@ -46,14 +46,14 @@ visible :: RealFloat a => GeodeticPlace a -> Longitude a -> Bool
 visible st l = dotProduct stECR r >= (0*~meter^pos2)
   where
     stECR = c $ geodeticToECR st
-    r   = elemSub (perfectGEO l) stECR
+    r   = elemSub (c $ perfectGEO l) stECR
 
 
 -- | Computes how sensitive the measured position of a geostationary SC is
 -- to biases in range measurements from a GS. The arguments are the
 -- geostationary longitude of the SC and the GS.
 sensitivity :: RealFloat a => Longitude a -> GeodeticPlace a -> WaveNumber a
-sensitivity l st = _1 / diff (range' (lift st) . C . perfectGEO) l
+sensitivity l st = _1 / diff (range' (lift st) . perfectGEO) l
 
 
 -- Ground stations
@@ -126,7 +126,7 @@ main = do
 
 showAzElRg :: Longitude Double -> (String, GeodeticPlace Double) -> String
 showAzElRg long (name, gs) = printf "%-7s  %9.3f km  %8.3f deg  %7.3f deg" name (range' gs s/~kilo meter) (azimuth' gs s/~degree) (elevation' gs s/~degree)
-  where s = C $ perfectGEO long
+  where s = perfectGEO long
 
 {-
 -- Version of main using parseargs library. Pretty nice except negative
