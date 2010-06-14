@@ -10,7 +10,7 @@ import Vector
 import Matrix
 import PosVel hiding (latitude, longitude)
 import Tmp.Lifts
-import Tmp.ForwardAD
+import Tmp.AD
 import ForwardAD (diffV)
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude

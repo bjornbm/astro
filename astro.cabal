@@ -18,7 +18,7 @@ Build-Depends:       base < 5,
                      HList > 0.1 && < 0.3,
                      leapseconds-announced,
                      dimensional < 1.1,
-                     dimensional-vectors < 1.1,
+                     dimensional-vectors >= 0.3 && < 1.1,
                      astro-tables < 1.1,
                      ad < 1.1
 Exposed-Modules:     Astro,
