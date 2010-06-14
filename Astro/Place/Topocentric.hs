@@ -9,9 +9,9 @@ import Astro.Place
 import Vector
 import Matrix
 import PosVel hiding (latitude, longitude)
+import AD
 import Tmp.Lifts
-import Tmp.AD
-import ForwardAD (diffV)
+import VectorAD (diffV)
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 

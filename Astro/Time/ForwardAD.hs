@@ -9,7 +9,7 @@ import Data.HList.HZip
 import MyHList (HZipWith)
 import Astro.Time (E (E), diffEpoch)
 import Numeric.Units.Dimensional.Prelude
-import ForwardAD
+import VectorAD
 import Vector
 import Numeric.AD (Mode, AD)
 

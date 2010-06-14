@@ -28,7 +28,7 @@ import Astro.Util (perfectGEO, r_GEO)
 import Numeric.Units.Dimensional.Prelude
 import Vector
 import PosVel
-import Tmp.AD
+import AD
 import Tmp.Lifts
 import System.SimpleArgs -- System (getArgs)
 --import System.Console.ParseArgs
