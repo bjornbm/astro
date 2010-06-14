@@ -43,10 +43,7 @@ type Longitude = Angle
 -- | Determine whether the SC at the given longitude is above the horizon
 -- of the given GS.
 visible :: RealFloat a => GeodeticPlace a -> Longitude a -> Bool
-visible st l = dotProduct stECR r >= (0*~meter^pos2)
-  where
-    stECR = c $ geodeticToECR st
-    r   = elemSub (c $ perfectGEO l) stECR
+visible st l = elevation' st (perfectGEO l) >= _0
 
 
 -- | Computes how sensitive the measured position of a geostationary SC is
