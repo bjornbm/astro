@@ -20,6 +20,7 @@ on the antennae is minimized.
 Requires simpleargs.
 -}
 
+import Astro.Coords
 import Astro.Place
 import Astro.Place.ReferenceEllipsoid
 import Astro.Place.Topocentric
@@ -42,17 +43,17 @@ type Longitude = Angle
 -- | Determine whether the SC at the given longitude is above the horizon
 -- of the given GS.
 visible :: RealFloat a => GeodeticPlace a -> Longitude a -> Bool
-visible st l = dotProduct stC r >= (0*~meter^pos2)
+visible st l = dotProduct stECR r >= (0*~meter^pos2)
   where
-    stC = geodeticToCartesian st
-    r   = elemSub (perfectGEO l) stC
+    stECR = c $ geodeticToECR st
+    r   = elemSub (perfectGEO l) stECR
 
 
 -- | Computes how sensitive the measured position of a geostationary SC is
 -- to biases in range measurements from a GS. The arguments are the
 -- geostationary longitude of the SC and the GS.
 sensitivity :: RealFloat a => Longitude a -> GeodeticPlace a -> WaveNumber a
-sensitivity l st = _1 / diff (range (lift st) . perfectGEO) l
+sensitivity l st = _1 / diff (range' (lift st) . C . perfectGEO) l
 
 
 -- Ground stations
@@ -124,8 +125,8 @@ main = do
   putStrLn $ unlines $ map (showAzElRg long) stations
 
 showAzElRg :: Longitude Double -> (String, GeodeticPlace Double) -> String
-showAzElRg long (name, gs) = printf "%-7s  %9.3f km  %8.3f deg  %7.3f deg" name (range gs s/~kilo meter) (azimuth gs s/~degree) (elevation gs s/~degree)
-  where s = perfectGEO long
+showAzElRg long (name, gs) = printf "%-7s  %9.3f km  %8.3f deg  %7.3f deg" name (range' gs s/~kilo meter) (azimuth' gs s/~degree) (elevation' gs s/~degree)
+  where s = C $ perfectGEO long
 
 {-
 -- Version of main using parseargs library. Pretty nice except negative
