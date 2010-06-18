@@ -8,7 +8,6 @@ import Astro.Celestrak
 import Test.QuickCheck
 import Data.Time hiding (utc)
 import Data.Time.Clock.TAI
-import Data.Fixed (Micro, Pico)
 import Data.Array.IArray
 import qualified Debug.Trace as D
 

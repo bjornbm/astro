@@ -9,7 +9,6 @@ import Astro.Time
 import Astro.Time.Convert
 import Data.Time
 import Data.Time.Clock.TAI
-import Data.Fixed (Pico)
 import Control.Monad.Reader (asks)
 import Numeric.Units.Dimensional.Prelude
 
@@ -39,14 +38,15 @@ fromUniversalTime t = mjd (fromRational $ getModJulianDate t) UT1
 -- UTC epochs use 'Data.Time.Clock.UTCTime'.
 
 -- | Convenience function for specifying UTC epochs.
-clockUTC :: Integer  -- ^ Year
+clockUTC :: Real a
+         => Integer  -- ^ Year
          -> Int      -- ^ Month
          -> Int      -- ^ Day (of month)
          -> Int      -- ^ Hour
          -> Int      -- ^ Minute
-         -> Pico     -- ^ Second, including fraction
+         -> a        -- ^ Second, including fraction
          -> UTCTime  -- ^ Epoch
-clockUTC y m d h min s = UTCTime (fromGregorian y m d) (timeOfDayToTime $ TimeOfDay h min s)
+clockUTC y m d h min s = UTCTime (fromGregorian y m d) (timeOfDayToTime $ TimeOfDay h min (realToFrac s))
 
 -- Conversion
 -- ----------

@@ -88,7 +88,6 @@ import qualified Prelude
 import Data.Time hiding (utc)
 import qualified Data.Time (utc)
 import Data.Time.Clock.TAI
-import Data.Fixed (Pico)
 
 
 -- A Julian century.
@@ -129,17 +128,17 @@ infixl 6 .+, .-
 -- ** Clock dates
 --    -----------
 -- | Define an epoch using "clock time" and time scale.
-clock :: Fractional a
+clock :: (Fractional a, Real b)
       => Integer  -- ^ Year
       -> Int      -- ^ Month
       -> Int      -- ^ Day (of month)
       -> Int      -- ^ Hour
       -> Int      -- ^ Minute
-      -> Pico     -- ^ Second, including fraction
+      -> b        -- ^ Second, including fraction
       -> t        -- ^ Time scale
       -> E t a    -- ^ Epoch
 clock y m d h min s _ = E $ f $ utcToTAITime (const 0) $
-  UTCTime (fromGregorian y m d) (timeOfDayToTime $ TimeOfDay h min s)
+  UTCTime (fromGregorian y m d) (timeOfDayToTime $ TimeOfDay h min (realToFrac s))
   where f t = fromDiffTime $ diffAbsoluteTime t taiEpoch
 
 
@@ -392,7 +391,7 @@ of TCB at the convergence epoch will not produce 1977-01-01
 intermediate TDB calculation and is within its error margin.
 -}
 tdb_0 :: Fractional a => Time a
-tdb_0 = (-6.55e-5) *~ second  -- :: Time Pico
+tdb_0 = (-6.55e-5) *~ second
 
 -- | The TDB epoch corresponding to 1977 January 1.0 TAI.
 convergenceEpochTDB :: Fractional a => E TDB a

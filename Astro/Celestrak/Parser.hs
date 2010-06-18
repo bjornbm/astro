@@ -2,7 +2,6 @@
 
 import Astro.Celestrak
 import Data.Time
-import Data.Fixed (Pico)
 import Text.Parsec
 import Text.Parsec.String
 --import Text.Parsec.ByteString.Lazy
@@ -31,9 +30,6 @@ arcsec = float' >>= return . (*~arcsecond)
 secs :: Parser (Time Double)
 secs = float' >>= return . (*~second)
 
-secsPico :: Parser (Time Pico)
-secsPico = float' >>= return . (*~second) . fromRational . toRational
-
 
 {-
 # FORMAT(I4,I3,I3,I6,2F10.6,2F11.7,4F10.6,I4)
@@ -55,7 +51,7 @@ line = do
   d           <- mjd
   x           <- arcsec
   y           <- arcsec
-  ut1MinusUTC <- secsPico
+  ut1MinusUTC <- secs
   lod         <- secs
   dPsi        <- arcsec
   dEpsilon    <- arcsec
