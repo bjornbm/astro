@@ -29,6 +29,22 @@ toUniversalTime (E t) = ModJulianDate $ toRational (t /~ day)
 fromUniversalTime :: Fractional a => UniversalTime -> E UT1 a
 fromUniversalTime t = mjd (fromRational $ getModJulianDate t) UT1
 
+-- | Convert an epoch to a representation based on the form of
+-- 'Data.Time.LocalTime.LocalTime'. This isn't really semantically
+-- accurate: the "locality" actually refers to the time scale in
+-- question rather than a geographical longitude. Use with caution!
+toLocalTime :: (Fractional a, Real a) => E t a -> LocalTime
+toLocalTime e = ut1ToLocalTime 0 (ModJulianDate t)
+  where t = toRational $ diffEpoch e (mjd 0 undefined) /~ day
+
+-- | Convert an 'Data.Time.LocalTime.LocalTime' to an epoch, assuming
+-- the same time scale (and zone). This isn't really semantically
+-- accurate: the "locality" actually refers to the time scale in
+-- question rather than a geographical longitude. Use with caution!
+fromLocalTime :: Fractional a => LocalTime -> E t a
+fromLocalTime t = addTime (mjd 0 undefined) (fromRational ut1 *~ day)
+  where ut1 = getModJulianDate (localTimeToUT1 0 t)
+
 
 -- UTC
 -- ===
