@@ -62,14 +62,17 @@ module Astro.Time (
   -- * Time Respresentations
   -- ** Clock Time
   , clock
+  , clock'
   , showClock
   -- ** Julian Dates (JD)
   -- $jd
   , jd
+  , jd'
   , showJD
   -- ** Modified Julian Dates (MJD)
   -- $mjd
   , mjd
+  , mjd'
   , showMJD
   -- * Subject To Change
   , diffEpoch
@@ -137,10 +140,20 @@ clock :: (Fractional a, Real b)
       -> b        -- ^ Second, including fraction
       -> t        -- ^ Time scale
       -> E t a    -- ^ Epoch
-clock y m d h min s _ = E $ f $ utcToTAITime (const 0) $
-  UTCTime (fromGregorian y m d) (timeOfDayToTime $ TimeOfDay h min (realToFrac s))
-  where f t = fromDiffTime $ diffAbsoluteTime t taiEpoch
+clock y m d h min s _ = mjd' $ fromRational $ getModJulianDate $ localTimeToUT1 0
+      $ LocalTime (fromGregorian y m d) (TimeOfDay h min (realToFrac s))
 
+-- | A version of 'clock' where the time scale isn't an input (it is
+-- inferred from the type.
+clock' :: (Fractional a, Real b)
+       => Integer  -- ^ Year
+       -> Int      -- ^ Month
+       -> Int      -- ^ Day (of month)
+       -> Int      -- ^ Hour
+       -> Int      -- ^ Minute
+       -> b        -- ^ Second, including fraction
+       -> E t a    -- ^ Epoch
+clock' y m d h min s = clock y m d h min s undefined
 
 -- | Show an epoch as a clock time. This function is used by the @Show@
 -- instance. TODO: should change this to use ISO8601 format.
@@ -173,6 +186,11 @@ jdEpoch  = subTime mjdEpoch (2400000.5 *~ day)
 jd :: Fractional a => a -> t -> E t a
 jd d _ = addTime jdEpoch (d *~ day)
 
+-- | A version of 'jd' where the time scale isn't an input (it is
+-- inferred from the type.
+jd' :: Fractional a => a -> E t a
+jd' d = jd d undefined
+
 -- | Show an epoch as JD on the format \"JD 0.0 TAI\".
 showJD :: forall t a. (Show t, Show a, Fractional a) => E t a -> String
 showJD e = "JD " ++ show (diffEpoch e jdEpoch /~ day) ++ " " ++ show (undefined::t)
@@ -192,6 +210,11 @@ mjdEpoch = E $ 0*~second  -- taiEpoch
 -- | Define an epoch by specifying a MJD and time scale.
 mjd :: Num a => a -> t -> E t a
 mjd d _ = addTime mjdEpoch (d *~ day)
+
+-- | A version of 'mjd' where the time scale isn't an input (it is
+-- inferred from the type.
+mjd' :: Fractional a => a -> E t a
+mjd' d = mjd d undefined
 
 -- | Show an epoch as MJD on the format \"MJD 0.0 TAI\".
 showMJD :: forall t a. (Show t, Show a, Fractional a) => E t a -> String
