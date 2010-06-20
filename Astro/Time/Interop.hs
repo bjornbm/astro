@@ -13,49 +13,21 @@ import Control.Monad.Reader (asks)
 import Numeric.Units.Dimensional.Prelude
 
 
--- | Converta TAI epoch into a 'Data.Time.Clock.TAI.AbsoluteTime'.
+-- | Convert a TAI epoch into a 'Data.Time.Clock.TAI.AbsoluteTime'.
 toAbsoluteTime :: (Real a, Fractional a) => E TAI a -> AbsoluteTime
 toAbsoluteTime (E t) = addAbsoluteTime (toDiffTime t) taiEpoch
 
--- | Converts a 'Data.Time.Clock.TAI.AbsoluteTime' into a TAI epoch.
+-- | Convert a 'Data.Time.Clock.TAI.AbsoluteTime' into a TAI epoch.
 fromAbsoluteTime :: Fractional a => AbsoluteTime -> E TAI a
 fromAbsoluteTime t = E $ fromDiffTime $ diffAbsoluteTime t taiEpoch
 
 -- | Convert a UT1 epoch into a 'Data.Time.Clock.UniversalTime'.
 toUniversalTime :: (Real a, Fractional a) => E UT1 a -> UniversalTime
-toUniversalTime = toModJulianDate
+toUniversalTime = unsafeToModJulianDate
 
 -- | Convert a 'Data.Time.Clock.UniversalTime' into a UT1 epoch.
 fromUniversalTime :: Fractional a => UniversalTime -> E UT1 a
-fromUniversalTime = fromModJulianDate
-
--- | Convert an epoch unsafely to the 'Data.Time.Clock.ModJulianDate'
--- representation of 'Data.Time.Clock.UniversalTime'. This is unsafe in
--- the sense that the time scale of the epoch is not respected. This
--- function is only for internal use (i.e., an implementation detail).
-toModJulianDate :: (Real a, Fractional a) => E t a -> UniversalTime
-toModJulianDate (E t) = ModJulianDate (toRational (t /~ day))
---
--- | Convert an 'Data.Time.Clock.ModJulianDate' unsafely into an epoch.
--- This is unsafe in the sense that the time scale of the epoch is not
--- respected. This function is only for internal use (i.e., an
--- implementation detail).
-fromModJulianDate :: Fractional a => UniversalTime -> E t a
-fromModJulianDate = mjd' . fromRational . getModJulianDate
-
--- | Convert an epoch to a representation based on the form of
--- 'Data.Time.LocalTime.LocalTime'. This isn't really semantically
--- accurate: the "locality" actually refers to the time scale in
--- question rather than a geographical longitude. Use with caution!
-toLocalTime :: (Fractional a, Real a) => E t a -> LocalTime
-toLocalTime = ut1ToLocalTime 0 . toModJulianDate
-
--- | Convert an 'Data.Time.LocalTime.LocalTime' to an epoch, assuming
--- the same time scale (and zone). This isn't really semantically
--- accurate: the "locality" actually refers to the time scale in
--- question rather than a geographical longitude. Use with caution!
-fromLocalTime :: Fractional a => LocalTime -> E t a
-fromLocalTime = fromModJulianDate . localTimeToUT1 0
+fromUniversalTime = unsafeFromModJulianDate
 
 
 -- UTC

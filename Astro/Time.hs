@@ -28,6 +28,9 @@ generally use an (imprecise) expression relating TDB to TT. This
 expression, together with the definition of TDB, would then also
 be used to obtain TCB.)
 
+For interoperation with the types of the time library ("Data.Time"
+module hierarchy) see the "Astro.Time.Interop" module.
+
 -}
 module Astro.Time (
   -- * References
@@ -83,6 +86,8 @@ module Astro.Time (
   , tcgToTT ,  ttToTCG
   , tcbToTDB, tdbToTCB
   , taiToUT1, ut1ToTAI, UT1MinusTAI, TAIMinusUT1
+  -- $unsafe
+  , unsafeToModJulianDate, unsafeFromModJulianDate
   ) where
 
 
@@ -91,6 +96,7 @@ import qualified Prelude
 import Data.Time hiding (utc)
 import qualified Data.Time (utc)
 import Data.Time.Clock.TAI
+import Data.Fixed (Pico)
 
 
 -- A Julian century.
@@ -126,6 +132,40 @@ infixl 6 .+, .-
 (.-) = diffEpoch
 
 
+{- $unsafe
+
+These functions convert epochs to and from the 'Data.Time.Clock.ModJulianDate'
+representation of 'Data.Time.Clock.UniversalTime'. This is (semantically)
+unsafe in that the time scale of the epoch is not respected. These functions
+are only for internal use (i.e., an implementation detail).
+-}
+
+-- | Convert an epoch unsafely to the 'Data.Time.Clock.ModJulianDate'
+-- representation of 'Data.Time.Clock.UniversalTime'. This is unsafe in
+-- the sense that the time scale of the epoch is not respected.
+unsafeToModJulianDate :: (Real a, Fractional a) => E t a -> UniversalTime
+unsafeToModJulianDate (E t) = ModJulianDate (toRational (t /~ day))
+--
+-- | Convert an 'Data.Time.Clock.ModJulianDate' unsafely into an epoch.
+-- This is unsafe in the sense that the time scale of the epoch is not
+-- respected.
+unsafeFromModJulianDate :: Fractional a => UniversalTime -> E t a
+unsafeFromModJulianDate = mjd' . fromRational . getModJulianDate
+
+-- | Convert an epoch to a representation based on the form of
+-- 'Data.Time.LocalTime.LocalTime'. This isn't really semantically
+-- accurate: the "locality" actually refers to the time scale in
+-- question rather than a geographical longitude. Use with caution!
+unsafeToLocalTime :: (Fractional a, Real a) => E t a -> LocalTime
+unsafeToLocalTime = ut1ToLocalTime 0 . unsafeToModJulianDate
+
+-- | Convert an 'Data.Time.LocalTime.LocalTime' to an epoch, assuming
+-- the same time scale (and zone). This isn't really semantically
+-- accurate: the "locality" actually refers to the time scale in
+-- question rather than a geographical longitude. Use with caution!
+unsafeFromLocalTime :: Fractional a => LocalTime -> E t a
+unsafeFromLocalTime = unsafeFromModJulianDate . localTimeToUT1 0
+
 
 -- * Time Representations
 -- ** Clock dates
@@ -140,8 +180,8 @@ clock :: (Fractional a, Real b)
       -> b        -- ^ Second, including fraction
       -> t        -- ^ Time scale
       -> E t a    -- ^ Epoch
-clock y m d h min s _ = mjd' $ fromRational $ getModJulianDate $ localTimeToUT1 0
-      $ LocalTime (fromGregorian y m d) (TimeOfDay h min (realToFrac s))
+clock y m d h min s _ = unsafeFromLocalTime $
+      LocalTime (fromGregorian y m d) (TimeOfDay h min (realToFrac s))
 
 -- | A version of 'clock' where the time scale isn't an input (it is
 -- inferred from the type.
@@ -159,10 +199,7 @@ clock' y m d h min s = clock y m d h min s undefined
 -- instance. TODO: should change this to use ISO8601 format.
 showClock :: forall t a. (Show t, Show a, Real a, Fractional a) 
           => E t a -> String
-showClock (E t) = show (utcToLocalTime Data.Time.utc (taiToUTCTime (const 0) t')) 
-               ++ ' ':show (undefined::t)
-  where t' = addAbsoluteTime (toDiffTime t) taiEpoch
---  addTime   t dt = addAbsoluteTime (toDiffTime dt) t
+showClock t = show (unsafeToLocalTime t) ++ ' ':show (undefined::t)
 
 -- ** Julian Date (JD)
 --    ----------------
