@@ -104,9 +104,13 @@ century :: Num a => Unit DTime a
 century = prefix 36525 day
 
 
--- | Representation of an epoch parameterized by time scale.
+-- | Representation of an epoch parameterized by time scale and
+-- numerical representation. When Double is used for the numerical
+-- representation the accuracy will be below one microsecond in
+-- the 21st century. For exact numerical representation use e.g.
+-- Rational.
 newtype E t a = E (Time a) deriving (Eq, Ord)
-instance (Show t, Show a, Real a, Fractional a) 
+instance (Show t, Show a, Real a, Fractional a)
   => Show (E t a) where show = showClock
 
 
@@ -170,7 +174,10 @@ unsafeFromLocalTime = unsafeFromModJulianDate . localTimeToUT1 0
 -- * Time Representations
 -- ** Clock dates
 --    -----------
--- | Define an epoch using "clock time" and time scale.
+-- | Define an epoch using "clock time" and time scale. The maximum
+-- accuracy is one picosecond which can be obtained e.g. if the type
+-- of the parameter for seconds is 'Data.Fixed.Pico' and the numerical
+-- representation of the resulting epoch is Rational.
 clock :: (Fractional a, Real b)
       => Integer  -- ^ Year
       -> Int      -- ^ Month
