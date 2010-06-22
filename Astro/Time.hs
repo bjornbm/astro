@@ -88,6 +88,7 @@ module Astro.Time (
   , taiToUT1, ut1ToTAI, UT1MinusTAI, TAIMinusUT1
   -- $unsafe
   , unsafeToModJulianDate, unsafeFromModJulianDate
+  , unsafeToLocalTime,     unsafeFromLocalTime
   ) where
 
 
