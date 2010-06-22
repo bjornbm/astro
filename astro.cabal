@@ -23,6 +23,8 @@ Build-Depends:       base < 5,
                      ad >= 0.44.4 && < 1.1
 Exposed-Modules:     Astro,
                      Astro.DefaultData,
+                     Astro.Coords,
+                     Astro.Coords.TNR,
                      Astro.Place,
                      Astro.Place.ReferenceEllipsoid,
                      Astro.Place.Topocentric,
@@ -38,7 +40,8 @@ Exposed-Modules:     Astro,
                      IAU2000.FundamentalArguments,
                      IAU2000.Nutation,
                      IAU2000.Equations,
-                     Astrodynamics
+                     Astrodynamics,
+                     Tmp.Lifts
 Extra-source-files:  README,
                      Test.lhs,
                      Astro/TestTime.hs,
