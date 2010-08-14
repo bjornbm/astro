@@ -1,4 +1,4 @@
-module Astro.Coords.AstroPosVel where
+module Astro.Coords.PosVel where
 
 import Astro.Coords
 import PosVel

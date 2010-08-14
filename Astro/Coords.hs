@@ -37,4 +37,5 @@ data ECI = ECI -- ICRS
 data ECR = ECR -- ITRS
 data Topocentric = Topocentric
 data Orbital = Orbital
+data MEGSD = MEGSD -- Close to ECI as per Soop, not very rigorous.
 
