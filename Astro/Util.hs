@@ -5,7 +5,6 @@ module Astro.Util (r_GEO, perfectGEO) where
 import Astro.Coords
 import Astrodynamics (r_GEO)
 import Vector
-import PosVel
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 

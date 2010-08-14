@@ -5,7 +5,6 @@ module Astro.Place.TestTopocentric where
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import Vector
-import PosVel (CPos)
 import Astro.Coords
 import Astro.Place
 import Astro.Place.Topocentric
