@@ -16,7 +16,7 @@ orbitalFrame :: RealFloat a => PosVel ECI a -> CoordSys a
 orbitalFrame pv = consRow t $ consRow n $ rowMatrix r where
   r = vNormalize (cpos pv)
   n = vNormalize (crossProduct (cpos pv) (cvel pv))
-  t = vNormalize $ crossProduct r n
+  t = vNormalize $ crossProduct n r
 
 
 -- | Converts ECI position to orbital frame defined by PosVel.
