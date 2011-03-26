@@ -33,10 +33,10 @@ diffCoords :: Floating a => Coord s a -> Coord s a -> Coord s a
 diffCoords c1 c2 = C $ elemSub (c c1) (c c2)
 
 -- Some coordinate systems
-data ECI = ECI -- ICRS
-data ECR = ECR -- ITRS
-data Topocentric = Topocentric
-data Orbital = Orbital
+data ECI = ECI deriving (Show, Read) -- ICRS
+data ECR = ECR deriving (Show, Read) -- ITRS
+data Topocentric = Topocentric deriving (Show, Read)
+data Orbital = Orbital deriving (Show, Read)
 type MEGSD = ECI  -- Close to ECI as per Soop, not very rigorous.
 
 -- Perhaps class ECI with instance ICRS, MEGSD, TEME...
