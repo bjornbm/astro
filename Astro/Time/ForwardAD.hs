@@ -6,9 +6,9 @@ module Astro.Time.ForwardAD where
 import qualified Prelude
 import Data.HList (HMap)
 import Data.HList.HZip
-import MyHList (HZipWith)
 import Astro.Time (E (E), diffEpoch)
 import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional.LinearAlgebra.HListExtras (HZipWith)
 import AD
 import VectorAD
 import Vector

@@ -2,7 +2,7 @@ Name:                astro
 Version:             0.5
 License:             BSD3
 License-File:        LICENSE
-Copyright:           Bjorn Buckwalter 2008-2010
+Copyright:           Bjorn Buckwalter 2008-2011
 Author:              Bjorn Buckwalter 
 Maintainer:          bjorn.buckwalter@gmail.com
 Stability:           Unstable
@@ -18,7 +18,7 @@ Build-Depends:       base < 5,
                      HList > 0.1 && < 0.3,
                      leapseconds-announced,
                      dimensional < 1.1,
-                     dimensional-vectors >= 0.4 && < 1.1,
+                     dimensional-vectors >= 0.7 && < 1.1,
                      astro-tables < 1.1,
                      ad >= 0.44.4 && < 1.1
 Exposed-Modules:     Astro,
