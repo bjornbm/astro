@@ -4,8 +4,8 @@ module Astro.Util (r_GEO, perfectGEO) where
 
 import Astro.Coords
 import Astrodynamics (r_GEO)
-import Vector
 import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional.LinearAlgebra (fromTuple)
 import qualified Prelude
 
 

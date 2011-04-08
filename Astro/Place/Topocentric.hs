@@ -6,13 +6,12 @@ module Astro.Place.Topocentric where
 
 import Astro.Coords
 import Astro.Place
-import Vector
-import Matrix
 import PosVel hiding (latitude, longitude)
 import AD
 import Tmp.Lifts
 import VectorAD (diffV)
 import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional.LinearAlgebra
 import qualified Prelude
 
 

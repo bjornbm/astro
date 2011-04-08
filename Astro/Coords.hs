@@ -3,7 +3,7 @@ module Astro.Coords where
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import PosVel
-import Vector (elemSub)
+import Numeric.Units.Dimensional.LinearAlgebra (elemSub)
 
 
 data Coord system a = C (CPos a)

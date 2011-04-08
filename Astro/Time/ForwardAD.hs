@@ -8,10 +8,10 @@ import Data.HList (HMap)
 import Data.HList.HZip
 import Astro.Time (E (E), diffEpoch)
 import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.LinearAlgebra.HListExtras (HZipWith)
 import AD
 import VectorAD
-import Vector
 import Numeric.AD (Mode, AD)
 
 

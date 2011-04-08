@@ -6,8 +6,8 @@ module TestUtil where
 
 import Numeric.Units.Dimensional (Dimensional (Dimensional))
 import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional.LinearAlgebra
 import qualified Prelude
-import Vector
 import Astro.Coords
 import Astro.Place
 import Astro.Place.Topocentric

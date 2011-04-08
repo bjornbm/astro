@@ -10,7 +10,7 @@ import Astro.Coords
 import Astro.Place.ReferenceEllipsoid
 import Control.Monad.Reader (asks)
 import Numeric.Units.Dimensional.Prelude
-import Vector
+import Numeric.Units.Dimensional.LinearAlgebra
 import qualified Prelude
 
 -- | Geodetic height above mean sea level.

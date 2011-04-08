@@ -2,8 +2,7 @@ module Astro.Coords.TNR where
 
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
-import Vector
-import Matrix
+import Numeric.Units.Dimensional.LinearAlgebra
 import PosVel
 import Astro.Coords
 import Astro.Coords.PosVel
