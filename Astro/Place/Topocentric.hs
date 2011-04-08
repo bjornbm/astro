@@ -15,9 +15,6 @@ import Numeric.Units.Dimensional.LinearAlgebra
 import qualified Prelude
 
 
-type Axis a = Vec3 DOne DOne DOne a
-type CoordSys a = Homo33 DOne a
-
 -- | Calculates the axis of the topocentric coordinate system defined
 -- by the given geodetic place. The axis definitions are those used by
 -- Soop (p.222):

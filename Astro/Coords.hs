@@ -3,6 +3,7 @@ module Astro.Coords where
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import PosVel
+import Rotation (Homo33)
 import Numeric.Units.Dimensional.LinearAlgebra (elemSub)
 
 
@@ -41,4 +42,7 @@ type MEGSD = ECI  -- Close to ECI as per Soop, not very rigorous.
 
 -- Perhaps class ECI with instance ICRS, MEGSD, TEME...
 
+-- Type synonyms for use elsewhere.
+type Axis a = Vec3 DOne DOne DOne a
+type CoordSys a = Homo33 DOne a
 

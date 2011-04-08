@@ -7,7 +7,6 @@ import PosVel
 import Astro.Coords
 import Astro.Coords.PosVel
 
-type CoordSys a = Homo33 DOne a
 
 -- | Calculate the orbital coordinate frame of the satellite with the
 -- given ECI PosVel.
