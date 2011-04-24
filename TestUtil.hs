@@ -7,8 +7,11 @@ module TestUtil where
 import Numeric.Units.Dimensional (Dimensional (Dimensional))
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
+import Numeric.Units.Dimensional.LinearAlgebra.Vector (Vec (ListVec))
 import qualified Prelude
+import Astro.Time
 import Astro.Coords
+import Astro.Coords.PosVel
 import Astro.Place
 import Astro.Place.Topocentric
 import Astro.Place.ReferenceEllipsoid
@@ -39,6 +42,15 @@ instance (Floating a, AEq a) => AEq (Coord s a)
     r1 === r2 = c r1 === c r2
     r1 ~== r2 = c r1 ~== c r2
 
+instance (RealFloat a, AEq a) => AEq (E t a)
+  where
+    E t1 === E t2 = t1 === t2
+    E t1 ~== E t2 = t1 ~== t2
+
+instance (RealFloat a, AEq a) => AEq (PosVel s a)
+  where
+    pv1 === pv2 = cpos pv1 === cpos pv2 && cvel pv1 === cvel pv2
+    pv1 ~== pv2 = cpos pv1 ~== cpos pv2 && cvel pv1 ~== cvel pv2
 
 -- Arbitrary instances
 -- -------------------
@@ -67,6 +79,12 @@ instance (Num a, Arbitrary a) => Arbitrary (ReferenceEllipsoid a)
       d <- arbitrary
       let eq  = pol + abs d       -- Always larger than polar radius.
       return (ReferenceEllipsoid eq pol)
+
+instance (Arbitrary a, Fractional a) => Arbitrary (E t a) where
+  arbitrary = mjd' <$> arbitrary
+
+instance (Arbitrary a, Fractional a) => Arbitrary (PosVel s a) where
+  arbitrary = C' <$> arbitrary <*> arbitrary
 
 
 -- Helpers
