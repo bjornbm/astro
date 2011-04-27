@@ -23,10 +23,10 @@ data MEOE a = MEOE
 
 meoe2vec MEOE{..} = mu <: p <: f <: g <: h <: k <:. l
 
-coe2meoe :: RealFloat a => COEt a -> MEOE a
-coe2meoe COEt {..} = MEOE
+coe2meoe :: RealFloat a => COE a -> MEOE a
+coe2meoe COE {..} = MEOE
   { mu = mu
-  , p  = sma * (_1 - ecc ^ pos2)
+  , p  = slr
   , f  = ecc * cos (aop + raan)
   , g  = ecc * sin (aop + raan)
   , h  = tan (inc / _2) * cos raan
@@ -34,10 +34,10 @@ coe2meoe COEt {..} = MEOE
   , l  = raan + aop + trueAnomaly
   }
 
-meoe2coe :: RealFloat a => MEOE a -> COEt a
-meoe2coe MEOE {..} = COEt
+meoe2coe :: RealFloat a => MEOE a -> COE a
+meoe2coe MEOE {..} = COE
   { mu  = mu
-  , sma = p / (_1 - f ^ pos2 - g ^ pos2)
+  , slr = p
   , ecc = sqrt (f ^ pos2 + g ^ pos2)
   , inc = atan2 (_2 * sqrt (h ^ pos2 + k ^ pos2)) (_1 - h ^ pos2 - k ^ pos2)
   , aop = atan2 (g * h - f * k) (f * h + g * k)

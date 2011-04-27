@@ -82,10 +82,10 @@ spec_meoe2coe = describe "Interpolate.polate" $ do
 
   -- Need to ensure that the params are valid, e.g. h^2 + k^2 < 1...
   it "Converting a MEOE to a COE and back to a MEOE does not change it"
-    (property $ \mu r v -> let coe = sv2coe mu r v :: COEt Double
+    (property $ \mu r v -> let coe = sv2coe mu r v :: COE Double
       in mu > 0*~(meter^pos3/second^pos2) ==> coe2vec coe ~== (coe2vec . meoe2coe . coe2meoe) coe
     )
-    --(property $ \mu r v -> let coe = sv2coe mu r v :: COEt Double in coe2vec coe ~== coe2vec coe)
+    --(property $ \mu r v -> let coe = sv2coe mu r v :: COE Double in coe2vec coe ~== coe2vec coe)
 
 
 spec_sv2coe = describe "sv2coe" $ do
@@ -160,9 +160,9 @@ mu_Earth = 398600.4418 *~ (kilo meter ^ pos3 / second ^ pos2)
 
 sv2coe' = uncurry (sv2coe mu_Earth)
 
-testCOE0 = COEt
+testCOE0 = COE
   { mu = mu_Earth
-  , sma = 10000 *~ kilo meter
+  , slr = 10000 *~ kilo meter
   , ecc = 0 *~ one
   , inc = 0 *~ degree
   , aop = 0 *~ degree
@@ -170,9 +170,9 @@ testCOE0 = COEt
   , trueAnomaly = 0 *~ degree
   }
 
-testCOE1 = COEt
+testCOE1 = COE
   { mu = mu_Earth
-  , sma = 24000 *~ kilo meter
+  , slr = 24000 *~ kilo meter
   , ecc = 0.01 *~ one
   , inc = 15 *~ degree
   , aop = 255 *~ degree

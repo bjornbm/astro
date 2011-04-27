@@ -4,7 +4,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# OPTIONS_GHC -fcontext-stack=35 #-}
 
-module COE where
+-- | Classical Orbital Elements using semi-major axis (use only for elliptic orbits).
+module COEElliptic where
 
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
@@ -13,9 +14,9 @@ import qualified Prelude
 import PosVel (CPos, CVel)
 
 
-data COE a = COE
+data COEt a = COEt
   { mu   :: GravitationalParameter a
-  , slr  :: Length a  -- Semi-latus rectum.
+  , sma  :: Length a
   , ecc  :: Dimensionless a
   , inc  :: Angle a
   , aop  :: Angle a
@@ -25,8 +26,8 @@ data COE a = COE
 
 -- | Convert a COE into a vector (not a State Vector) of its
 -- elements (including mu).
-coe2vec :: COE a -> Vec (DGravitationalParameter:*:DLength:*:DOne:*:DPlaneAngle:*:DPlaneAngle:*:DPlaneAngle:*.DPlaneAngle) a
-coe2vec COE{..} = mu <: slr <: ecc <: inc <: aop <: raan <:. trueAnomaly
+coe2vec :: COEt a -> Vec (DGravitationalParameter:*:DLength:*:DOne:*:DPlaneAngle:*:DPlaneAngle:*:DPlaneAngle:*.DPlaneAngle) a
+coe2vec COEt{..} = mu <: sma <: ecc <: inc <: aop <: raan <:. trueAnomaly
 
 
 -- | Convert state vector into Classical Orbital Elements. The
@@ -35,10 +36,10 @@ coe2vec COE{..} = mu <: slr <: ecc <: inc <: aop <: raan <:. trueAnomaly
 --   i = 0   ->  RAAN = pi
 --   i = pi  ->  RAAN = pi
 --   e = 0   ->  AoP  = 0
-sv2coe :: RealFloat a => GravitationalParameter a -> CPos a -> CVel a -> COE a
-sv2coe mu r' v' = COE
+sv2coe :: RealFloat a => GravitationalParameter a -> CPos a -> CVel a -> COEt a
+sv2coe mu r' v' = COEt
   { mu   = mu
-  , slr  = p
+  , sma  = sma
   , ecc  = vNorm e'
   , inc  = inc
   , aop  = aop
@@ -46,13 +47,15 @@ sv2coe mu r' v' = COE
   , trueAnomaly = trueAnomaly
   }
   where
+    -- Semi-major axis.
+    r = vNorm r'
+    v = vNorm v'
+    sma = mu * r / (_2 * mu - r * v ^ pos2)
+
     -- Angular momentum.
     h' = r' `crossProduct` v'  -- Angular momentum vector.
     h  = vNorm h'
     (h_x, h_y, h_z) = toTuple h'
-
-    -- Semi-latus rectum
-    p = h ^ pos2 / mu
 
     -- Inclination and ascending node.
     inc  = acos (h_z / h)
@@ -71,9 +74,9 @@ sv2coe mu r' v' = COE
 
 
 
-coe2sv COE{..} = undefined
+coe2sv COEt{..} = undefined
   where
-    r = slr / (_1 + ecc * cos trueAnomaly)
+    r = sma * (_1 - ecc ^ pos2) / (_1 + ecc * cos trueAnomaly)
     x_orb = r * cos trueAnomaly
     y_orb = r * sin trueAnomaly
     z_orb = 0 *~ meter
