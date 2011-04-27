@@ -1,0 +1,7 @@
+*.[oa]
+*.exe
+*.exe.manifest
+*.hi
+*~
+*.swp
+dist/
