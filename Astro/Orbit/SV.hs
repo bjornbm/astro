@@ -1,4 +1,4 @@
-module SV where
+module Astro.Orbit.SV where
 
 import PosVel (CPos, CVel)
 

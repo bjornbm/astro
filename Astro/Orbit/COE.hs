@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeOperators #-}
 
-module COE where
+module Astro.Orbit.COE where
 
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra

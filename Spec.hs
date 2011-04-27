@@ -1,5 +1,4 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE RecordWildCards #-}
 
 import Test.Hspec.Monadic
@@ -8,22 +7,16 @@ import Test.QuickCheck ((==>))
 import Data.AEq
 
 import TestUtil
-import PosVel
 
 import Numeric.Units.Dimensional.Prelude
-import Numeric.Units.Dimensional (Dimensional (Dimensional))
---import Numeric.Units.Dimensional.NonSI
 import Numeric.Units.Dimensional.LinearAlgebra
-import Numeric.Units.Dimensional.Constants
-import Numeric.Units.Dimensional.LinearAlgebra.Vector (Vec (ListVec))
 import qualified Prelude
 
-import COE
-import MEOE
-import SV
-import Conversion
+import Astro.Orbit.COE
+import Astro.Orbit.MEOE
+import Astro.Orbit.SV
+import Astro.Orbit.Conversion
 import Debug.Trace
-
 
 
 

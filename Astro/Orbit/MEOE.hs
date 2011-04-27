@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeOperators #-}
 
-module MEOE where
+module Astro.Orbit.MEOE where
 
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra

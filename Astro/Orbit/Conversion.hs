@@ -1,16 +1,16 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Module defining conversions between different orbit representations.
-module Conversion where
+module Astro.Orbit.Conversion where
 
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.LinearAlgebra
 import qualified Prelude
 import PosVel (CPos, CVel)
-import SV
-import COE
-import MEOE
+import Astro.Orbit.SV
+import Astro.Orbit.COE
+import Astro.Orbit.MEOE
 
 
 -- | Convert state vector into Classical Orbital Elements. The
