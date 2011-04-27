@@ -20,11 +20,11 @@ import qualified Prelude
 
 import COE
 import MEOE
+import SV
+import Conversion
 import Debug.Trace
 
-type D = Double
 
-mps = meter / second
 
 
 main = do
@@ -67,21 +67,6 @@ spec_fundamentals = describe "Fundamentals" $ do
 
 
 
--- | Removes the integral part of a value so that it ends up in the
--- interval [0,1).
-zero2one :: Dimensionless Double -> Dimensionless Double
-zero2one x = x - fromIntegral (floor (x /~ one)) *~ one
-
--- | Constrains a value to the range [-pi,pi) by adding/subtracting
--- full revolutions.
-plusMinusPi :: Angle Double -> Angle Double
-plusMinusPi x = zero2one ((x + pi) / rev) * rev - pi
-  where rev = _2 * pi
-
--- | Two ways to compute eccentric anomaly.
-eccAnomaly1, eccAnomaly2 :: Dimensionless Double -> Angle Double -> Angle Double
-eccAnomaly1 e t = _2 * atan (sqrt ((_1 - e) / (_1 + e)) * tan (t / _2))
-eccAnomaly2 e t = atan2 (sqrt (_1 - e ^ pos2) * sin t) (e + cos t)
 
 
 
@@ -98,7 +83,6 @@ spec_coe2meoe2coe = describe "coe2meoe2coe" $ do
       in mu > 0*~(meter^pos3/second^pos2) && i /= pi && i /= negate pi
       ==> coe2vec coe ~== (coe2vec . meoe2coe . coe2meoe) coe
     )
-    --(property $ \mu r v -> let coe = sv2coe mu r v :: COE Double in coe2vec coe ~== coe2vec coe)
 
 
 spec_sv2coe2meoe2sv = describe "sv2coe2meoe2sv" $ do
@@ -194,14 +178,48 @@ spec_sv2coe = describe "sv2coe" $ do
     )
 
 
--- | Trace the argument with a descriptive prefix.
-myTrace :: Show a => String -> a -> a
-myTrace s x = trace (s ++ ": " ++ show x) x
+-- Convenience and utility functions.
+
+mps = meter / second
 
 -- | From Wikipedia.
 mu_Earth = 398600.4418 *~ (kilo meter ^ pos3 / second ^ pos2)
 
+-- | Removes the integral part of a value so that it ends up in the
+-- interval [0,1).
+zero2one :: Dimensionless Double -> Dimensionless Double
+zero2one x = x - fromIntegral (floor (x /~ one)) *~ one
+
+-- | Constrains a value to the range [-pi,pi) by adding/subtracting
+-- full revolutions.
+plusMinusPi :: Angle Double -> Angle Double
+plusMinusPi x = zero2one ((x + pi) / rev) * rev - pi
+  where rev = _2 * pi
+
+-- | Compute eccentric anomaly using atan.
+eccAnomaly1 :: Dimensionless Double -> Angle Double -> Angle Double
+eccAnomaly1 e t = _2 * atan (sqrt ((_1 - e) / (_1 + e)) * tan (t / _2))
+-- | Compute eccentric anomaly using atan2.
+eccAnomaly2 :: Dimensionless Double -> Angle Double -> Angle Double
+eccAnomaly2 e t = atan2 (sqrt (_1 - e ^ pos2) * sin t) (e + cos t)
+
+-- | Convert an SV to a COE assuming Earth is central body.
 sv2coe' = uncurry (sv2coe mu_Earth)
+
+-- | Fudge a state vector to avoid comparing to zero elements
+-- where the deviation may be greated than epsilon.
+fudgeSV :: SV Double -> SV Double
+fudgeSV (r,v) = (r >+< (a<:a<:.a), v >+< (b<:b<:.b))
+  where
+    a = vNorm r / (1e-9*~one)
+    b = vNorm v / (1e-9*~one)
+
+-- | Trace the argument with a descriptive prefix.
+myTrace :: Show a => String -> a -> a
+myTrace s x = trace (s ++ ": " ++ show x) x
+
+
+-- Test elements.
 
 testCOE0 = COE
   { mu = mu_Earth
@@ -253,11 +271,3 @@ testSV3 = ( 42156 *~ kilo meter <: 0 *~ meter <:. 0 *~ meter
 testSV4 = ( 42156 *~ kilo meter <: 0 *~ meter <:. 0 *~ meter
           , 0 *~ mps <: 3000 *~ mps <:. (-1) *~ mps
           )
-
--- | Fudge a state vector to avoid comparing to zero elements
--- where the deviation may be greated than epsilon.
-fudgeSV :: SV Double -> SV Double
-fudgeSV (r,v) = (r >+< (a<:a<:.a), v >+< (b<:b<:.b))
-  where
-    a = vNorm r / (1e-9*~one)
-    b = vNorm v / (1e-9*~one)
