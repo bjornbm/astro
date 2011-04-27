@@ -24,12 +24,17 @@ import Debug.Trace
 
 type D = Double
 
+mps = meter / second
+
+
 main = do
-  -- hspec spec_meoe2coe
   hspec spec_fundamentals
   hspec spec_sv2coe
+  hspec spec_coe2meoe2coe
+  hspec spec_sv2coe2meoe2sv
 
 
+-- | Verify some basic properties not strictly related to orbit representations.
 spec_fundamentals = describe "Fundamentals" $ do
 
   it "atan2 y x + pi/2 ~= atan2 x (-y)"
@@ -37,7 +42,7 @@ spec_fundamentals = describe "Fundamentals" $ do
       plusMinusPi (atan2 y x + pi / _2) ~== atan2 x (negate y))
 
   it "Two ways of computing eccentric anomaly from true anomaly"
-    (property $ \e' t -> let e = zero2one e' in ecc1 e t ~== ecc2 e t)
+    (property $ \e' t -> let e = zero2one e' in eccAnomaly1 e t ~== eccAnomaly2 e t)
 
   it "zero2one works as advertized"
     (property $ \x -> zero2one x >= _0 && zero2one x < _1)
@@ -73,19 +78,57 @@ plusMinusPi :: Angle Double -> Angle Double
 plusMinusPi x = zero2one ((x + pi) / rev) * rev - pi
   where rev = _2 * pi
 
+-- | Two ways to compute eccentric anomaly.
+eccAnomaly1, eccAnomaly2 :: Dimensionless Double -> Angle Double -> Angle Double
+eccAnomaly1 e t = _2 * atan (sqrt ((_1 - e) / (_1 + e)) * tan (t / _2))
+eccAnomaly2 e t = atan2 (sqrt (_1 - e ^ pos2) * sin t) (e + cos t)
 
-ecc1, ecc2 :: Dimensionless Double -> Angle Double -> Angle Double
-ecc1 e t = _2 * atan (sqrt ((_1 - e) / (_1 + e)) * tan (t / _2))
-ecc2 e t = atan2 (sqrt (_1 - e ^ pos2) * sin t) (e + cos t)
 
-spec_meoe2coe = describe "Interpolate.polate" $ do
 
-  -- Need to ensure that the params are valid, e.g. h^2 + k^2 < 1...
-  it "Converting a MEOE to a COE and back to a MEOE does not change it"
-    (property $ \mu r v -> let coe = sv2coe mu r v :: COE Double
-      in mu > 0*~(meter^pos3/second^pos2) ==> coe2vec coe ~== (coe2vec . meoe2coe . coe2meoe) coe
+spec_coe2meoe2coe = describe "coe2meoe2coe" $ do
+
+  it "Converting a COE to a MEOE and back to a COE does not change it"
+    (coe2vec testCOE0 ~== (coe2vec . meoe2coe . coe2meoe) testCOE0)
+
+  it "Converting a COE to a MEOE and back to a COE does not change it"
+    (coe2vec testCOE1 ~== (coe2vec . meoe2coe . coe2meoe) testCOE1)
+
+  it "Converting a COE (generated from a random SV) to a MEOE and back to a COE does not change it"
+    (property $ \mu r v -> let coe = sv2coe mu r v :: COE Double; i = inc coe
+      in mu > 0*~(meter^pos3/second^pos2) && i /= pi && i /= negate pi
+      ==> coe2vec coe ~== (coe2vec . meoe2coe . coe2meoe) coe
     )
     --(property $ \mu r v -> let coe = sv2coe mu r v :: COE Double in coe2vec coe ~== coe2vec coe)
+
+
+spec_sv2coe2meoe2sv = describe "sv2coe2meoe2sv" $ do
+
+  it "Converting a prograde SV to a MEOE and back to a SV does not change it"
+    ((meoe2sv . coe2meoe . sv2coe') testSV0 ~== testSV0)
+
+  it "Converting a retrograde SV to a MEOE and back to a SV does not change it – surprisingly!"
+    ((meoe2sv . coe2meoe . sv2coe') testSV0R ~== testSV0R)
+
+  it "Converting a prograde SV to a MEOE and back to a SV does not change it"
+    ((meoe2sv . coe2meoe . sv2coe') testSV1 ~== testSV1)
+
+  it "Converting a prograde SV to a MEOE and back to a SV does not change it"
+    ((meoe2sv . coe2meoe . sv2coe') testSV2 ~== testSV2)
+
+  it "Converting a retrograde SV to a MEOE and back to a SV does not change it – surprisingly!"
+    ((meoe2sv . coe2meoe . sv2coe') testSV2R ~== testSV2R)
+
+  it "Converting a prograde SV to a MEOE and back to a SV does not change it significantly"
+    ((fudgeSV . meoe2sv . coe2meoe . sv2coe') testSV3 ~== fudgeSV testSV3)
+
+  it "Converting a prograde SV to a MEOE and back to a SV does not change it significantly"
+    ((fudgeSV . meoe2sv . coe2meoe . sv2coe') testSV4 ~== fudgeSV testSV4)
+
+  it "Converting a random SV to a MEOE and back to a SV does not change it"
+    (property $ \mu r v -> let coe = sv2coe mu r v :: COE Double; i = inc coe
+      in mu > 0*~(meter^pos3/second^pos2) && i /= pi && i /= negate pi
+      ==> (r,v) ~== (meoe2sv $ coe2meoe $ sv2coe mu r v)
+    )
 
 
 spec_sv2coe = describe "sv2coe" $ do
@@ -175,7 +218,7 @@ testCOE1 = COE
   , slr = 24000 *~ kilo meter
   , ecc = 0.01 *~ one
   , inc = 15 *~ degree
-  , aop = 255 *~ degree
+  , aop = (-105) *~ degree -- 255 *~ degree
   , raan = 35 *~ degree
   , trueAnomaly = 10 *~ degree
   }
@@ -197,24 +240,24 @@ testSV1R = (42156 *~ kilo meter <:       0 *~ meter <:. 0 *~ meter
            )
 
 testSV2 = ( 42156 *~ kilo meter <: 0 *~ meter <:. 0 *~ meter
-          , 0 *~ mps <: 3075 *~ mps <:. 1e-4 *~ mps
+          , 0 *~ mps <: 3075 *~ mps <:. 1 *~ mps
           )
 testSV2R = ( 42156 *~ kilo meter <: 0 *~ meter <:. 0 *~ meter
-           , 0 *~ mps <: (-3075) *~ mps <:. 1e-4 *~ mps
+           , 0 *~ mps <: (-3075) *~ mps <:. 1 *~ mps
            )
 
 testSV3 = ( 42156 *~ kilo meter <: 0 *~ meter <:. 0 *~ meter
-          , 0 *~ mps <: 3075 *~ mps <:. (-1e-4) *~ mps
+          , 0 *~ mps <: 3075 *~ mps <:. (-1) *~ mps
           )
 
 testSV4 = ( 42156 *~ kilo meter <: 0 *~ meter <:. 0 *~ meter
-          , 0 *~ mps <: 3000 *~ mps <:. (-1e-4) *~ mps
+          , 0 *~ mps <: 3000 *~ mps <:. (-1) *~ mps
           )
 
-mps = meter / second
-{-
-spec_coe2sv = describe "Conversions to state vector" $ do
-
-  it "Converting the trivial COE to SV is trivial"
-    (fst (coe2sv testCOE0) == 10000*~kilo meter <: 0*~meter <:. 0*~meter)
--- -}
+-- | Fudge a state vector to avoid comparing to zero elements
+-- where the deviation may be greated than epsilon.
+fudgeSV :: SV Double -> SV Double
+fudgeSV (r,v) = (r >+< (a<:a<:.a), v >+< (b<:b<:.b))
+  where
+    a = vNorm r / (1e-9*~one)
+    b = vNorm v / (1e-9*~one)
