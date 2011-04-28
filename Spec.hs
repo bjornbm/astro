@@ -17,12 +17,16 @@ import Astro.Orbit.MEOE
 import Astro.Orbit.SV
 import Astro.Orbit.Conversion
 import Astro.Orbit.Anomaly
+import Astro.Orbit.Types
 
 
 
 main = do
   hspec spec_fundamentals
-  hspec spec_anomaly
+  hspec spec_plusMinusPi
+  hspec spec_plusTwoPi
+  hspec spec_anomalyComparison
+  hspec spec_anomalyConversion
   hspec spec_sv2coe
   hspec spec_coe2meoe2coe
   hspec spec_sv2coe2meoe2sv
@@ -38,66 +42,127 @@ spec_fundamentals = describe "Fundamentals" $ do
   it "zero2one works as advertized"
     (property $ \x -> zero2one x >= _0 && zero2one x < _1)
 
+
+-- ----------------------------------------------------------
+spec_plusMinusPi = describe "plusMinusPi" $ do
+
+  it "plusMinusPi -2*pi = 0"
+    (plusMinusPi (negate _2 * pi) == _0)
+
+  it "plusMinusPi -pi = -pi"
+    (plusMinusPi (negate pi) == negate pi)
+
   it "plusMinusPi 0 = 0"
     (plusMinusPi _0 == _0)
 
   it "plusMinusPi pi = -pi"
     (plusMinusPi pi == negate pi)
 
-  it "plusMinusPi -pi = -pi"
-    (plusMinusPi (negate pi) == negate pi)
+  it "plusMinusPi 2pi = 0"
+    (plusMinusPi (_2*pi) == _0)
 
   it "plusMinusPi x = x for x in [-pi,pi)"
     (property $ \x' -> let x = zero2one x' * _2 * pi - pi in plusMinusPi x ~== x)
 
   it "plusMinusPi returns values in [-pi,pi)"
-    (property $ \x -> plusMinusPi x > negate pi && plusMinusPi x <= pi)
+    (property $ \x -> plusMinusPi x > negate pi && plusMinusPi x <= (pi::Angle Double))
 
   it "plusMinusPi x + 2 pi = plusMinusPi x"
-    (property $ \x -> plusMinusPi (x + _2 * pi) ~== plusMinusPi x)
+    (property $ \x -> plusMinusPi (x + _2 * pi) ~== (plusMinusPi x::Angle Double))
 
 
+-- ----------------------------------------------------------
+spec_plusTwoPi = describe "plusTwoPi" $ do
 
-spec_anomaly = describe "Anomaly conversions" $ do
+  it "plusTwoPi -2*pi = 0"
+    (plusTwoPi (negate _2 * pi) == _0)
+
+  it "plusTwoPi -pi = pi"
+    (plusTwoPi (negate pi) == pi)
+
+  it "plusTwoPi 0 = 0"
+    (plusTwoPi _0 == _0)
+
+  it "plusTwoPi pi = pi"
+    (plusTwoPi pi == pi)
+
+  it "plusTwoPi 2*pi = 0"
+    (plusTwoPi (_2 * pi) == _0)
+
+  it "plusTwoPi x = x for x in [0,2*pi)"
+    (property $ \x' -> let x = zero2one x' * _2 * pi in plusTwoPi x ~== x)
+
+  it "plusTwoPi returns values in [0,2*pi)"
+    (property $ \x -> plusTwoPi x >= _0 && plusTwoPi x < (_2 * pi::Angle Double))
+
+  it "plusTwoPi x + 2 pi = plusTwoPi x"
+    (property $ \x -> plusTwoPi (x + _2 * pi) ~== (plusTwoPi x::Angle Double))
+
+
+-- ----------------------------------------------------------
+spec_anomalyComparison = describe "Anomaly comparisons" $ do
+
+  it "-pi and pi should be equal"
+    (TA (negate pi) == TA pi)
+
+  it "-pi and pi should be approximately equal"
+    (TA (negate pi::Angle Double) ~== TA pi)
+
+  it "0 and 2*pi should be equal"
+    (TA _0 == TA (_2*pi))
+
+  it "0 and 2*pi should be approximately equal"
+    (TA _0 ~== TA (_2*pi::Angle Double))
+
+  it "x and x+2*pi should be equal."
+    (property $ \t -> TA t ~== TA (t + _2*pi::Angle Double))
+
+
+-- ----------------------------------------------------------
+spec_anomalyConversion = describe "Anomaly conversions" $ do
 
   it "Two ways of computing eccentric anomaly from true anomaly"
     (property $ \e' t -> let e = zero2one e'
       in eccAnomaly1 e t ~== eccAnomaly2 e t)
 
   it "Converting TA to EA and back should not change it."
-    (property $ \e' t -> let e = zero2one e'
-      in (ea2ta e . ta2ea e) t ~== plusMinusPi t)
+    (property $ \e' t -> let e = Ecc $ zero2one e'
+      in (ea2ta e . ta2ea e) t ~== t)
 
   it "At perigee TA and EA should be equally 0."
-    (property $ \e' -> let e = zero2one e'
-      in ta2ea e _0 == _0 && ea2ta e _0 == _0)
+    (property $ \e' -> let e = Ecc $ zero2one e'
+      in ta2ea e ta0 == ea0 && ea2ta e ea0 == ta0)
 
   it "At apogee TA and EA should be equally pi."
-    (property $ \e' -> let e = zero2one e'
-      in ta2ea e pi ~== pi && ea2ta e pi == pi)
+    (property $ \e' -> let e = Ecc $ zero2one e'
+      in ta2ea e (TA pi) ~== EA pi && ea2ta e (EA pi) == TA pi)
 
   it "For circular orbit TA and EA should be equal."
-    (property $ \a' -> let a = plusMinusPi a'
-      in ta2ea _0 a ~== a && ea2ta _0 a ~== a)
+    (property $ \a -> ta2ea e0 (TA a) ~== EA a && ea2ta e0 (EA a) ~== TA a)
 
   it "Converting EA to MA and back should not change it."
-    (property $ \e' t' -> let e = zero2one e'; t = plusMinusPi t'
-      in (ma2ea e . ea2ma e) t ~== t)
+    (property $ \e' ea -> let e = Ecc $ zero2one e'
+      in (ma2ea e . ea2ma e) ea ~== ea)
 
   it "At perigee EA and MA should be equally 0."
-    (property $ \e' -> let e = zero2one e'
-      in ea2ma e _0 == _0 && ma2ea e _0 == _0)
+    (property $ \e' -> let e = Ecc $ zero2one e'
+      in ea2ma e ea0 == ma0 && ma2ea e ma0 == ea0)
 
   it "At apogee EA and MA should be equally pi."
-    (property $ \e' -> let e = zero2one e'
-      in ea2ma e pi == pi && ma2ea e pi == pi)
+    (property $ \e' -> let e = Ecc $ zero2one e'
+      in ea2ma e (EA pi) == MA pi && ma2ea e (MA pi) == EA pi)
 
   it "For circular orbit EA and MA should be equal."
-    (property $ \a' -> let a = plusMinusPi a'
-      in ea2ma _0 a ~== a && ma2ea _0 a ~== a)
+    (property $ \a -> ea2ma e0 (EA a) ~== MA a && ma2ea e0 (MA a) ~== EA a)
+
+  where
+    e0 = Ecc _0 :: Eccentricity Double
+    ta0 = TA _0 :: TrueAnomaly Double
+    ea0 = EA _0 :: EccentricAnomaly Double
+    ma0 = MA _0 :: MeanAnomaly Double
 
 
-
+-- ----------------------------------------------------------
 spec_coe2meoe2coe = describe "coe2meoe2coe" $ do
 
   it "Converting a COE to a MEOE and back to a COE does not change it"
@@ -113,6 +178,7 @@ spec_coe2meoe2coe = describe "coe2meoe2coe" $ do
     )
 
 
+-- ----------------------------------------------------------
 spec_sv2coe2meoe2sv = describe "sv2coe2meoe2sv" $ do
 
   it "Converting a prograde SV to a MEOE and back to a SV does not change it"
@@ -143,6 +209,7 @@ spec_sv2coe2meoe2sv = describe "sv2coe2meoe2sv" $ do
     )
 
 
+-- ----------------------------------------------------------
 spec_sv2coe = describe "sv2coe" $ do
 
   it "Inclination of prograde orbit in xy-plane is zero"
@@ -218,11 +285,13 @@ mu_Earth = 398600.4418 *~ (kilo meter ^ pos3 / second ^ pos2)
 zero2one :: Dimensionless Double -> Dimensionless Double
 zero2one x = x - fromIntegral (floor (x /~ one)) *~ one
 
+{-
 -- | Constrains a value to the range [-pi,pi) by adding/subtracting
 -- full revolutions.
 plusMinusPi :: Angle Double -> Angle Double
 plusMinusPi x = zero2one ((x + pi) / rev) * rev - pi
   where rev = _2 * pi
+-}
 
 -- | Compute eccentric anomaly using atan.
 eccAnomaly1 :: Dimensionless Double -> Angle Double -> Angle Double
