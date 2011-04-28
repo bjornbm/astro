@@ -16,12 +16,13 @@ import Astro.Orbit.COE
 import Astro.Orbit.MEOE
 import Astro.Orbit.SV
 import Astro.Orbit.Conversion
-import Debug.Trace
+import Astro.Orbit.Anomaly
 
 
 
 main = do
   hspec spec_fundamentals
+  hspec spec_anomaly
   hspec spec_sv2coe
   hspec spec_coe2meoe2coe
   hspec spec_sv2coe2meoe2sv
@@ -33,9 +34,6 @@ spec_fundamentals = describe "Fundamentals" $ do
   it "atan2 y x + pi/2 ~= atan2 x (-y)"
     (property $ \(y::Dimensionless Double) x -> x /= _0 || y /= _0 ==>
       plusMinusPi (atan2 y x + pi / _2) ~== atan2 x (negate y))
-
-  it "Two ways of computing eccentric anomaly from true anomaly"
-    (property $ \e' t -> let e = zero2one e' in eccAnomaly1 e t ~== eccAnomaly2 e t)
 
   it "zero2one works as advertized"
     (property $ \x -> zero2one x >= _0 && zero2one x < _1)
@@ -60,6 +58,43 @@ spec_fundamentals = describe "Fundamentals" $ do
 
 
 
+spec_anomaly = describe "Anomaly conversions" $ do
+
+  it "Two ways of computing eccentric anomaly from true anomaly"
+    (property $ \e' t -> let e = zero2one e'
+      in eccAnomaly1 e t ~== eccAnomaly2 e t)
+
+  it "Converting TA to EA and back should not change it."
+    (property $ \e' t -> let e = zero2one e'
+      in (ea2ta e . ta2ea e) t ~== plusMinusPi t)
+
+  it "At perigee TA and EA should be equally 0."
+    (property $ \e' -> let e = zero2one e'
+      in ta2ea e _0 == _0 && ea2ta e _0 == _0)
+
+  it "At apogee TA and EA should be equally pi."
+    (property $ \e' -> let e = zero2one e'
+      in ta2ea e pi ~== pi && ea2ta e pi == pi)
+
+  it "For circular orbit TA and EA should be equal."
+    (property $ \a' -> let a = plusMinusPi a'
+      in ta2ea _0 a ~== a && ea2ta _0 a ~== a)
+
+  it "Converting EA to MA and back should not change it."
+    (property $ \e' t' -> let e = zero2one e'; t = plusMinusPi t'
+      in (ma2ea e . ea2ma e) t ~== t)
+
+  it "At perigee EA and MA should be equally 0."
+    (property $ \e' -> let e = zero2one e'
+      in ea2ma e _0 == _0 && ma2ea e _0 == _0)
+
+  it "At apogee EA and MA should be equally pi."
+    (property $ \e' -> let e = zero2one e'
+      in ea2ma e pi == pi && ma2ea e pi == pi)
+
+  it "For circular orbit EA and MA should be equal."
+    (property $ \a' -> let a = plusMinusPi a'
+      in ea2ma _0 a ~== a && ma2ea _0 a ~== a)
 
 
 
@@ -84,10 +119,10 @@ spec_sv2coe2meoe2sv = describe "sv2coe2meoe2sv" $ do
     ((meoe2sv . coe2meoe . sv2coe') testSV0 ~== testSV0)
 
   it "Converting a retrograde SV to a MEOE and back to a SV does not change it – surprisingly!"
-    ((meoe2sv . coe2meoe . sv2coe') testSV0R ~== testSV0R)
+    ((fudgeSV . meoe2sv . coe2meoe . sv2coe') testSV0R ~== fudgeSV testSV0R)
 
   it "Converting a prograde SV to a MEOE and back to a SV does not change it"
-    ((meoe2sv . coe2meoe . sv2coe') testSV1 ~== testSV1)
+    ((fudgeSV . meoe2sv . coe2meoe . sv2coe') testSV1 ~== fudgeSV testSV1)
 
   it "Converting a prograde SV to a MEOE and back to a SV does not change it"
     ((meoe2sv . coe2meoe . sv2coe') testSV2 ~== testSV2)
@@ -130,12 +165,12 @@ spec_sv2coe = describe "sv2coe" $ do
   it "RAAN of retrograde orbit in xy-plane is pi"
     (raan (sv2coe' testSV0R) == pi)
 
-  it "RAAN of orbit in xy-plane is pi"
+  it "RAAN of orbit in xy-plane is ±pi or zero"
     (property $ \mu x y vx vy -> mu > 0 *~ (meter ^ pos3 / second ^ pos2) ==>
       let r =  x <:  y <:. 0 *~ meter
           v = vx <: vy <:. 0 *~ mps
           ra = raan (sv2coe mu r v) :: Angle Double
-      in ra ~== pi || ra ~== negate pi
+      in ra ~== pi || ra ~== negate pi || ra == _0
     )
 
   it "For prograde orbit at perigee trueAnomaly = 0"
@@ -207,10 +242,6 @@ fudgeSV (r,v) = (r >+< (a<:a<:.a), v >+< (b<:b<:.b))
     a = vNorm r / (1e-9*~one)
     b = vNorm v / (1e-9*~one)
 
--- | Trace the argument with a descriptive prefix.
-myTrace :: Show a => String -> a -> a
-myTrace s x = trace (s ++ ": " ++ show x) x
-
 
 -- Test elements.
 
@@ -264,3 +295,11 @@ testSV3 = ( 42156 *~ kilo meter <: 0 *~ meter <:. 0 *~ meter
 testSV4 = ( 42156 *~ kilo meter <: 0 *~ meter <:. 0 *~ meter
           , 0 *~ mps <: 3000 *~ mps <:. (-1) *~ mps
           )
+
+
+
+testCOEfail = sv2coe
+  (0.4922582096724264 *~ (meter^pos3/second^pos2))
+  (1.0011061239886767*~meter <: 0.3631363942943464*~meter <:. 0*~meter)
+  ((-1.426229958784909)*~mps <: (-0.44155132615395254)*~mps <:. 0*~mps)
+

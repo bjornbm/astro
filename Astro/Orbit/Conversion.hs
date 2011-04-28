@@ -16,7 +16,7 @@ import Astro.Orbit.MEOE
 -- | Convert state vector into Classical Orbital Elements. The
 -- algorithm employed provides sound results for orbits with
 -- inclination and/or eccentricity of zero.
---   i = 0   ->  RAAN = pi
+--   i = 0   ->  RAAN = one of [-pi,-0,0,pi]
 --   i = pi  ->  RAAN = pi
 --   e = 0   ->  AoP  = 0
 sv2coe :: RealFloat a => GravitationalParameter a -> CPos a -> CVel a -> COE a

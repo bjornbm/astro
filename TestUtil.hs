@@ -18,6 +18,7 @@ import Astro.Place.ReferenceEllipsoid
 import Test.QuickCheck
 import Control.Applicative
 import Data.AEq
+import qualified Debug.Trace
 
 
 
@@ -98,4 +99,12 @@ manyCheck = quickCheckWith stdArgs { maxSuccess = 1000, maxDiscard = 1000 }
 -- | Comparison allowing for specified inaccuracy.
 cmpE :: (Fractional a, Ord a) => Quantity d a -> Quantity d a -> Quantity d a -> Bool
 cmpE accuracy x y' = abs (x - y') < accuracy
+
+
+-- Debugging
+-- =========
+
+-- | Trace the argument with a descriptive prefix.
+trace :: Show a => String -> a -> a
+trace s x = Debug.Trace.trace (s ++ ": " ++ show x) x
 
