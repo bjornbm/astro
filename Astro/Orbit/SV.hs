@@ -1,5 +1,5 @@
 module Astro.Orbit.SV where
 
-import PosVel (CPos, CVel)
+import Numeric.Units.Dimensional.LinearAlgebra.PosVel (CPos, CVel)
 
 type SV a = (CPos a, CVel a)

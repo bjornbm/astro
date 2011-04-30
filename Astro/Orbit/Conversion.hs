@@ -5,9 +5,8 @@ module Astro.Orbit.Conversion where
 
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
-import Numeric.Units.Dimensional.LinearAlgebra
+import Numeric.Units.Dimensional.LinearAlgebra.PosVel (CPos, CVel)
 import qualified Prelude
-import PosVel (CPos, CVel)
 import Astro.Orbit.SV
 import Astro.Orbit.COE
 import Astro.Orbit.MEOE
