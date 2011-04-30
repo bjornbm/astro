@@ -32,6 +32,16 @@ ma2ea :: (RealFloat a, AEq a) => Eccentricity a -> MeanAnomaly a -> EccentricAno
 ma2ea ecc ma'@MA{ma} = EA $ iterateUntil (~==) (keplerStep ecc ma') ma
 
 
+-- | Compute true anomaly from mean anomaly using Newton's
+-- method as shown on [1].
+ma2ta :: (RealFloat a, AEq a) => Eccentricity a -> MeanAnomaly a -> TrueAnomaly a
+ma2ta ecc = ea2ta ecc . ma2ea ecc
+
+-- | Compute mean anomaly from true anomaly.
+ta2ma :: RealFloat a => Eccentricity a -> TrueAnomaly a -> MeanAnomaly a
+ta2ma ecc = ea2ma ecc . ta2ea ecc
+
+
 -- Kepler's Equation
 -- =================
 

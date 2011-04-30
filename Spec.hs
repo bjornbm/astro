@@ -30,6 +30,7 @@ main = do
   hspec spec_sv2coe
   hspec spec_coe2meoe2coe
   hspec spec_sv2coe2meoe2sv
+  hspec spec_coe2coeM
 
 
 -- | Verify some basic properties not strictly related to orbit representations.
@@ -272,6 +273,24 @@ spec_sv2coe = describe "sv2coe" $ do
       in raan coe == negate pi && aop coe ~== _0 && trueAnomaly coe == TA pi
     )
 
+
+-- ----------------------------------------------------------
+spec_coe2coeM = describe "coe2meoe2coe" $ do
+
+  it "Converting a COE to a COEm and back to a COE does not change it"
+    (coe2vec testCOE0 ~== (coe2vec . coeM2coe . coe2coeM) testCOE0)
+
+  it "Converting a COE to a COEm and back to a COE does not change it"
+    (coe2vec testCOE1 ~== (coe2vec . coeM2coe . coe2coeM) testCOE1)
+
+  {-
+  -- This doesn't work for hyperbolic orbits(?).
+  it "Converting a COE (generated from a random SV) to a COEm and back to a COE does not change it"
+    (property $ \mu r v -> let coe = sv2coe mu r v :: COE Double; i = inc coe
+      in mu > 0*~(meter^pos3/second^pos2) && i /= pi && i /= negate pi
+      ==> coe2vec coe ~== (coe2vec . coeM2coe . coe2coeM) coe
+    )
+  -}
 
 -- Convenience and utility functions.
 

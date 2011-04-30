@@ -9,8 +9,11 @@ import Numeric.Units.Dimensional.LinearAlgebra.PosVel (CPos, CVel)
 import qualified Prelude
 import Astro.Orbit.SV
 import Astro.Orbit.COE
+import Astro.Orbit.COEm
 import Astro.Orbit.MEOE
 import Astro.Orbit.Types
+import Astro.Orbit.Anomaly
+import Data.AEq
 
 
 -- | Convert state vector into Classical Orbital Elements. The
@@ -117,3 +120,32 @@ meoe2sv MEOE{..} = ( (r_x <: r_y <:. r_z) >* (r / s2)
 -- | Convert Classical Orbital Elements into a State Vector.
 coe2sv :: RealFloat a => COE a -> SV a
 coe2sv = meoe2sv . coe2meoe
+
+
+
+-- Mean Anomaly
+-- ============
+
+-- | Convert CEO with true anomaly to CEO with mean anomaly.
+coe2coeM :: RealFloat a => COE a -> COEm a
+coe2coeM COE{..} = COEm
+  { mu   = mu
+  , slr  = slr
+  , ecc  = ecc
+  , inc  = inc
+  , aop  = aop
+  , raan = raan
+  , meanAnomaly = ta2ma (Ecc ecc) trueAnomaly
+  }
+
+-- | Convert CEO with mean anomaly to CEO with true anomaly.
+coeM2coe :: (AEq a, RealFloat a) => COEm a -> COE a
+coeM2coe COEm{..} = COE
+  { mu   = mu
+  , slr  = slr
+  , ecc  = ecc
+  , inc  = inc
+  , aop  = aop
+  , raan = raan
+  , trueAnomaly = ma2ta (Ecc ecc) meanAnomaly
+  }
