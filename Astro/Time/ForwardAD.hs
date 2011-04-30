@@ -10,8 +10,8 @@ import Astro.Time (E (E), diffEpoch)
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.LinearAlgebra.HListExtras (HZipWith)
-import AD
-import VectorAD
+import Numeric.Units.Dimensional.AD
+import Numeric.Units.Dimensional.LinearAlgebra.VectorAD
 import Numeric.AD (Mode, AD)
 
 

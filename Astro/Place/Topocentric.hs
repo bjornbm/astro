@@ -8,12 +8,12 @@ module Astro.Place.Topocentric where
 
 import Astro.Coords
 import Astro.Place
-import PosVel hiding (latitude, longitude)
-import AD
 import Tmp.Lifts
-import VectorAD (diffV)
 import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional.AD
 import Numeric.Units.Dimensional.LinearAlgebra
+import Numeric.Units.Dimensional.LinearAlgebra.VectorAD (diffV)
+import Numeric.Units.Dimensional.LinearAlgebra.PosVel hiding (latitude, longitude)
 import qualified Prelude
 
 

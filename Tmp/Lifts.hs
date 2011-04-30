@@ -2,7 +2,7 @@
 
 module Tmp.Lifts where
 
-import AD
+import Numeric.Units.Dimensional.AD
 import Astro.Place
 import Astro.Place.ReferenceEllipsoid
 

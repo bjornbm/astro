@@ -1,8 +1,8 @@
 module Astro.Coords.PosVel where
 
 import Astro.Coords
-import PosVel
-import VectorAD (applyLinear)
+import Numeric.Units.Dimensional.LinearAlgebra.PosVel
+import Numeric.Units.Dimensional.LinearAlgebra.VectorAD (applyLinear)
 
 
 data PosVel system a = C' (CPos a) (CVel a)

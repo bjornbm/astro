@@ -2,9 +2,9 @@ module Astro.Coords where
 
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
-import PosVel
-import Rotation (Homo33)
 import Numeric.Units.Dimensional.LinearAlgebra (elemSub)
+import Numeric.Units.Dimensional.LinearAlgebra.PosVel
+import Numeric.Units.Dimensional.LinearAlgebra.Rotation (Homo33)
 
 
 data Coord system a = C (CPos a)
