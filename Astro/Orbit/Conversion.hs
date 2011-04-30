@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DisambiguateRecordFields #-}
 
 -- | Module defining conversions between different orbit representations.
 module Astro.Orbit.Conversion where
@@ -11,6 +12,7 @@ import Astro.Orbit.SV
 import Astro.Orbit.COE
 import Astro.Orbit.COEm
 import Astro.Orbit.MEOE
+import Astro.Orbit.MEOEm
 import Astro.Orbit.Types
 import Astro.Orbit.Anomaly
 import Data.AEq
@@ -126,7 +128,7 @@ coe2sv = meoe2sv . coe2meoe
 -- Mean Anomaly
 -- ============
 
--- | Convert CEO with true anomaly to CEO with mean anomaly.
+-- | Convert COE with true anomaly to COE with mean anomaly.
 coe2coeM :: RealFloat a => COE a -> COEm a
 coe2coeM COE{..} = COEm
   { mu   = mu
@@ -138,7 +140,7 @@ coe2coeM COE{..} = COEm
   , meanAnomaly = ta2ma (Ecc ecc) trueAnomaly
   }
 
--- | Convert CEO with mean anomaly to CEO with true anomaly.
+-- | Convert COE with mean anomaly to COE with true anomaly.
 coeM2coe :: (AEq a, RealFloat a) => COEm a -> COE a
 coeM2coe COEm{..} = COE
   { mu   = mu
@@ -148,4 +150,58 @@ coeM2coe COEm{..} = COE
   , aop  = aop
   , raan = raan
   , trueAnomaly = ma2ta (Ecc ecc) meanAnomaly
+  }
+
+-- | Convert a COEm into a MEOEm. Note that in general the mean
+-- longitude of the resultwill not be in the range [-pi,pi).
+coeM2meoeM :: RealFloat a => COEm a -> MEOEm a
+coeM2meoeM COEm{..} = MEOEm
+  { mu = mu
+  , p  = slr
+  , f  = ecc * cos (aop + raan)
+  , g  = ecc * sin (aop + raan)
+  , h  = tan (inc / _2) * cos raan
+  , k  = tan (inc / _2) * sin raan
+  , meanLongitude = ML $ raan + aop + ma meanAnomaly  -- May be beyond [-pi,pi).
+  }
+
+-- | Convert a COEm into a MEOEm. Note that in general the mean
+-- longitude of the resultwill not be in the range [-pi,pi).
+meoeM2coeM :: RealFloat a => MEOEm a -> COEm a
+meoeM2coeM MEOEm{..} = COEm
+  { mu   = mu
+  , slr  = p
+  , ecc  = sqrt (f ^ pos2 + g ^ pos2)
+  , inc  = atan2 (_2 * sqrt (h ^ pos2 + k ^ pos2)) (_1 - h ^ pos2 - k ^ pos2)
+  , aop  = aop
+  , raan = raan
+  , meanAnomaly = MA $ l - aop - raan  -- May be beyond [-pi,pi).
+  }
+  where
+    l = ml meanLongitude
+    raan = atan2 k h
+    aop  = atan2 (g * h - f * k) (f * h + g * k)
+
+-- | Convert MEOE with true anomaly to MEOE with mean anomaly.
+meoe2meoeM :: RealFloat a => MEOE a -> MEOEm a
+meoe2meoeM meoe@MEOE{..} = MEOEm
+  { mu = mu
+  , p  = p
+  , f  = f
+  , g  = g
+  , h  = h
+  , k  = k
+  , meanLongitude = meanLongitude $ coeM2meoeM $ coe2coeM $ meoe2coe meoe
+  }
+
+-- | Convert MEOEm with mean anomaly to MEOE with true anomaly.
+meoeM2meoe :: (AEq a, RealFloat a) => MEOEm a -> MEOE a
+meoeM2meoe meoeM@MEOEm{..} = MEOE
+  { mu = mu
+  , p  = p
+  , f  = f
+  , g  = g
+  , h  = h
+  , k  = k
+  , trueLongitude = trueLongitude $ coe2meoe $ coeM2coe $ meoeM2coeM meoeM
   }
