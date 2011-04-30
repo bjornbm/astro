@@ -29,6 +29,9 @@ instance (Num a, Ord a, Arbitrary a) => Arbitrary (Eccentricity a) where
 -- ======
 -- For angles the following should hold: x == x + n 2 pi
 
+-- Anomlies
+-- --------
+
 -- | True Anomaly.
 newtype TrueAnomaly a = TA { ta :: Angle a } deriving (Show, Arbitrary)
 
@@ -57,6 +60,29 @@ instance (RealFloat a, Eq a) => Eq (MeanAnomaly a) where
 
 instance (RealFloat a, AEq a) => AEq (MeanAnomaly a) where
   (MA x) ~== (MA y) = plusMinusPi x ~== plusMinusPi y
+                   || plusTwoPi x ~== plusTwoPi y  -- move the boundaries.
+
+-- Longitudes
+-- ----------
+
+-- True Longitude.
+newtype TrueLongitude a = TL { tl :: Angle a } deriving (Show, Arbitrary)
+
+instance (RealFloat a, Eq a) => Eq (TrueLongitude a) where
+  (TL x) == (TL y) = plusMinusPi x == plusMinusPi y
+
+instance (RealFloat a, AEq a) => AEq (TrueLongitude a) where
+  (TL x) ~== (TL y) = plusMinusPi x ~== plusMinusPi y
+                   || plusTwoPi x ~== plusTwoPi y  -- move the boundaries.
+
+-- Mean Longitude.
+newtype MeanLongitude a = ML { ml :: Angle a } deriving (Show, Arbitrary)
+
+instance (RealFloat a, Eq a) => Eq (MeanLongitude a) where
+  (ML x) == (ML y) = plusMinusPi x == plusMinusPi y
+
+instance (RealFloat a, AEq a) => AEq (MeanLongitude a) where
+  (ML x) ~== (ML y) = plusMinusPi x ~== plusMinusPi y
                    || plusTwoPi x ~== plusTwoPi y  -- move the boundaries.
 
 

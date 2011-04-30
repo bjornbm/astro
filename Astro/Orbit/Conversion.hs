@@ -10,6 +10,7 @@ import qualified Prelude
 import Astro.Orbit.SV
 import Astro.Orbit.COE
 import Astro.Orbit.MEOE
+import Astro.Orbit.Types
 
 
 -- | Convert state vector into Classical Orbital Elements. The
@@ -26,7 +27,7 @@ sv2coe mu r' v' = COE
   , inc  = inc
   , aop  = aop
   , raan = raan
-  , trueAnomaly = trueAnomaly
+  , trueAnomaly = TA trueAnomaly
   }
   where
     -- Angular momentum.
@@ -63,7 +64,7 @@ coe2meoe COE {..} = MEOE
   , g  = ecc * sin (aop + raan)
   , h  = tan (inc / _2) * cos raan
   , k  = tan (inc / _2) * sin raan
-  , l  = raan + aop + trueAnomaly  -- May be beyond [-pi,pi).
+  , trueLongitude = TL $ raan + aop + ta trueAnomaly  -- May be beyond [-pi,pi).
   }
 
 
@@ -79,9 +80,10 @@ meoe2coe MEOE{..} = COE
   , inc  = atan2 (_2 * sqrt (h ^ pos2 + k ^ pos2)) (_1 - h ^ pos2 - k ^ pos2)
   , aop  = aop
   , raan = raan
-  , trueAnomaly = l - aop - raan  -- May be beyond [-pi,pi).
+  , trueAnomaly = TA $ l - aop - raan  -- May be beyond [-pi,pi).
   }
   where
+    l = tl trueLongitude
     raan = atan2 k h
     aop  = atan2 (g * h - f * k) (f * h + g * k)
 
@@ -92,6 +94,8 @@ meoe2sv MEOE{..} = ( (r_x <: r_y <:. r_z) >* (r / s2)
                    , (v_x <: v_y <:. v_z) >* negate (sqrt (mu / p) / s2)
                    )
   where
+    l = tl trueLongitude
+
     -- Position.
     r_x = cos l + a2 * cos l + _2 * h * k * sin l
     r_y = sin l - a2 * sin l + _2 * h * k * cos l

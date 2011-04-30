@@ -241,35 +241,35 @@ spec_sv2coe = describe "sv2coe" $ do
     )
 
   it "For prograde orbit at perigee trueAnomaly = 0"
-    (trueAnomaly (sv2coe' testSV0) == _0)
+    (trueAnomaly (sv2coe' testSV0) == TA _0)
 
   it "For retrograde orbit at perigee trueAnomaly = 0"
-    (trueAnomaly (sv2coe' testSV0R) == _0)
+    (trueAnomaly (sv2coe' testSV0R) == TA _0)
 
   it "For prograde orbit at apogee trueAnomaly = -pi"
-    (trueAnomaly (sv2coe' testSV1) == negate pi)
+    (trueAnomaly (sv2coe' testSV1) == TA (negate pi))
 
   it "For retrograde orbit at apogee trueAnomaly = pi"
-    (trueAnomaly (sv2coe' testSV1R) == pi)
+    (trueAnomaly (sv2coe' testSV1R) == TA pi)
 
   it "Prograde orbit with AN, perigee, and anomaly coinciding on +x"
     (let coe = sv2coe' testSV2
-      in raan coe == _0 && aop coe == _0 && trueAnomaly coe == _0
+      in raan coe == _0 && aop coe == _0 && trueAnomaly coe == TA _0
     )
 
   it "Retrograde orbit with AN, perigee, and anomaly coinciding on +x"
     (let coe = sv2coe' testSV2R
-      in raan coe == _0 && aop coe == _0 && trueAnomaly coe == _0
+      in raan coe == _0 && aop coe == _0 && trueAnomaly coe == TA _0
     )
 
   it "Prograde orbit with DN, perigee, and anomaly coinciding on +x"
     (let coe = sv2coe' testSV3
-      in raan coe == negate pi && aop coe == pi && trueAnomaly coe == _0
+      in raan coe == negate pi && aop coe == pi && trueAnomaly coe == TA _0
     )
 
   it "Prograde orbit with DN, apogee, and anomaly coinciding on +x"
     (let coe = sv2coe' testSV4
-      in raan coe == negate pi && aop coe ~== _0 && trueAnomaly coe == pi
+      in raan coe == negate pi && aop coe ~== _0 && trueAnomaly coe == TA pi
     )
 
 
@@ -321,7 +321,7 @@ testCOE0 = COE
   , inc = 0 *~ degree
   , aop = 0 *~ degree
   , raan = 0 *~ degree
-  , trueAnomaly = 0 *~ degree
+  , trueAnomaly = TA $ 0 *~ degree
   }
 
 testCOE1 = COE
@@ -331,7 +331,7 @@ testCOE1 = COE
   , inc = 15 *~ degree
   , aop = (-105) *~ degree -- 255 *~ degree
   , raan = 35 *~ degree
-  , trueAnomaly = 10 *~ degree
+  , trueAnomaly = TA $ 10 *~ degree
   }
 
 testSV0 = (42156 *~ kilo meter <:    0 *~ meter <:. 0 *~ meter
