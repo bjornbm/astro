@@ -108,3 +108,11 @@ cmpE accuracy x y' = abs (x - y') < accuracy
 trace :: Show a => String -> a -> a
 trace s x = Debug.Trace.trace (s ++ ": " ++ show x) x
 
+
+-- Massagers
+-- =========
+
+-- | Removes the integral part of a value so that it ends up in the
+-- interval [0,1).
+zero2one :: Dimensionless Double -> Dimensionless Double
+zero2one x = x - fromIntegral (floor (x /~ one)) *~ one

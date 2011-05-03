@@ -299,11 +299,6 @@ mps = meter / second
 -- | From Wikipedia.
 mu_Earth = 398600.4418 *~ (kilo meter ^ pos3 / second ^ pos2)
 
--- | Removes the integral part of a value so that it ends up in the
--- interval [0,1).
-zero2one :: Dimensionless Double -> Dimensionless Double
-zero2one x = x - fromIntegral (floor (x /~ one)) *~ one
-
 -- | Compute eccentric anomaly using atan.
 eccAnomaly1 :: Dimensionless Double -> Angle Double -> Angle Double
 eccAnomaly1 e t = _2 * atan (sqrt ((_1 - e) / (_1 + e)) * tan (t / _2))
