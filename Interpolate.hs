@@ -11,11 +11,11 @@ import Astro.Time
 import Astrodynamics
 import Astro.Coords (MEGSD)
 import Astro.Coords.PosVel
-import PosVel
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional (Dimensional (Dimensional))
 import Numeric.Units.Dimensional.NonSI
 import Numeric.Units.Dimensional.LinearAlgebra
+import Numeric.Units.Dimensional.LinearAlgebra.PosVel
 import qualified Prelude as P
 
 type Datum a = (E UT1 a, PosVel MEGSD a)
