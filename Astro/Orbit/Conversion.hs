@@ -1,5 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 -- | Module defining conversions between different orbit representations.
 module Astro.Orbit.Conversion where
@@ -10,9 +11,9 @@ import Numeric.Units.Dimensional.LinearAlgebra.PosVel (CPos, CVel)
 import qualified Prelude
 import Astro.Orbit.SV
 import Astro.Orbit.COE
-import Astro.Orbit.COEm
+--import Astro.Orbit.COEm
 import Astro.Orbit.MEOE
-import Astro.Orbit.MEOEm
+--import Astro.Orbit.MEOEm
 import Astro.Orbit.Types
 import Astro.Orbit.Anomaly
 import Data.AEq
@@ -24,7 +25,7 @@ import Data.AEq
 --   i = 0   ->  RAAN = one of [-pi,-0,0,pi]
 --   i = pi  ->  RAAN = pi
 --   e = 0   ->  AoP  = 0
-sv2coe :: RealFloat a => GravitationalParameter a -> CPos a -> CVel a -> COE a
+sv2coe :: RealFloat a => GravitationalParameter a -> CPos a -> CVel a -> COE True a
 sv2coe mu r' v' = COE
   { mu   = mu
   , slr  = p
@@ -32,7 +33,7 @@ sv2coe mu r' v' = COE
   , inc  = inc
   , aop  = aop
   , raan = raan
-  , trueAnomaly = TA trueAnomaly
+  , anomaly = Anom trueAnomaly
   }
   where
     -- Angular momentum.
@@ -59,9 +60,11 @@ sv2coe mu r' v' = COE
     trueAnomaly = u - aop
 
 
--- | Convert a COE into a MEOE. Note that in general the true
--- longitude of the resultwill not be in the range [-pi,pi).
-coe2meoe :: RealFloat a => COE a -> MEOE a
+-- | Convert a COE into a MEOE. Note that in general the
+-- longitude of the result will not be in the range [-pi,pi).
+-- This converision is valid for true, eccentric, and mean
+-- longitude/anomaly.
+coe2meoe :: RealFloat a => COE t a -> MEOE t a
 coe2meoe COE {..} = MEOE
   { mu = mu
   , p  = slr
@@ -69,15 +72,20 @@ coe2meoe COE {..} = MEOE
   , g  = ecc * sin (aop + raan)
   , h  = tan (inc / _2) * cos raan
   , k  = tan (inc / _2) * sin raan
-  , trueLongitude = TL $ raan + aop + ta trueAnomaly  -- May be beyond [-pi,pi).
+  , longitude = Long $ raan + aop + anom anomaly  -- May be beyond [-pi,pi).
   }
 
+-- | Convert a SV into a COE.
+sv2meoe :: RealFloat a
+        => GravitationalParameter a -> CPos a -> CVel a -> MEOE True a
+sv2meoe mu r v = coe2meoe $ sv2coe mu r v
 
 -- | Convert a MEOE into a COE. Use the algoritm from Eagle
--- except for trueAnomaly for which it has a singularity.
--- Note that in general the true anomaly of the result will
--- not be in the range [-pi,pi).
-meoe2coe :: RealFloat a => MEOE a -> COE a
+-- except for anomaly for which it has a singularity.
+-- Note that in general the anomaly of the result will
+-- not be in the range [-pi,pi). This converision is valid
+-- for true, eccentric, and mean longitude/anomaly.
+meoe2coe :: RealFloat a => MEOE t a -> COE t a
 meoe2coe MEOE{..} = COE
   { mu   = mu
   , slr  = p
@@ -85,21 +93,21 @@ meoe2coe MEOE{..} = COE
   , inc  = atan2 (_2 * sqrt (h ^ pos2 + k ^ pos2)) (_1 - h ^ pos2 - k ^ pos2)
   , aop  = aop
   , raan = raan
-  , trueAnomaly = TA $ l - aop - raan  -- May be beyond [-pi,pi).
+  , anomaly = Anom $ long longitude - aop - raan  -- May be beyond [-pi,pi).
+  -- , anomaly = Anom $ long longitude - atan2 g f  -- May be beyond [-pi,pi).
   }
   where
-    l = tl trueLongitude
     raan = atan2 k h
     aop  = atan2 (g * h - f * k) (f * h + g * k)
 
 
 -- | Convert a MEOE to a cartesian State Vector. Algorithm from Eagle.
-meoe2sv :: RealFloat a => MEOE a -> SV a
+meoe2sv :: RealFloat a => MEOE True a -> SV a
 meoe2sv MEOE{..} = ( (r_x <: r_y <:. r_z) >* (r / s2)
                    , (v_x <: v_y <:. v_z) >* negate (sqrt (mu / p) / s2)
                    )
   where
-    l = tl trueLongitude
+    l = long longitude
 
     -- Position.
     r_x = cos l + a2 * cos l + _2 * h * k * sin l
@@ -120,7 +128,7 @@ meoe2sv MEOE{..} = ( (r_x <: r_y <:. r_z) >* (r / s2)
 
 
 -- | Convert Classical Orbital Elements into a State Vector.
-coe2sv :: RealFloat a => COE a -> SV a
+coe2sv :: RealFloat a => COE True a -> SV a
 coe2sv = meoe2sv . coe2meoe
 
 
@@ -129,79 +137,23 @@ coe2sv = meoe2sv . coe2meoe
 -- ============
 
 -- | Convert COE with true anomaly to COE with mean anomaly.
-coe2coeM :: RealFloat a => COE a -> COEm a
-coe2coeM COE{..} = COEm
-  { mu   = mu
-  , slr  = slr
-  , ecc  = ecc
-  , inc  = inc
-  , aop  = aop
-  , raan = raan
-  , meanAnomaly = ta2ma (Ecc ecc) trueAnomaly
-  }
+coe2coeM :: RealFloat a => COE True a -> COE Mean a
+coe2coeM coe@COE{ecc,anomaly} = coe { anomaly = ta2ma (Ecc ecc) anomaly }
 
 -- | Convert COE with mean anomaly to COE with true anomaly.
-coeM2coe :: (AEq a, RealFloat a) => COEm a -> COE a
-coeM2coe COEm{..} = COE
-  { mu   = mu
-  , slr  = slr
-  , ecc  = ecc
-  , inc  = inc
-  , aop  = aop
-  , raan = raan
-  , trueAnomaly = ma2ta (Ecc ecc) meanAnomaly
-  }
-
--- | Convert a COEm into a MEOEm. Note that in general the mean
--- longitude of the resultwill not be in the range [-pi,pi).
-coeM2meoeM :: RealFloat a => COEm a -> MEOEm a
-coeM2meoeM COEm{..} = MEOEm
-  { mu = mu
-  , p  = slr
-  , f  = ecc * cos (aop + raan)
-  , g  = ecc * sin (aop + raan)
-  , h  = tan (inc / _2) * cos raan
-  , k  = tan (inc / _2) * sin raan
-  , meanLongitude = ML $ raan + aop + ma meanAnomaly  -- May be beyond [-pi,pi).
-  }
-
--- | Convert a COEm into a MEOEm. Note that in general the mean
--- longitude of the resultwill not be in the range [-pi,pi).
-meoeM2coeM :: RealFloat a => MEOEm a -> COEm a
-meoeM2coeM MEOEm{..} = COEm
-  { mu   = mu
-  , slr  = p
-  , ecc  = sqrt (f ^ pos2 + g ^ pos2)
-  , inc  = atan2 (_2 * sqrt (h ^ pos2 + k ^ pos2)) (_1 - h ^ pos2 - k ^ pos2)
-  , aop  = aop
-  , raan = raan
-  , meanAnomaly = MA $ l - aop - raan  -- May be beyond [-pi,pi).
-  }
-  where
-    l = ml meanLongitude
-    raan = atan2 k h
-    aop  = atan2 (g * h - f * k) (f * h + g * k)
+coeM2coe :: (AEq a, RealFloat a) => COE Mean a -> COE True a
+coeM2coe coe@COE{ecc,anomaly} = coe { anomaly = ma2ta (Ecc ecc) anomaly }
 
 -- | Convert MEOE with true anomaly to MEOE with mean anomaly.
-meoe2meoeM :: RealFloat a => MEOE a -> MEOEm a
-meoe2meoeM meoe@MEOE{..} = MEOEm
-  { mu = mu
-  , p  = p
-  , f  = f
-  , g  = g
-  , h  = h
-  , k  = k
-  , meanLongitude = meanLongitude $ coeM2meoeM $ coe2coeM $ meoe2coe meoe
-  }
+meoe2meoeM :: RealFloat a => MEOE True a -> MEOE Mean a
+-- Naive implementation, converts everything and not only anomaly.
+--meoe2meoeM = coe2meoe . coe2coeM . meoe2coe
+-- Implementation where conversion limited to (that necessary for) longitude.
+meoe2meoeM m = m { longitude = (longitude . coe2meoe . coe2coeM . meoe2coe) m }
 
--- | Convert MEOEm with mean anomaly to MEOE with true anomaly.
-meoeM2meoe :: (AEq a, RealFloat a) => MEOEm a -> MEOE a
-meoeM2meoe meoeM@MEOEm{..} = MEOE
-  { mu = mu
-  , p  = p
-  , f  = f
-  , g  = g
-  , h  = h
-  , k  = k
-  , trueLongitude = trueLongitude $ coe2meoe $ coeM2coe $ meoeM2coeM meoeM
-  }
+-- | Convert MEOE with true anomaly to MEOE with mean anomaly.
+meoeM2meoe :: (AEq a, RealFloat a) => MEOE Mean a -> MEOE True a
+-- Naive implementation, converts everything and not only anomaly.
+--meoeM2meoe = coe2meoe . coeM2coe . meoe2coe
+-- Implementation where conversion limited to (that necessary for) longitude.
+meoeM2meoe m = m { longitude = (longitude . coe2meoe . coeM2coe . meoe2coe) m }

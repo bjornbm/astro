@@ -11,34 +11,34 @@ import TestUtil
 
 
 -- | Compute eccentric anomaly from true anomaly using atan2.
-ta2ea :: RealFloat a => Eccentricity a -> TrueAnomaly a -> EccentricAnomaly a
-ta2ea Ecc{ecc} TA{ta} = EA $ atan2 (sqrt (_1 - ecc ^ pos2) * sin ta) (ecc + cos ta)
+ta2ea :: RealFloat a => Eccentricity a -> Anomaly True a -> Anomaly Ecc a
+ta2ea Ecc{ecc} Anom{anom} = Anom $ atan2 (sqrt (_1 - ecc ^ pos2) * sin anom) (ecc + cos anom)
 -- | Compute eccentric anomaly from true anomaly using atan.
-ta2ea' :: RealFloat a => Eccentricity a -> TrueAnomaly a -> EccentricAnomaly a
-ta2ea' Ecc{ecc} TA{ta} = EA $ _2 * atan (sqrt ((_1 - ecc) / (_1 + ecc)) * tan (ta / _2))
+ta2ea' :: RealFloat a => Eccentricity a -> Anomaly True a -> Anomaly Ecc a
+ta2ea' Ecc{ecc} (Anom ta) = Anom $ _2 * atan (sqrt ((_1 - ecc) / (_1 + ecc)) * tan (ta / _2))
 
 -- | Compute mean anomaly from eccentric anomaly.
-ea2ma :: RealFloat a => Eccentricity a -> EccentricAnomaly a -> MeanAnomaly a
-ea2ma Ecc{ecc} EA{ea} = MA $ ea - ecc * sin ea
+ea2ma :: RealFloat a => Eccentricity a -> Anomaly Ecc a -> Anomaly Mean a
+ea2ma Ecc{ecc} (Anom ea) = Anom $ ea - ecc * sin ea
 
 
 -- | Compute true anomaly from eccentric anomaly. (Wikipedia)
-ea2ta :: RealFloat a => Eccentricity a -> EccentricAnomaly a -> TrueAnomaly a
-ea2ta Ecc{ecc} EA{ea} = TA $ _2 * atan (sqrt ((_1 + ecc) / (_1 - ecc)) * tan (ea / _2))
+ea2ta :: RealFloat a => Eccentricity a -> Anomaly Ecc a -> Anomaly True a
+ea2ta Ecc{ecc} (Anom ea) = Anom $ _2 * atan (sqrt ((_1 + ecc) / (_1 - ecc)) * tan (ea / _2))
 
 -- | Compute eccentric anomaly from mean anomaly using Newton's
 -- method as shown on [1].
-ma2ea :: (RealFloat a, AEq a) => Eccentricity a -> MeanAnomaly a -> EccentricAnomaly a
-ma2ea ecc ma'@MA{ma} = EA $ iterateUntil (~==) (keplerStep ecc ma') ma
+ma2ea :: (RealFloat a, AEq a) => Eccentricity a -> Anomaly Mean a -> Anomaly Ecc a
+ma2ea ecc ma'@(Anom ma) = Anom $ iterateUntil (~==) (keplerStep ecc ma') ma
 
 
 -- | Compute true anomaly from mean anomaly using Newton's
 -- method as shown on [1].
-ma2ta :: (RealFloat a, AEq a) => Eccentricity a -> MeanAnomaly a -> TrueAnomaly a
+ma2ta :: (RealFloat a, AEq a) => Eccentricity a -> Anomaly Mean a -> Anomaly True a
 ma2ta ecc = ea2ta ecc . ma2ea ecc
 
 -- | Compute mean anomaly from true anomaly.
-ta2ma :: RealFloat a => Eccentricity a -> TrueAnomaly a -> MeanAnomaly a
+ta2ma :: RealFloat a => Eccentricity a -> Anomaly True a -> Anomaly Mean a
 ta2ma ecc = ea2ma ecc . ta2ea ecc
 
 
@@ -46,9 +46,9 @@ ta2ma ecc = ea2ma ecc . ta2ea ecc
 -- =================
 
 -- | A step in solving Kepler's equation per [1].
-keplerStep :: Floating a => Eccentricity a -> MeanAnomaly a
+keplerStep :: Floating a => Eccentricity a -> Anomaly Mean a
            -> Angle a -> Angle a
-keplerStep Ecc{ecc} MA{ma} ea_ = ea_ + (ma + ecc * sin ea_ - ea_) / (_1 - ecc * cos ea_)
+keplerStep Ecc{ecc} (Anom ma) ea_ = ea_ + (ma + ecc * sin ea_ - ea_) / (_1 - ecc * cos ea_)
 
 -- | Iterate a function on its result until the predicate
 -- holds true for two subsequent results. When it does return

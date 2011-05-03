@@ -104,19 +104,19 @@ spec_plusTwoPi = describe "plusTwoPi" $ do
 spec_anomalyComparison = describe "Anomaly comparisons" $ do
 
   it "-pi and pi should be equal"
-    (TA (negate pi) == TA pi)
+    (Anom (negate pi) == Anom pi)
 
   it "-pi and pi should be approximately equal"
-    (TA (negate pi::Angle Double) ~== TA pi)
+    (Anom (negate pi::Angle Double) ~== Anom pi)
 
   it "0 and 2*pi should be equal"
-    (TA _0 == TA (_2*pi))
+    (Anom _0 == Anom (_2*pi))
 
   it "0 and 2*pi should be approximately equal"
-    (TA _0 ~== TA (_2*pi::Angle Double))
+    (Anom _0 ~== Anom (_2*pi::Angle Double))
 
   it "x and x+2*pi should be equal."
-    (property $ \t -> TA t ~== TA (t + _2*pi::Angle Double))
+    (property $ \t -> Anom t ~== Anom (t + _2*pi::Angle Double))
 
 
 -- ----------------------------------------------------------
@@ -136,10 +136,10 @@ spec_anomalyConversion = describe "Anomaly conversions" $ do
 
   it "At apogee TA and EA should be equally pi."
     (property $ \e' -> let e = Ecc $ zero2one e'
-      in ta2ea e (TA pi) ~== EA pi && ea2ta e (EA pi) == TA pi)
+      in ta2ea e (Anom pi) ~== Anom pi && ea2ta e (Anom pi) == Anom pi)
 
   it "For circular orbit TA and EA should be equal."
-    (property $ \a -> ta2ea e0 (TA a) ~== EA a && ea2ta e0 (EA a) ~== TA a)
+    (property $ \a -> ta2ea e0 (Anom a) ~== Anom a && ea2ta e0 (Anom a) ~== Anom a)
 
   it "Converting EA to MA and back should not change it."
     (property $ \e' ea -> let e = Ecc $ zero2one e'
@@ -151,16 +151,16 @@ spec_anomalyConversion = describe "Anomaly conversions" $ do
 
   it "At apogee EA and MA should be equally pi."
     (property $ \e' -> let e = Ecc $ zero2one e'
-      in ea2ma e (EA pi) == MA pi && ma2ea e (MA pi) == EA pi)
+      in ea2ma e (Anom pi) == Anom pi && ma2ea e (Anom pi) == Anom pi)
 
   it "For circular orbit EA and MA should be equal."
-    (property $ \a -> ea2ma e0 (EA a) ~== MA a && ma2ea e0 (MA a) ~== EA a)
+    (property $ \a -> ea2ma e0 (Anom a) ~== Anom a && ma2ea e0 (Anom a) ~== Anom a)
 
   where
     e0 = Ecc _0 :: Eccentricity Double
-    ta0 = TA _0 :: TrueAnomaly Double
-    ea0 = EA _0 :: EccentricAnomaly Double
-    ma0 = MA _0 :: MeanAnomaly Double
+    ta0 = Anom _0 :: Anomaly True Double
+    ea0 = Anom _0 :: Anomaly Ecc  Double
+    ma0 = Anom _0 :: Anomaly Mean Double
 
 
 -- ----------------------------------------------------------
@@ -173,7 +173,7 @@ spec_coe2meoe2coe = describe "coe2meoe2coe" $ do
     (coe2vec testCOE1 ~== (coe2vec . meoe2coe . coe2meoe) testCOE1)
 
   it "Converting a COE (generated from a random SV) to a MEOE and back to a COE does not change it"
-    (property $ \mu r v -> let coe = sv2coe mu r v :: COE Double; i = inc coe
+    (property $ \mu r v -> let coe = sv2coe mu r v :: COE True Double; i = inc coe
       in mu > 0*~(meter^pos3/second^pos2) && i /= pi && i /= negate pi
       ==> coe2vec coe ~== (coe2vec . meoe2coe . coe2meoe) coe
     )
@@ -204,7 +204,7 @@ spec_sv2coe2meoe2sv = describe "sv2coe2meoe2sv" $ do
     ((fudgeSV . meoe2sv . coe2meoe . sv2coe') testSV4 ~== fudgeSV testSV4)
 
   it "Converting a random SV to a MEOE and back to a SV does not change it"
-    (property $ \mu r v -> let coe = sv2coe mu r v :: COE Double; i = inc coe
+    (property $ \mu r v -> let coe = sv2coe mu r v :: COE True Double; i = inc coe
       in mu > 0*~(meter^pos3/second^pos2) && i /= pi && i /= negate pi
       ==> (r,v) ~== (meoe2sv $ coe2meoe $ sv2coe mu r v)
     )
@@ -242,35 +242,35 @@ spec_sv2coe = describe "sv2coe" $ do
     )
 
   it "For prograde orbit at perigee trueAnomaly = 0"
-    (trueAnomaly (sv2coe' testSV0) == TA _0)
+    (anomaly (sv2coe' testSV0) == Anom _0)
 
   it "For retrograde orbit at perigee trueAnomaly = 0"
-    (trueAnomaly (sv2coe' testSV0R) == TA _0)
+    (anomaly (sv2coe' testSV0R) == Anom _0)
 
   it "For prograde orbit at apogee trueAnomaly = -pi"
-    (trueAnomaly (sv2coe' testSV1) == TA (negate pi))
+    (anomaly (sv2coe' testSV1) == Anom (negate pi))
 
   it "For retrograde orbit at apogee trueAnomaly = pi"
-    (trueAnomaly (sv2coe' testSV1R) == TA pi)
+    (anomaly (sv2coe' testSV1R) == Anom pi)
 
   it "Prograde orbit with AN, perigee, and anomaly coinciding on +x"
     (let coe = sv2coe' testSV2
-      in raan coe == _0 && aop coe == _0 && trueAnomaly coe == TA _0
+      in raan coe == _0 && aop coe == _0 && anomaly coe == Anom _0
     )
 
   it "Retrograde orbit with AN, perigee, and anomaly coinciding on +x"
     (let coe = sv2coe' testSV2R
-      in raan coe == _0 && aop coe == _0 && trueAnomaly coe == TA _0
+      in raan coe == _0 && aop coe == _0 && anomaly coe == Anom _0
     )
 
   it "Prograde orbit with DN, perigee, and anomaly coinciding on +x"
     (let coe = sv2coe' testSV3
-      in raan coe == negate pi && aop coe == pi && trueAnomaly coe == TA _0
+      in raan coe == negate pi && aop coe == pi && anomaly coe == Anom _0
     )
 
   it "Prograde orbit with DN, apogee, and anomaly coinciding on +x"
     (let coe = sv2coe' testSV4
-      in raan coe == negate pi && aop coe ~== _0 && trueAnomaly coe == TA pi
+      in raan coe == negate pi && aop coe ~== _0 && anomaly coe == Anom pi
     )
 
 
@@ -333,6 +333,7 @@ fudgeSV (r,v) = (r >+< (a<:a<:.a), v >+< (b<:b<:.b))
 
 -- Test elements.
 
+testCOE0 :: COE True Double
 testCOE0 = COE
   { mu = mu_Earth
   , slr = 10000 *~ kilo meter
@@ -340,9 +341,10 @@ testCOE0 = COE
   , inc = 0 *~ degree
   , aop = 0 *~ degree
   , raan = 0 *~ degree
-  , trueAnomaly = TA $ 0 *~ degree
+  , anomaly = Anom $ 0 *~ degree
   }
 
+testCOE1 :: COE True Double
 testCOE1 = COE
   { mu = mu_Earth
   , slr = 24000 *~ kilo meter
@@ -350,7 +352,7 @@ testCOE1 = COE
   , inc = 15 *~ degree
   , aop = (-105) *~ degree -- 255 *~ degree
   , raan = 35 *~ degree
-  , trueAnomaly = TA $ 10 *~ degree
+  , anomaly = Anom $ 10 *~ degree
   }
 
 testSV0 = (42156 *~ kilo meter <:    0 *~ meter <:. 0 *~ meter

@@ -29,61 +29,36 @@ instance (Num a, Ord a, Arbitrary a) => Arbitrary (Eccentricity a) where
 -- ======
 -- For angles the following should hold: x == x + n 2 pi
 
+data True
+data Mean
+data Ecc
+
 -- Anomlies
 -- --------
 
+newtype Anomaly t a = Anom { anom :: Angle a } deriving (Show, Arbitrary)
+
 -- | True Anomaly.
-newtype TrueAnomaly a = TA { ta :: Angle a } deriving (Show, Arbitrary)
 
-instance (RealFloat a, Eq a) => Eq (TrueAnomaly a) where
-  (TA x) == (TA y) = plusMinusPi x == plusMinusPi y
+instance (RealFloat a, Eq a) => Eq (Anomaly t a) where
+  (Anom x) == (Anom y) = plusMinusPi x == plusMinusPi y
 
-instance (RealFloat a, AEq a) => AEq (TrueAnomaly a) where
-  (TA x) ~== (TA y) = plusMinusPi x ~== plusMinusPi y
-                   || plusTwoPi x ~== plusTwoPi y  -- move the boundaries.
-
--- | Eccentric Anomaly.
-newtype EccentricAnomaly a = EA { ea :: Angle a } deriving (Show, Arbitrary)
-
-instance (RealFloat a, Eq a) => Eq (EccentricAnomaly a) where
-  (EA x) == (EA y) = plusMinusPi x == plusMinusPi y
-
-instance (RealFloat a, AEq a) => AEq (EccentricAnomaly a) where
-  (EA x) ~== (EA y) = plusMinusPi x ~== plusMinusPi y
-                   || plusTwoPi x ~== plusTwoPi y  -- move the boundaries.
-
--- | Mean Anomaly.
-newtype MeanAnomaly a = MA { ma :: Angle a } deriving (Show, Arbitrary)
-
-instance (RealFloat a, Eq a) => Eq (MeanAnomaly a) where
-  (MA x) == (MA y) = plusMinusPi x == plusMinusPi y
-
-instance (RealFloat a, AEq a) => AEq (MeanAnomaly a) where
-  (MA x) ~== (MA y) = plusMinusPi x ~== plusMinusPi y
-                   || plusTwoPi x ~== plusTwoPi y  -- move the boundaries.
+instance (RealFloat a, AEq a) => AEq (Anomaly t a) where
+  (Anom x) ~== (Anom y) = plusMinusPi x ~== plusMinusPi y
+                       || plusTwoPi x ~== plusTwoPi y  -- move the boundaries.
 
 -- Longitudes
 -- ----------
 
 -- True Longitude.
-newtype TrueLongitude a = TL { tl :: Angle a } deriving (Show, Arbitrary)
+newtype Longitude t a = Long { long :: Angle a } deriving (Show, Arbitrary)
 
-instance (RealFloat a, Eq a) => Eq (TrueLongitude a) where
-  (TL x) == (TL y) = plusMinusPi x == plusMinusPi y
+instance (RealFloat a, Eq a) => Eq (Longitude l a) where
+  (Long x) == (Long y) = plusMinusPi x == plusMinusPi y
 
-instance (RealFloat a, AEq a) => AEq (TrueLongitude a) where
-  (TL x) ~== (TL y) = plusMinusPi x ~== plusMinusPi y
-                   || plusTwoPi x ~== plusTwoPi y  -- move the boundaries.
-
--- Mean Longitude.
-newtype MeanLongitude a = ML { ml :: Angle a } deriving (Show, Arbitrary)
-
-instance (RealFloat a, Eq a) => Eq (MeanLongitude a) where
-  (ML x) == (ML y) = plusMinusPi x == plusMinusPi y
-
-instance (RealFloat a, AEq a) => AEq (MeanLongitude a) where
-  (ML x) ~== (ML y) = plusMinusPi x ~== plusMinusPi y
-                   || plusTwoPi x ~== plusTwoPi y  -- move the boundaries.
+instance (RealFloat a, AEq a) => AEq (Longitude l a) where
+  (Long x) ~== (Long y) = plusMinusPi x ~== plusMinusPi y
+                       || plusTwoPi x ~== plusTwoPi y  -- move the boundaries.
 
 
 -- Helpers
