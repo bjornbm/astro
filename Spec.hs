@@ -304,14 +304,6 @@ mu_Earth = 398600.4418 *~ (kilo meter ^ pos3 / second ^ pos2)
 zero2one :: Dimensionless Double -> Dimensionless Double
 zero2one x = x - fromIntegral (floor (x /~ one)) *~ one
 
-{-
--- | Constrains a value to the range [-pi,pi) by adding/subtracting
--- full revolutions.
-plusMinusPi :: Angle Double -> Angle Double
-plusMinusPi x = zero2one ((x + pi) / rev) * rev - pi
-  where rev = _2 * pi
--}
-
 -- | Compute eccentric anomaly using atan.
 eccAnomaly1 :: Dimensionless Double -> Angle Double -> Angle Double
 eccAnomaly1 e t = _2 * atan (sqrt ((_1 - e) / (_1 + e)) * tan (t / _2))
