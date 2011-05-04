@@ -20,47 +20,42 @@ import qualified Prelude as P
 
 type Datum a = (E UT1 a, PosVel MEGSD a)
 
-{-
-toSync :: RealFloat a => GravitationalParameter a -> Datum a -> Elements a
-toSync mu (t,pv) = Elements t ml d e i where
-  ml = undefined
-  d  = 1*~revolution / (orbitPeriod mu pv) - 1*~revolution / siderealDay
-  e  = eccVector pv
-  i  = incVector pv
 
--- | Calculates the total orbital energy per unit mass of a body with the
--- given @PosVel@. The @PosVel@ must be in an inertial reference frame.
-orbitalEneryPerUnitMass :: RealFloat a
-                        => GravitationalParameter a -> PosVel s a
-                        -> EnergyPerUnitMass a
-orbitalEneryPerUnitMass mu pv = (dotProduct v v) / _2 + mu / r
-  where
-    r = radius (spos pv)
-    v = (cvel pv)
-
-semiMajorAxis' :: RealFloat a
-              => GravitationalParameter a -> PosVel s a
-              -> Length a
-semiMajorAxis' mu pv = negate mu / (_2 * orbitalEneryPerUnitMass mu pv)
-
-orbitPeriod :: RealFloat a
-            => GravitationalParameter a -> PosVel s a
-            -> Time a
-orbitPeriod mu pv = _2 * pi * sqrt (semiMajorAxis' mu pv ^ pos3 / mu)
+-- dimensional
+-- -----------
+-- Interpolate.
+linearPolate :: (Div d d DOne, Mul DOne dy dy, Fractional a)
+             => (Quantity d a, Quantity dy a) -> (Quantity d a, Quantity dy a)
+             -> Quantity d a -> Quantity dy a
+linearPolate (x0,y0) (x1,y1) x = y0 + ((x - x0) / (x1 - x0)) * (y1 - y0)
 
 
-driftRate :: RealFloat a => GravitationalParameter a -> PosVel s a -> DriftRate a
-driftRate mu pv = undefined where
--}
+-- dimensional-vectors
+-- -------------------
+-- Interpolate vector.
+linearPolateVec :: (Div d d DOne, Fractional a)
+                => (Quantity d a, Vec ds a) -> (Quantity d a, Vec ds a)
+                -> Quantity d a -> Vec ds a
+linearPolateVec (x0,v0) (x1,v1) x = v0 `elemAdd` scaleVec1 ((x - x0) / (x1 - x0)) (v1 `elemSub` v0)
 
--- F = GMm/r^2
 
-
--- convert 
+-- Depend on astro
+-- ---------------
 
 -- | Interpolate or extrapolate linearly.
-polate :: (Mul DOne d d, Fractional a) => (E t a, Quantity d a) -> (E t a, Quantity d a) -> E t a -> Quantity d a
-polate (t1, x1) (t2, x2) t = x1 + diffEpoch t t1 / diffEpoch t2 t1 * (x2 - x1)
+linearPolateT :: (Mul DOne d d, Fractional a)
+              => (E t a, Quantity d a) -> (E t a, Quantity d a)
+              -> E t a -> Quantity d a
+linearPolateT (t1, x1) (t2, x2) t = x1 + diffEpoch t t1 / diffEpoch t2 t1 * (x2 - x1)
+
+-- Interpolate vector as function of time.
+linearPolateVecT :: Fractional a
+                 => (E t a, Vec ds a) -> (E t a, Vec ds a) -> E t a -> Vec ds a
+linearPolateVecT (t1,v1) (t2,v2) t = linearPolateVec (f t1,v1) (f t2,v2) (f t)
+  where f t = diffEpoch t (mjd' 0)
+
+
+-- Interpolate datum. Soon to be removed.
 
 polateDatum :: RealFloat a => Datum a -> Datum a -> E UT1 a -> Datum a
 polateDatum (t1,pv1) (t2,pv2) t = (t,pv)
@@ -69,30 +64,17 @@ polateDatum (t1,pv1) (t2,pv2) t = (t,pv)
     ( x2, y2, z2) = toTuple $ cpos pv2
     (vx1,vy1,vz1) = toTuple $ cvel pv1
     (vx2,vy2,vz2) = toTuple $ cvel pv2
-    x = polate (t1,x1) (t2,x2) t
-    y = polate (t1,y1) (t2,y2) t
-    z = polate (t1,z1) (t2,z2) t
-    vx = polate (t1,vx1) (t2,vx2) t
-    vy = polate (t1,vy1) (t2,vy2) t
-    vz = polate (t1,vz1) (t2,vz2) t
+    x = linearPolateT (t1,x1) (t2,x2) t
+    y = linearPolateT (t1,y1) (t2,y2) t
+    z = linearPolateT (t1,z1) (t2,z2) t
+    vx = linearPolateT (t1,vx1) (t2,vx2) t
+    vy = linearPolateT (t1,vy1) (t2,vy2) t
+    vz = linearPolateT (t1,vz1) (t2,vz2) t
     pv = C' (fromTuple (x,y,z)) (fromTuple (vx,vy,vz))
 
 
 polateDatum2 :: RealFloat a => Datum a -> Datum a -> E UT1 a -> Datum a
 polateDatum2 d1 d2 t = (t, C' p v)
   where
-    p = polateVec' (fmap cpos d1) (fmap cpos d2) t
-    v = polateVec' (fmap cvel d1) (fmap cvel d2) t
-
-
--- Interpolate vector.
-polateVec :: (Div d d DOne, Fractional a)
-           => (Quantity d a, Vec ds a) -> (Quantity d a, Vec ds a) -> Quantity d a -> Vec ds a
-polateVec (t1,v1) (t2,v2) t = v1 `elemAdd` scaleVec1 ((t - t1) / (t2 - t1)) (v2 `elemSub` v1)
-
-
--- Interpolate vector as function of time.
-polateVec' :: Fractional a
-           => (E t a, Vec ds a) -> (E t a, Vec ds a) -> E t a -> Vec ds a
-polateVec' (t1,v1) (t2,v2) t = polateVec (f t1,v1) (f t2,v2) (f t)
-  where f t = diffEpoch t (mjd 0 undefined)
+    p = linearPolateVecT (fmap cpos d1) (fmap cpos d2) t
+    v = linearPolateVecT (fmap cvel d1) (fmap cvel d2) t
