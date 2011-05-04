@@ -11,9 +11,7 @@ import Numeric.Units.Dimensional.LinearAlgebra.PosVel (CPos, CVel)
 import qualified Prelude
 import Astro.Orbit.SV
 import Astro.Orbit.COE
---import Astro.Orbit.COEm
 import Astro.Orbit.MEOE
---import Astro.Orbit.MEOEm
 import Astro.Orbit.Types
 import Astro.Orbit.Anomaly
 import Data.AEq

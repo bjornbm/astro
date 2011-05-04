@@ -31,3 +31,17 @@ vec2meoe v = MEOE (vElemAt zero v)
                   (vElemAt pos4 v)
                   (vElemAt pos5 v)
                   (Long $ vElemAt (incr pos5) v)
+
+
+
+orbitalPeriod :: Floating a => GravitationalParameter a -> SemiMajorAxis a -> Time a
+orbitalPeriod mu (SMA a) = _2 * pi * sqrt (a ^ pos3 / mu)
+
+eccentricity2 :: Fractional a => MEOE t a -> Dimensionless a
+eccentricity2 MEOE{..} = f ^ pos2 + g ^ pos2
+
+semiMajorAxis :: Fractional a => MEOE t a -> SemiMajorAxis a
+semiMajorAxis m = SMA $ p m / (_1 - eccentricity2 m)
+
+meoeOrbitalPeriod :: Floating a => MEOE t a -> Time a
+meoeOrbitalPeriod meoe = orbitalPeriod (mu meoe) (semiMajorAxis meoe)

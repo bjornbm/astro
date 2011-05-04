@@ -66,17 +66,26 @@ linearPolateVecT (t1,v1) (t2,v2) t = linearPolateVec (f t1,v1) (f t2,v2) (f t)
 linearPolateMEOEm :: RealFloat a
                   => (E t a, MEOE Mean a) -> (E t a, MEOE Mean a)
                   -> E t a -> MEOE Mean a
-linearPolateMEOEm tm0 tm1 t = vec2meoe $
-  linearPolateVecT (fmap meoe2vec tm0) (fmap meoe2vec tm1) t
+linearPolateMEOEm tm0@(t0,m0) tm1@(t1,m1) t = ( vec2meoe
+  $ linearPolateVecT (fmap meoe2vec tm0) (fmap meoe2vec tm1) t
+  ) { longitude = Long $ linearPolateT (t0,l0) (t1,l1') t }
   where
-    (t0,l0) = fmap (long . longitude) tm0
-    (t1,l1) = fmap (long . longitude) tm1
-    l = if abs (plusMinusPi l1 - plusMinusPi l0) < pi
-      then linearPolateT (t0, plusMinusPi l0) (t1, plusMinusPi l1) t
-      else linearPolateT (t0, plusTwoPi   l0) (t1, plusTwoPi   l1) t
-  -- TODO use adjustCyclic with the osculating period instead!
+    l0 = long $ longitude m0
+    l1 = long $ longitude m1
+    l1' = adjustCyclicT (t0,l0) (t1,l1) period (_2 * pi)
+    period = linearPolateT (fmap meoeOrbitalPeriod tm0) (fmap meoeOrbitalPeriod tm1) t
 
 
+-- | Assume that y(t) is cyclic in meaning (but not in value, as
+-- for e.g. angles). Then @adjustCyclic (t0,y0) (t1,y1) period cycle@
+-- returns a new @y1@ adjusted so that the difference @y1 - y0@
+-- corresponds roughly to the difference @t1 - t0@.
+-- (See also the more general adjustCyclic.)
+adjustCyclicT :: (RealFrac a, Div dy dy DOne, Mul DOne dy dy)
+              => (E t a, Quantity dy a) -> (E t a, Quantity dy a)
+              -> Time a -> Quantity dy a -> Quantity dy a
+adjustCyclicT (t0,y0) (t1,y1) = adjustCyclic (f t0 ,y0) (f t1, y1)
+  where f t = diffEpoch t (mjd' 0)
 
 -- | Assume that y(x) is cyclic in meaning (but not in value, as
 -- for e.g. angles). Then @adjustCyclic (x0,y0) (x1,y1) period cycle@
