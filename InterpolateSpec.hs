@@ -2,7 +2,7 @@
 
 import Test.Hspec.Monadic
 import Test.Hspec.QuickCheck (property)
-import Test.QuickCheck ((==>))
+import Test.QuickCheck ((==>), Positive(..))
 import Data.AEq
 
 -- import Web.AstroPosVel (Datum)
@@ -22,6 +22,7 @@ main = do
   hspec spec_linearPolateT
   hspec spec_linearPolateVec
   hspec spec_linearPolateVecT
+  hspec spec_adjustCyclic
   hspec spec_polateDatum
   hspec spec_polateDatum2
 
@@ -79,6 +80,55 @@ spec_linearPolateVecT = describe "Interpolate.polateVecT" $ do
       ==> linearPolateVecT (t1, x1) (t2, x2) t2 ~== x2)
 
 
+-- ---------------------------------------------------------------------
+
+spec_adjustCyclic = describe "adjustCyclic1 (x0,y0) (x1,y1) period cycle" $ do
+
+  it "seems to work correctly"
+    (adjustCyclic (_0, negate _3) (_1, _3) _1 (_2 * pi) == _3)
+
+  it "seems to work correctly"
+    (adjustCyclic (_0, negate _3) (_1,_3) _1 _8 == _3)
+
+  it "seems to work correctly"
+    (adjustCyclic (_0, negate _3) (_1,_5) _5 _8 == negate _3)
+
+  it "seems to work correctly"
+    (adjustCyclic (_0,_3) (_1, negate _3) _5 _8 == _5)
+
+  it "seems to work correctly"
+    (adjustCyclic (_0,_3) (_1, negate _3) _5 _8 == _5)
+
+  it "seems to work correctly"
+    (adjustCyclic (_0,_3) (_1, negate _3) _1 _8 == 13*~one)
+
+  it "seems to work correctly on a previously failing case"
+    (let (x0,y0) = ((-9.200202975846752)*~one,3.1439390419699795*~one)
+         (x1,y1) = ((-36.091591960763786)*~one,(-3.341608661319045)*~one)
+         y1' = adjustCyclic1 (x0,y0) (x1,y1)
+      in abs ((y1'-y0) - (x1-x0)) < 0.5 *~one)
+
+  it "seems to work correctly on a previously failing case"
+    ( let (x0,y0) = (0.36547819268776943*~one, 7.590913372057166*~one)
+          (x1,y1) = ((-2.000468137259748)*~one, (-0.18165146326599815)*~one)
+          period = 1.9197163741923564 *~one
+          cycle  = 64.0 *~one
+          y1' = adjustCyclic (x0,y0) (x1,y1) period cycle
+      in abs ((y1'-y0)/cycle - (x1-x0)/period) < 0.5*~one)
+
+  it "seems to work with random inputs"
+    (property $ \(x0,y0) (x1,y1) -> let y1' = adjustCyclic1 (x0,y0) (x1,y1)
+        in abs ((y1' - y0) - (x1 - x0)) < (0.5 *~one::Dimensionless Double))
+
+  it "seems to work with random inputs"
+    (property $ \(x0,y0) (x1,y1) (Positive p) (Positive c)
+      -> let period = p *~ second :: Time Double
+             cycle  = c *~ meter
+             y1' = adjustCyclic (x0,y0) (x1,y1) period cycle
+          in abs ((y1'-y0)/cycle - (x1-x0)/period) < 0.5 *~one)
+
+
+-- ======================================
 spec_polateDatum = describe "Interpolate.polateDatum" $ do
 
   it "Interpolating at the start time returns the start datum"

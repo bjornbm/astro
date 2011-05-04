@@ -15,7 +15,10 @@ import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional (Dimensional (Dimensional))
 import Numeric.Units.Dimensional.NonSI
 import Numeric.Units.Dimensional.LinearAlgebra
-import Numeric.Units.Dimensional.LinearAlgebra.PosVel
+import Numeric.Units.Dimensional.LinearAlgebra.PosVel hiding (longitude)
+
+import Astro.Orbit.Types
+import Astro.Orbit.MEOE
 import qualified Prelude as P
 
 type Datum a = (E UT1 a, PosVel MEGSD a)
@@ -53,6 +56,58 @@ linearPolateVecT :: Fractional a
                  => (E t a, Vec ds a) -> (E t a, Vec ds a) -> E t a -> Vec ds a
 linearPolateVecT (t1,v1) (t2,v2) t = linearPolateVec (f t1,v1) (f t2,v2) (f t)
   where f t = diffEpoch t (mjd' 0)
+
+
+-- ==================================================================
+
+-- | Interpolate two MEOEs with mean anomaly. In interpolating mean
+-- anomaly the orbital period is taken into account to ensure proper
+-- interpolation.
+linearPolateMEOEm :: RealFloat a
+                  => (E t a, MEOE Mean a) -> (E t a, MEOE Mean a)
+                  -> E t a -> MEOE Mean a
+linearPolateMEOEm tm0 tm1 t = vec2meoe $
+  linearPolateVecT (fmap meoe2vec tm0) (fmap meoe2vec tm1) t
+  where
+    (t0,l0) = fmap (long . longitude) tm0
+    (t1,l1) = fmap (long . longitude) tm1
+    l = if abs (plusMinusPi l1 - plusMinusPi l0) < pi
+      then linearPolateT (t0, plusMinusPi l0) (t1, plusMinusPi l1) t
+      else linearPolateT (t0, plusTwoPi   l0) (t1, plusTwoPi   l1) t
+  -- TODO use adjustCyclic with the osculating period instead!
+
+
+
+-- | Assume that y(x) is cyclic in meaning (but not in value, as
+-- for e.g. angles). Then @adjustCyclic (x0,y0) (x1,y1) period cycle@
+-- returns a new @y1@ adjusted so that the difference @y1 - y0@
+-- corresponds roughly to the difference @x1 - x0@.
+-- (See also adjustCyclic1.)
+adjustCyclic :: (RealFrac a, Div d d DOne, Div dy dy DOne, Mul DOne dy dy)
+            => (Quantity d a, Quantity dy a) -> (Quantity d a, Quantity dy a)
+            -> Quantity d a -> Quantity dy a -> Quantity dy a
+adjustCyclic (x0,y0) (x1,y1) period cycle =
+  adjustCyclic1 (x0/period,y0/cycle) (x1/period,y1/cycle) * cycle
+
+
+-- | Assume that y(x) is cyclic in meaning (but not in value, as
+-- for e.g. angles) where the meaning has a cycle (in y) of 1 with
+-- a period (in x) of 1. Then @adjustCyclic1 (x0,y0) (x1,y1)@
+-- returns a new @y1@ adjusted so that @y1 - y0@ is roughly the same
+-- as @x1 - x0@.
+--
+-- Property of returned y1:
+--   | (y1 - y0) - (x1 - x0) | < 0.5
+--
+-- (This is a "normalized" version of adjustCyclic for cycle and
+-- period of 1.)
+adjustCyclic1 :: (RealFrac a, Ord a)
+              => (Dimensionless a, Dimensionless a)
+              -> (Dimensionless a, Dimensionless a)
+              -> Dimensionless a
+adjustCyclic1 (x0,y0) (x1,y1)
+  = y1 + (fromIntegral $ round $ ((x1 - x0) - (y1 - y0)) /~ one) *~ one
+
 
 
 -- Interpolate datum. Soon to be removed.
