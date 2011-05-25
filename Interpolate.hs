@@ -4,8 +4,6 @@
 
 module Interpolate where
 
--- import Web.AstroPosVel (Datum)
--- import Synchronized
 import Astro
 import Astro.Time
 import Astrodynamics
@@ -20,8 +18,6 @@ import Numeric.Units.Dimensional.LinearAlgebra.PosVel hiding (longitude)
 import Astro.Orbit.Types
 import Astro.Orbit.MEOE
 import qualified Prelude as P
-
-type Datum a = (E UT1 a, PosVel MEGSD a)
 
 
 -- dimensional
