@@ -116,29 +116,3 @@ adjustCyclic1 :: (RealFrac a, Ord a)
               -> Dimensionless a
 adjustCyclic1 (x0,y0) (x1,y1)
   = y1 + (fromIntegral $ round $ ((x1 - x0) - (y1 - y0)) /~ one) *~ one
-
-
-
--- Interpolate datum. Soon to be removed.
-
-polateDatum :: RealFloat a => Datum a -> Datum a -> E UT1 a -> Datum a
-polateDatum (t1,pv1) (t2,pv2) t = (t,pv)
-  where
-    ( x1, y1, z1) = toTuple $ cpos pv1
-    ( x2, y2, z2) = toTuple $ cpos pv2
-    (vx1,vy1,vz1) = toTuple $ cvel pv1
-    (vx2,vy2,vz2) = toTuple $ cvel pv2
-    x = linearPolateT (t1,x1) (t2,x2) t
-    y = linearPolateT (t1,y1) (t2,y2) t
-    z = linearPolateT (t1,z1) (t2,z2) t
-    vx = linearPolateT (t1,vx1) (t2,vx2) t
-    vy = linearPolateT (t1,vy1) (t2,vy2) t
-    vz = linearPolateT (t1,vz1) (t2,vz2) t
-    pv = C' (fromTuple (x,y,z)) (fromTuple (vx,vy,vz))
-
-
-polateDatum2 :: RealFloat a => Datum a -> Datum a -> E UT1 a -> Datum a
-polateDatum2 d1 d2 t = (t, C' p v)
-  where
-    p = linearPolateVecT (fmap cpos d1) (fmap cpos d2) t
-    v = linearPolateVecT (fmap cvel d1) (fmap cvel d2) t

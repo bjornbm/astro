@@ -5,7 +5,6 @@ import Test.Hspec.QuickCheck (property)
 import Test.QuickCheck ((==>), Positive(..))
 import Data.AEq
 
--- import Web.AstroPosVel (Datum)
 import Astro.Time
 import TestUtil
 import Interpolate
@@ -23,8 +22,6 @@ main = do
   hspec spec_linearPolateVec
   hspec spec_linearPolateVecT
   hspec spec_adjustCyclic
-  hspec spec_polateDatum
-  hspec spec_polateDatum2
 
 
 spec_linearPolate = describe "linearPolate (x0,y0) (x1,y1) x" $ do
@@ -126,22 +123,3 @@ spec_adjustCyclic = describe "adjustCyclic1 (x0,y0) (x1,y1) period cycle" $ do
              cycle  = c *~ meter
              y1' = adjustCyclic (x0,y0) (x1,y1) period cycle
           in abs ((y1'-y0)/cycle - (x1-x0)/period) < 0.5 *~one)
-
-
--- ======================================
-spec_polateDatum = describe "Interpolate.polateDatum" $ do
-
-  it "Interpolating at the start time returns the start datum"
-    (property $ \(d1::Datum D) d2 -> fst d1 /= fst d2 ==> polateDatum d1 d2 (fst d1) ~== d1)
-
-  it "Interpolating at the end time returns the end datum"
-    (property $ \(d1::Datum D) d2 -> fst d1 /= fst d2 ==> polateDatum d1 d2 (fst d2) ~== d2)
-
-
-spec_polateDatum2 = describe "Interpolate.polateDatum2" $ do
-
-  it "Interpolating at the start time returns the start datum"
-    (property $ \(d1::Datum D) d2 -> fst d1 /= fst d2 ==> polateDatum2 d1 d2 (fst d1) ~== d1)
-
-  it "Interpolating at the end time returns the end datum"
-    (property $ \(d1::Datum D) d2 -> fst d1 /= fst d2 ==> polateDatum2 d1 d2 (fst d2) ~== d2)
