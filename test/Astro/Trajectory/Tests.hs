@@ -1,6 +1,7 @@
 module Astro.Trajectory.Tests where
 
 import Astro.Trajectory
+import Astro.Trajectory.EphemTrajectory
 
 import Numeric.Units.Dimensional.Prelude
 import Astro.Time
