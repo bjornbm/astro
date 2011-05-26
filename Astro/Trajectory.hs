@@ -2,7 +2,10 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
 
-module Astro.Trajectory where
+module Astro.Trajectory
+  ( Trajectory, startTime, endTime, ephemeris
+  , EphemTrajectory (ET)
+  ) where
 
 import Data.Maybe --(mapMaybe)
 import Data.List (mapAccumL, unfoldr)
@@ -60,6 +63,36 @@ meoeAtMaybe' (x:xs) t = case compare t (fst x) of
                        GT -> go x xs t
 
 
+mobo :: (RealFloat a, Ord a) => [Datum t a] -> [E t a] -> [Datum t a]
+mobo [] _ = []
+mobo _ [] = []
+mobo (x:xs) (t:ts) = case compare t (fst x) of
+                       LT -> mobo xs (t:ts)
+                       EQ -> x:mobo (x:xs) ts
+                       GT -> go x xs (t:ts)
+  where
+    go _   []     _     = []
+    go x0 (x:xs) (t:ts) = case compare t (fst x) of
+        LT -> (t, linearPolateMEOEm x0 x t):mobo (x0:x:xs) ts
+        EQ -> x:mobo (x:xs) ts
+        GT -> go x xs (t:ts)
+
+-- | Chronologically ordered arrays.
+mobo22 :: (RealFloat a, Ord a) => [Datum t a] -> [E t a] -> [Datum t a]
+mobo22 [] _ = []
+mobo22 (x:xs) ts = mobo2 (x:xs) $ dropWhile (< fst x) ts
+
+
+-- We already know that @t >= fst x@.
+mobo2 :: (RealFloat a, Ord a) => [Datum t a] -> [E t a] -> [Datum t a]
+mobo2 _    []   = []
+mobo2 [x] (t:_) = if t == fst x then [x] else []
+mobo2 (x0:x1:xs) (t:ts)
+  | t == fst x0 = x0:mobo2 (x0:x1:xs) ts
+  | t >= fst x1 = mobo2 (x1:xs) (t:ts)
+  | otherwise   = (t, linearPolateMEOEm x0 x1 t):mobo (x0:x1:xs) ts
+
+
 instance (RealFloat a) => Trajectory (EphemTrajectory t a) t a
   where
     startTime (ET []) = mjd' 0
@@ -67,6 +100,10 @@ instance (RealFloat a) => Trajectory (EphemTrajectory t a) t a
     endTime   (ET []) = mjd' 0
     endTime   (ET xs) = fst (last xs)
     -- ephemeris (ET xs) t0 t1 interval = mapMaybe (meoeAtMaybe xs) [t0, addTime t0 interval..t1]  -- SLOW!!!
-    ephemeris (ET xs) t0 t1 interval = catMaybes $ snd $ mapAccumL meoeAtMaybe' xs ts
-      where ts = unfoldr (\t -> if t > t1 then Nothing else Just (t, addTime t interval)) t0
-          --ts = [t0, addTime t0 interval..t1]  -- Requires Enum (E t a)!
+    -- ephemeris (ET xs) t0 t1 interval = catMaybes $ snd $ mapAccumL meoeAtMaybe' xs ts
+    --ephemeris (ET xs) t0 t1 interval = mobo xs ts
+    ephemeris (ET xs) t0 t1 interval = mobo22 xs ts
+      where
+        ts = takeWhile (<=t1) $ iterate (`addTime` interval) t0
+        --ts = unfoldr (\t -> if t > t1 then Nothing else Just (t, addTime t interval)) t0
+        --ts = [t0, addTime t0 interval..t1]  -- Requires Enum (E t a)!
