@@ -2,7 +2,7 @@
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Interpolate where
+module Astro.Orbit.Interpolate where
 
 import Astro
 import Astro.Time

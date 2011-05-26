@@ -1,5 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE RecordWildCards #-}
+
 module Astro.Orbit.Anomaly.Tests where
 
 import Test.Hspec.Monadic
@@ -8,6 +9,7 @@ import Test.QuickCheck ((==>))
 import Data.AEq
 
 import TestUtil
+import TestInstances
 
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra

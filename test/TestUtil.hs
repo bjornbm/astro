@@ -8,6 +8,7 @@ import Numeric.Units.Dimensional (Dimensional (Dimensional))
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.LinearAlgebra.Vector (Vec (ListVec))
+import Numeric.Units.Dimensional.AEq
 import qualified Prelude
 import Astro.Time
 import Astro.Coords
@@ -27,17 +28,6 @@ import qualified Debug.Trace
 
 -- Approximate equality
 -- --------------------
-
-instance AEq a => AEq (Quantity d a)
-  where
-    (Dimensional x) === (Dimensional y) = x === y
-    (Dimensional x) ~== (Dimensional y) = x ~== y
-
-instance (Floating a, AEq a) => AEq (Vec ds a)  -- CPos et al
-  where
-    ListVec xs === ListVec ys = and $ zipWith (===) xs ys
-    ListVec xs ~== ListVec ys = and $ zipWith (~==) xs ys
-
 instance (Floating a, AEq a) => AEq (Coord s a)
   where
     r1 === r2 = c r1 === c r2

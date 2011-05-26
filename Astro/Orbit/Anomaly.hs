@@ -1,14 +1,15 @@
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE EmptyDataDecls #-}
+
 module Astro.Orbit.Anomaly where
 
 -- [1] http://mathworld.wolfram.com/KeplersEquation.html
 
 import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional.AEq
 import qualified Prelude
 import Astro.Orbit.Types
 import Data.AEq
-import TestUtil
-
 
 -- | Compute eccentric anomaly from true anomaly using atan2.
 ta2ea :: RealFloat a => Eccentricity a -> Anomaly True a -> Anomaly Ecc a

@@ -1,5 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
+module Astro.Orbit.Interpolate.Tests (main) where
+
 import Test.Hspec.Monadic
 import Test.Hspec.QuickCheck (property)
 import Test.QuickCheck ((==>), Positive(..))
@@ -7,7 +9,7 @@ import Data.AEq
 
 import Astro.Time
 import TestUtil
-import Interpolate
+import Astro.Orbit.Interpolate
 
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra.PosVel
