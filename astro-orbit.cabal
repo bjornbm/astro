@@ -25,6 +25,7 @@ Exposed-Modules:     Astro.Orbit.Anomaly,
                      Astro.Orbit.MEOE,
                      Astro.Orbit.SV,
                      Astro.Orbit.Types,
+                     Astro.Orbit.Maneuver,
                      Astro.Trajectory,
                      Astro.Trajectory.EphemTrajectory
 Extra-source-files:  README
