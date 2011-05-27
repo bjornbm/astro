@@ -57,7 +57,7 @@ meoes (x:xs) ts = go (x:xs) $ dropWhile (< fst x) ts
 newtype EphemTrajectory t a = ET [Datum t a]
   -- Should I skip this newtype and just define an instance for the list??
 
-instance (RealFloat a) => Trajectory (EphemTrajectory t a) t a
+instance (RealFloat a) => Trajectory EphemTrajectory t a
   where
     startTime (ET []) = mjd' 0
     startTime (ET xs) = fst (head xs)

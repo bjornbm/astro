@@ -17,18 +17,18 @@ type Datum t a = (E t a, MEOE Mean a)
 class (Fractional a, Ord a) => Trajectory x t a
   where
     -- | The earliest epoch at which this trajectory is valid.
-    startTime  :: x -> E t a
+    startTime  :: x t a -> E t a
     -- | The last epoch at which this trajectory is valid.
-    endTime    :: x -> E t a
+    endTime    :: x t a -> E t a
     -- | Produce an ephemeris with the given epochs.
     -- The list of epochs must be increasing. If two identical
     -- epochs are encountered behaviour is unspecified (one or
     -- two data may be produced for that epoch).
-    ephemeris  :: x -> [E t a] -> [Datum t a]
+    ephemeris  :: x t a -> [E t a] -> [Datum t a]
     -- | @ephemeris' t0 t1 dt@ produces an ephemeris starting
     -- at @t0@ with data every @dt@ until @t1@. A datum at @t1@
     -- is produced only if @(t1 - t0) / dt@ is an integer.
-    ephemeris' :: x -> E t a -> E t a -> Time a -> [Datum t a]
+    ephemeris' :: x t a -> E t a -> E t a -> Time a -> [Datum t a]
     ephemeris' x t0 t1 dt = ephemeris x ts
       where
         ts = takeWhile (<=t1) $ iterate (`addTime` dt) t0
