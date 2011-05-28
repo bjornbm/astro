@@ -10,7 +10,7 @@ import Astro.Orbit.MEOE
 import Astro.Orbit.Types
 import Numeric.Units.Dimensional.Prelude
 
-type Datum t a = (E t a, MEOE Mean a)
+type Datum t a = At t a (MEOE Mean a)
 
 -- | A @Trajectory@ is an abstraction for a position-velocity
 -- path through space in a particular time window.

@@ -4,9 +4,18 @@ module Astro.Orbit.Types where
 
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.NonSI (revolution)
+import Astro.Time (E)
 import qualified Prelude
 
+-- | Data type tagging some value x with a specific time.
+-- Isomorphic to (E t a, x).
+-- TODO move At to Astro.Time??
+data At t a x = At { value :: x
+                   , epoch :: E t a
+                   } deriving (Show, Eq)
+instance Functor (At t a) where fmap f (x `At` t) = f x `At` t
 
+-- Parameters.
 newtype SemiMajorAxis a = SMA { sma :: Length a } deriving (Show, Eq)
 newtype SemiLatusRectum a = SLR { slr :: Length a } deriving (Show, Eq)
 -- | Eccentricity. Should be >= 0.

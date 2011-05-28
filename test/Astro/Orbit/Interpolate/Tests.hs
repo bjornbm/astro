@@ -9,6 +9,7 @@ import Data.AEq
 
 import Astro.Time
 import TestUtil
+import Astro.Orbit.Types
 import Astro.Orbit.Interpolate
 
 import Numeric.Units.Dimensional.Prelude
@@ -50,11 +51,11 @@ spec_linearPolateT = describe "linearPolateT (t0,y0) (t1,y1) t" $ do
 
   it "returns y0 when interpolating at t0."
     (property $ \(t0::E UT1 D, y0::Length D) (t1,y1) -> t0 /= t1
-      ==> linearPolateT (t0,y0) (t1,y1) t0 ~== y0)
+      ==> linearPolateT (y0`At`t0) (y1`At`t1) t0 ~== y0)
 
   it "returns y1 when interpolating at t1."
     (property $ \(t0::E UT1 D, y0::Length D) (t1,y1) -> t0 /= t1
-      ==> linearPolateT (t0,y0) (t1,y1) t1 ~== y1)
+      ==> linearPolateT (y0`At`t0) (y1`At`t1) t1 ~== y1)
 
 
 spec_linearPolateVec = describe "Interpolate.linearPolateVec" $ do
@@ -72,11 +73,11 @@ spec_linearPolateVecT = describe "Interpolate.polateVecT" $ do
 
   it "Interpolating at the start time returns the start value"
     (property $ \(t1::E UT1 D) (x1::SPos D) t2 x2 -> t1 /= t2
-      ==> linearPolateVecT (t1, x1) (t2, x2) t1 ~== x1)
+      ==> linearPolateVecT (x1`At`t1) (x2`At`t2) t1 ~== x1)
 
   it "Interpolating at the end time returns the end value"
     (property $ \(t1::E UT1 D) (x1::SPos D) t2 x2 -> t1 /= t2
-      ==> linearPolateVecT (t1, x1) (t2, x2) t2 ~== x2)
+      ==> linearPolateVecT (x1`At`t1) (x2`At`t2) t2 ~== x2)
 
 
 -- ---------------------------------------------------------------------

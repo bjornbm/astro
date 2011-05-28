@@ -17,6 +17,7 @@ import Numeric.Units.Dimensional.LinearAlgebra.PosVel hiding (longitude)
 
 import Astro.Orbit.Types
 import Astro.Orbit.MEOE
+import Astro.Trajectory (Datum)
 import qualified Prelude as P
 
 
@@ -43,14 +44,14 @@ linearPolateVec (x0,v0) (x1,v1) x = v0 `elemAdd` scaleVec1 ((x - x0) / (x1 - x0)
 
 -- | Interpolate or extrapolate linearly.
 linearPolateT :: (Mul DOne d d, Fractional a)
-              => (E t a, Quantity d a) -> (E t a, Quantity d a)
+              => At t a (Quantity d a) -> At t a (Quantity d a)
               -> E t a -> Quantity d a
-linearPolateT (t1, x1) (t2, x2) t = x1 + diffEpoch t t1 / diffEpoch t2 t1 * (x2 - x1)
+linearPolateT (x1`At`t1) (x2`At`t2) t = x1 + diffEpoch t t1 / diffEpoch t2 t1 * (x2 - x1)
 
 -- Interpolate vector as function of time.
 linearPolateVecT :: Fractional a
-                 => (E t a, Vec ds a) -> (E t a, Vec ds a) -> E t a -> Vec ds a
-linearPolateVecT (t1,v1) (t2,v2) t = linearPolateVec (f t1,v1) (f t2,v2) (f t)
+                 => At t a (Vec ds a) -> At t a (Vec ds a) -> E t a -> Vec ds a
+linearPolateVecT (v1`At`t1) (v2`At`t2) t = linearPolateVec (f t1,v1) (f t2,v2) (f t)
   where f t = diffEpoch t (mjd' 0)
 
 
@@ -60,16 +61,16 @@ linearPolateVecT (t1,v1) (t2,v2) t = linearPolateVec (f t1,v1) (f t2,v2) (f t)
 -- anomaly the orbital period is taken into account to ensure proper
 -- interpolation.
 linearPolateMEOEm :: RealFloat a
-                  => (E t a, MEOE Mean a) -> (E t a, MEOE Mean a)
+                  => Datum t a -> Datum t a
                   -> E t a -> MEOE Mean a
-linearPolateMEOEm tm0@(t0,m0) tm1@(t1,m1) t = ( vec2meoe
-  $ linearPolateVecT (fmap meoe2vec tm0) (fmap meoe2vec tm1) t
-  ) { longitude = Long $ linearPolateT (t0,l0) (t1,l1') t }
+linearPolateMEOEm (m0`At`t0) (m1`At`t1) t = ( vec2meoe
+  $ linearPolateVecT (meoe2vec m0`At`t0) (meoe2vec m1`At`t1) t
+  ) { longitude = Long $ linearPolateT (l0`At`t0) (l1'`At`t1) t }
   where
     l0 = long $ longitude m0
     l1 = long $ longitude m1
     l1' = adjustCyclicT (t0,l0) (t1,l1) period (_2 * pi)
-    period = linearPolateT (fmap meoeOrbitalPeriod tm0) (fmap meoeOrbitalPeriod tm1) t
+    period = linearPolateT (meoeOrbitalPeriod m0`At`t0) (meoeOrbitalPeriod m1`At`t1) t
 
 
 -- | Assume that y(t) is cyclic in meaning (but not in value, as
