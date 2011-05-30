@@ -19,11 +19,11 @@ import Astro.Orbit.Types
 
 
 
-
-main = do
-  hspec spec_fundamentals
-  hspec spec_plusMinusPi
-  hspec spec_plusTwoPi
+main = hspec specs
+specs = do
+  spec_fundamentals
+  spec_plusMinusPi
+  spec_plusTwoPi
 
 
 -- | Verify some basic properties not strictly related to orbit representations.

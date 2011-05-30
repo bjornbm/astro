@@ -19,9 +19,10 @@ import Astro.Orbit.Types
 import Astro.Orbit.Anomaly
 
 
-main = do
-  hspec spec_anomalyComparison
-  hspec spec_anomalyConversion
+main = hspec specs
+specs = do
+  spec_anomalyComparison
+  spec_anomalyConversion
 
 
 -- ----------------------------------------------------------

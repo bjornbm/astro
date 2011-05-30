@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Astro.Orbit.Interpolate.Tests (main) where
+module Astro.Orbit.Interpolate.Tests (main, specs) where
 
 import Test.Hspec.Monadic
 import Test.Hspec.QuickCheck (property)
@@ -19,12 +19,13 @@ import qualified Prelude
 
 type D = Double
 
-main = do
-  hspec spec_linearPolate
-  hspec spec_linearPolateT
-  hspec spec_linearPolateVec
-  hspec spec_linearPolateVecT
-  hspec spec_adjustCyclic
+main = hspec specs
+specs = do
+  spec_linearPolate
+  spec_linearPolateT
+  spec_linearPolateVec
+  spec_linearPolateVecT
+  spec_adjustCyclic
 
 
 spec_linearPolate = describe "linearPolate (x0,y0) (x1,y1) x" $ do

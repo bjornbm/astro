@@ -21,12 +21,12 @@ import Astro.Orbit.Conversion
 import Astro.Orbit.Types
 
 
-
-main = do
-  hspec spec_sv2coe
-  hspec spec_coe2meoe2coe
-  hspec spec_sv2coe2meoe2sv
-  hspec spec_coe2coeM
+main = hspec specs
+specs = do
+  spec_sv2coe
+  spec_coe2meoe2coe
+  spec_sv2coe2meoe2sv
+  spec_coe2coeM
 
 
 -- ----------------------------------------------------------
