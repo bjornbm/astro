@@ -4,12 +4,15 @@
 
 module TestInstances where
 
+import Control.Applicative
 import Test.QuickCheck hiding (property)-- (Arbitrary, arbitrary, (==>))
 import Data.AEq
 import TestUtil
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import Astro.Orbit.Types
+import Astro.Orbit.MEOE (MEOE (MEOE))
+import Astro.Orbit.Maneuver
 
 
 -- Instances
@@ -24,6 +27,8 @@ instance (Num a, Ord a, Arbitrary a) => Arbitrary (Eccentricity a) where
       NonNegative e <- arbitrary
       return $ Ecc (e*~one)
 
+instance Arbitrary a => Arbitrary (Maneuver a) where
+  arbitrary = ImpulsiveRTN <$> arbitrary <*> arbitrary <*> arbitrary
 
 
 deriving instance AEq a => AEq (SemiMajorAxis a)
@@ -43,3 +48,6 @@ instance (RealFloat a, Eq a) => Eq (Longitude l a) where
 instance (RealFloat a, AEq a) => AEq (Longitude l a) where
   (Long x) ~== (Long y) = plusMinusPi x ~== plusMinusPi y
                        || plusTwoPi x ~== plusTwoPi y  -- move the boundaries.
+
+deriving instance (RealFloat a,  Eq a) =>  Eq (MEOE l a)
+--deriving instance (RealFloat a, AEq a) => AEq (MEOE l a)
