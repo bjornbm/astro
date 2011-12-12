@@ -122,6 +122,11 @@ Calculate the semi-major axis of an orbit based on the mean angular motion.
 > semiMajorAxis :: Floating a => AngularVelocity a -> Length a
 > semiMajorAxis n = cbrt (mu / n ^ pos2)
 
+Calculate the mean angular motion of an orbit based on the semi-major axis.
+
+> meanAngularMotion :: Floating a => Length a -> AngularVelocity a
+> meanAngularMotion a = sqrt (mu / a ^ pos3)
+
 
 Utility functions
 =================
