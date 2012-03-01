@@ -127,6 +127,16 @@ Calculate the mean angular motion of an orbit based on the semi-major axis.
 > meanAngularMotion :: Floating a => Length a -> AngularVelocity a
 > meanAngularMotion a = sqrt (mu / a ^ pos3)
 
+Drift rate
+----------
+
+Calculate drift rate of an orbit based on the orbital period.
+
+> periodToDriftRate :: Floating a => Time a -> AngularVelocity a
+> periodToDriftRate t = (1 *~ revolution) / t - phi
+
+> smaToDriftRate :: Floating a => Length a -> AngularVelocity a
+> smaToDriftRate a = meanAngularMotion a - phi
 
 Utility functions
 =================
