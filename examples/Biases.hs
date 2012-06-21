@@ -27,7 +27,7 @@ import Astro.Place.Topocentric
 import Astro.Util (perfectGEO, r_GEO)
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
-import AD
+import Numeric.Units.Dimensional.AD
 import Tmp.Lifts
 import System.SimpleArgs -- System (getArgs)
 --import System.Console.ParseArgs
@@ -102,8 +102,8 @@ showStation longBias (name, Nothing) = printf "%-7s           no visibility" nam
 
 main = do
   (long', station, bias') <- getArgs
-  let !long = long' *~ degree
-  let !bias = bias' *~ kilo meter
+  let long = long' *~ degree
+  let bias = bias' *~ kilo meter
 
   let ss = sensitivities long stations
   let s1 = fromMaybe (0*~meter^neg1) $ join $ lookup station ss
