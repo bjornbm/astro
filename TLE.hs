@@ -1,5 +1,6 @@
 module TLE where
 
+import qualified Astrodynamics
 import Numeric.Units.Dimensional.Prelude
 import Numeric.NumType (Zero, Neg1, Neg2, Neg3)
 import Data.Time
@@ -23,13 +24,14 @@ data IntlDesignator = IntlDesignator
     , piece  :: T.Text     -- ^ Piece of the launch
     } deriving (Show, Eq)
 
+-- | The type of ephemeris. Is expected to always be SGP4_SDP4.
 data EphemerisType = SGP4_SDP4  -- 0
                    | SGP        -- 1
                    | SGP4       -- 2
                    | SDP4       -- 3
                    | SGP8       -- 4
                    | SDP8       -- 5
-                   | EphemerisType Int
+                   | EphemerisType Int  -- In case a new type materializes.
                    deriving (Show, Eq)
 
 data TLE a = TLE
@@ -49,7 +51,7 @@ data TLE a = TLE
     , eccentricity   :: Dimensionless a
     , aop            :: PlaneAngle a
     , meanAnomaly    :: PlaneAngle a
-    , meanMotion     :: Frequency a
+    , meanMotion     :: AngularVelocity a
     , revs           :: Int  -- ^ Revolution number at epoch.
     } deriving (Show, Eq)
 
@@ -59,3 +61,11 @@ type DMdt = Dim Zero Zero Neg2 Zero Zero Zero Zero
 type D2Mdt2 = Dim Zero Zero Neg3 Zero Zero Zero Zero
 -- | An SGP4-type drag coefficient.
 type BStar = Dim Neg1 Zero Zero Zero Zero Zero Zero
+
+
+period :: Floating a => TLE a -> Time a
+period tle = _2 * pi * meanMotion tle ^ neg1
+semiMajorAxis :: Floating a => TLE a -> Length a
+semiMajorAxis = Astrodynamics.semiMajorAxis . meanMotion
+driftRate :: Floating a => TLE a -> AngularVelocity a
+driftRate = Astrodynamics.smaToDriftRate . semiMajorAxis
