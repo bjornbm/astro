@@ -127,6 +127,13 @@ Calculate the mean angular motion of an orbit based on the semi-major axis.
 > meanAngularMotion :: Floating a => Length a -> AngularVelocity a
 > meanAngularMotion a = sqrt (mu / a ^ pos3)
 
+Calculate the total orbital energy (kinetic + potential) per unit mass
+based on the semi-major axis. The orbital energy is relative to the escape
+velocity (E = 0 J/kg).
+
+> orbitalEnergyPerUnitMass :: Floating a => Length a -> EnergyPerUnitMass a
+> orbitalEnergyPerUnitMass a = negate mu / (_2 * a)
+
 Drift rate
 ----------
 
