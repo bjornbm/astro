@@ -205,7 +205,7 @@ takeParseNote desc n p = do
 
 main = interact
     ( unlines
-    .  map show
+    . map show
     . map mangle
     . blubb
     . map T.init
