@@ -23,7 +23,7 @@ import qualified Prelude
 --   X -- towards local East,
 --   Y -- towards local North,
 --   Z -- towards local Zenith.
--- Note that the our Zenith is defined by the reference ellipsod (as
+-- Note that the our Zenith is defined by the reference ellipsoid (as
 -- opposed to e.g. the geoid).
 topocentricX, topocentricY, topocentricZ :: RealFloat a => GeodeticPlace a -> Axis a
 topocentricX p = vNormalize $ diffV (\x -> c $ geodeticToECR (lift p){longitude = x}) (longitude p)
