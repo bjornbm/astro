@@ -12,7 +12,7 @@ import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.LinearAlgebra.HListExtras (HZipWith)
 import Numeric.Units.Dimensional.AD
 import Numeric.Units.Dimensional.LinearAlgebra.VectorAD
-import Numeric.AD (Mode, AD)
+import Numeric.AD.Types (Mode, AD)
 
 
 -- | If @f@ is a function of epoch that returns a 'Vector', then

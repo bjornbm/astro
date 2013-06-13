@@ -31,3 +31,5 @@ svel :: RealFloat a => PosVel s a -> SVel a
 svel (S' _ v) = v
 svel (C' p v) = snd $ applyLinear c2s (p,v)
 
+--applyLinearC f (C' p v) = let (p',v') = applyLinear f (p,v) in C' p' v'
+
