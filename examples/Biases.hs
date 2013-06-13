@@ -78,7 +78,9 @@ stations =
   , station "ATL" 33.48657775  275.7267  0.07367
   , station "CLK" 39.029938499358  282.729127  0.12095988  -- Clarksburg
   , station "MAS" 27.263  (360 Prelude.- 15.634)  0.167
-  , ("Telkom", cibinong)
+  , ("Cibinong", cibinong)
+  , station "Dasoguz"  41.50 59.55 0.086
+  , station "Ashgabat" 38.14 58.37 0.134
   ]
 
 cibinong = GeodeticPlace wgs84 (negate $ 6*~degree + 26*~arcminute + 52*~arcsecond) (106*~degree + 56*~arcminute + 10*~arcsecond) (0*~meter)
