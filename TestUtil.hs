@@ -1,5 +1,6 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module TestUtil where
@@ -93,7 +94,7 @@ instance (Arbitrary a, Fractional a) => Arbitrary (PosVel s a) where
 onceCheck :: (Testable prop) => prop -> IO ()
 onceCheck = quickCheckWith stdArgs { maxSuccess = 1 }
 manyCheck :: (Testable prop) => prop -> IO ()
-manyCheck = quickCheckWith stdArgs { maxSuccess = 1000, maxDiscard = 1000 }
+manyCheck = quickCheckWith stdArgs { maxSuccess = 1000, maxDiscardRatio = 1 }
 
 -- | Comparison allowing for specified inaccuracy.
 cmpE :: (Fractional a, Ord a) => Quantity d a -> Quantity d a -> Quantity d a -> Bool
