@@ -4,8 +4,8 @@ import Astro.Place.ReferenceEllipsoid
 
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
-import PosVel hiding (latitude, longitude)
-import Rotation (rotZ)
+import Numeric.Units.Dimensional.LinearAlgebra.Rotation (rotZ)
+import Numeric.Units.Dimensional.LinearAlgebra.PosVel hiding (latitude, longitude)
 import qualified Prelude
 
 
