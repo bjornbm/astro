@@ -27,7 +27,7 @@ perfectGEO l = S $ fromTuple (r_GEO, 90*~degree, l)
 -- | ECEF posvel of a perfectly geostationary SC.
 perfectGEO' :: RealFloat a => Longitude a -> PosVel ECR a
 perfectGEO' l = S' (s $ perfectGEO l)
-                   (fromTuple (0*~(meter/second), 0*~day^neg1, 0*~day^neg1))
+                   (fromTuple (_0, _0, _0))
 
 -- | Coerces a UT1 epoch to a `UTCTime`. Note that this is an approximation
 -- that is only accurate to within 0.9 s. Use with care!

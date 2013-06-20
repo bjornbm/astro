@@ -251,7 +251,7 @@ an initial epoch of 1858-11-17 00:00.
 
 -- | The epoch of MJD 0.0 as an AbsoluteTime.
 mjdEpoch :: Num a => E t a
-mjdEpoch = E $ 0*~second  -- taiEpoch
+mjdEpoch = E _0  -- taiEpoch
 
 -- | Define an epoch by specifying a MJD and time scale.
 mjd :: Num a => a -> t -> E t a

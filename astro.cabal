@@ -1,8 +1,8 @@
 Name:                astro
-Version:             0.6
+Version:             0.6.0.1
 License:             BSD3
 License-File:        LICENSE
-Copyright:           Bjorn Buckwalter 2008-2011
+Copyright:           Bjorn Buckwalter 2008-2013
 Author:              Bjorn Buckwalter 
 Maintainer:          bjorn.buckwalter@gmail.com
 Stability:           Unstable
@@ -17,7 +17,7 @@ Build-Depends:       base,
                      array,
                      HList > 0.1,
                      leapseconds-announced,
-                     dimensional,
+                     dimensional >= 0.12,
                      dimensional-vectors >= 0.9,
                      dimensional-experimental,
                      astro-tables,

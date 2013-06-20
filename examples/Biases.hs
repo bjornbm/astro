@@ -83,7 +83,7 @@ stations =
   , station "Ashgabat" 38.14 58.37 0.134
   ]
 
-cibinong = GeodeticPlace wgs84 (negate $ 6*~degree + 26*~arcminute + 52*~arcsecond) (106*~degree + 56*~arcminute + 10*~arcsecond) (0*~meter)
+cibinong = GeodeticPlace wgs84 (negate $ 6*~degree + 26*~arcminute + 52*~arcsecond) (106*~degree + 56*~arcminute + 10*~arcsecond) _0
 
 -- | Computes sensitivities for a list of ground stations.
 -- If the SC is below the GS's horizon Nothing is returned.
@@ -108,7 +108,7 @@ main = do
   let bias = bias' *~ kilo meter
 
   let ss = sensitivities long stations
-  let s1 = fromMaybe (0*~meter^neg1) $ join $ lookup station ss
+  let s1 = fromMaybe _0 $ join $ lookup station ss
   let longBias = bias * s1  -- This linearization breaks down when SC and GS longitudes coincide.
 
   putStrLn $ showSC long longBias

@@ -113,7 +113,7 @@ ascension twice only the first occurence will be returned.
 Same for the Greenwich meridian.
 
 > gwraToD :: RealFloat a => Angle a -> Day -> TimeOfDay
-> gwraToD = longitudeToD (0 *~ degree)
+> gwraToD = longitudeToD _0
 
 Orbits
 ------
