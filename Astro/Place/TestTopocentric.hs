@@ -32,6 +32,11 @@ prop_topo1 :: GeodeticPlace Double -> Coord ECR Double -> Property
 prop_topo1 place p = not (degeneratePlace place) ==> p ~== p'
   where
     p' = topocentricToECR place $ ecrToTopocentric place $ p
+{- prop_topo1
+*** Failed! Falsifiable (after 720 tests):
+GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 21972.493449352645 m, polarRadius = 2.1731050756815637 m}, latitude = 39.30500938162273, longitude = 69.62167787937885, height = 26.50133090234193 m}
+C < -12.02345499632946 m, -138.2024450210176 m, -23.342674229564704 m >
+-}
 
 -- | Converting topocentric to geocentric and back should be identity function.
 prop_topo2 :: GeodeticPlace Double -> Coord Topocentric Double -> Property
@@ -122,6 +127,12 @@ prop_obsECR_fail1 = prop_obsECR place p
                           (79.93674030440873*~radian)
                           (60.60648347976257*~radian)
                           (58.278163555009634*~meter)
+{- prop_obsECR
+*** Failed! Falsifiable (after 746 tests):
+GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 311179.0845705706 m, polarRadius = 4.703271503709908 m}, latitude = 82.75891566042836, longitude = -97.08922573273038, height = 34.00110203891187 m}
+C < 10.924475023284334 m, -113.26486229757461 m, 43.599269604222506 m >
+-}
+
 
 prop_obsECR_fail2 = prop_obsECR place p
   where
