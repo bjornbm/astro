@@ -30,11 +30,7 @@ ea2ta Ecc{ecc} (Anom ea) = Anom $ _2 * atan (sqrt ((_1 + ecc) / (_1 - ecc)) * ta
 -- | Compute eccentric anomaly from mean anomaly using Newton's
 -- method as shown on [1].
 ma2ea :: (RealFloat a, AEq a) => Eccentricity a -> Anomaly Mean a -> Anomaly Ecc a
-ma2ea ecc ma'@(Anom ma) = Anom $ iterateUntil (approx) (keplerStep ecc ma') ma
-  where
-    approx :: (Fractional a, AEq a) => Angle a -> Angle a -> Bool
-    approx x y = (x /~ radian) ~== (y /~ radian)
-
+ma2ea ecc ma'@(Anom ma) = Anom $ iterateUntil (~==) (keplerStep ecc ma') ma
 
 -- | Compute true anomaly from mean anomaly using Newton's
 -- method as shown on [1].
