@@ -1,5 +1,5 @@
 Name:                astro
-Version:             0.6.0.1
+Version:             0.7
 License:             BSD3
 License-File:        LICENSE
 Copyright:           Bjorn Buckwalter 2008-2013
@@ -35,7 +35,7 @@ Exposed-Modules:     Astro,
                      Astro.Time.Barycentric.Kaplan2005,
                      Astro.Time.Barycentric.TT,
                      Astro.Time.Convert,
-                     --Astro.Time.ForwardAD,
+                     Astro.Time.ForwardAD,
                      Astro.Time.Interop,
                      Astro.Time.Sidereal,
                      Astro.Celestrak,

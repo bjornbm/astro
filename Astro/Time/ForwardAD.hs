@@ -34,7 +34,8 @@ applyLinearAtT :: forall a t ds ds' ds2 ds2' ts l'. (
                  Real a, Fractional a,
                  HMap (MulD,DTime) ds' ds,               -- Used in linearization.
                  HMap (DivD,DTime) ds2 ds2',             -- Used in differentiation.
-                 HZipWith DivD ds ds' ts, Homo ts DTime, -- Necessary to infer t (the dimension w r t which we are differentiating).
+                 --HZipWith DivD ds ds' ts, Homo ts DTime, -- Necessary to infer t (the dimension w r t which we are differentiating).
+                 Homo ts DTime,
                  HZip ds ds' l', HMap DivD l' ts         -- Needed to use applyLinearAt, not sure why, grr!
             ) => (forall tag. Mode tag => E t (AD tag a) -> Vec ds (AD tag a) -> Vec ds2 (AD tag a))
               -> E t a -> (Vec ds a, Vec ds' a) -> (Vec ds2 a, Vec ds2' a)
