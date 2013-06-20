@@ -45,7 +45,7 @@ sv2coe mu r' v' = COE
     -- Inclination and ascending node.
     inc  = acos (h_z / h)
     raan = atan2 (h_x) (negate h_y)   -- pi for inc == 0.
-    n' = cos raan <: sin raan <:. _0  -- Unit vector pointing towards AN.
+    n' = cos raan <: sin raan <:. (0 *~one)  -- Unit vector pointing towards AN.
     m' = h' `crossProduct` n'  -- Vector 90° ahead of n' (AN) in orbit plane.
 
     -- Eccentricity and perigee.
