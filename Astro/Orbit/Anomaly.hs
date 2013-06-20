@@ -51,7 +51,7 @@ keplerStep :: Floating a => Eccentricity a -> Anomaly Mean a
 keplerStep Ecc{ecc} (Anom ma) ea_ = ea_ + (ma + ecc * sin ea_ - ea_) / (_1 - ecc * cos ea_)
 
 -- | Iterate a function on its result until the predicate
--- holds true for two subsequent results. When it does return
+-- holds true for two subsequent results. Then returns
 -- the latter of the results. (Note: will diverge if the
 -- predicate is never fulfilled.)
 iterateUntil :: (a -> a -> Bool) -> (a -> a) -> a -> a
