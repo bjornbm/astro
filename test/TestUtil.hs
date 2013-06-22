@@ -105,5 +105,5 @@ trace s x = Debug.Trace.trace (s ++ ": " ++ show x) x
 
 -- | Removes the integral part of a value so that it ends up in the
 -- interval [0,1).
-zero2one :: Dimensionless Double -> Dimensionless Double
-zero2one x = x - fromIntegral (floor (x /~ one)) *~ one
+fractionalPart :: Dimensionless Double -> Dimensionless Double
+fractionalPart x = x - fromIntegral (floor (x /~ one)) *~ one
