@@ -1,5 +1,5 @@
 Name:                astro
-Version:             0.7.1
+Version:             0.7.2
 License:             BSD3
 License-File:        LICENSE
 Copyright:           Bjorn Buckwalter 2008-2013
@@ -53,4 +53,3 @@ Extra-source-files:  README,
                      Astro/Place/TestTopocentric.hs
                      Astro/Time/Barycentric/TestAsA2009.hs
                      IAU2000/TestEquations.hs
- 
