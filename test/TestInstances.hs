@@ -10,6 +10,7 @@ import Data.AEq
 import TestUtil
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
+import Astro.Util (plusMinusPi, zeroTwoPi)
 import Astro.Orbit.Types
 import Astro.Orbit.MEOE (MEOE (MEOE))
 import Astro.Orbit.Maneuver

@@ -14,6 +14,8 @@ import TestUtil
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 
+import Astro.Util (plusMinusPi, zeroTwoPi)
+
 import Astro.Orbit.Types
 
 

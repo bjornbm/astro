@@ -15,7 +15,7 @@ Build-Depends:       base < 5,
                      dimensional < 1.1,
                      dimensional-vectors >= 0.9 && < 1.1,
                      dimensional-experimental >= 0.4 && < 1.1,
-                     astro >= 0.7.1 && < 1.1,
+                     astro >= 0.7.2 && < 1.1,
                      ieee754 < 1.1,
                      numtype < 1.1
 Exposed-Modules:     Astro.Orbit.Anomaly,
