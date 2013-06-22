@@ -5,9 +5,8 @@
 
 module Astro.Orbit.Types.Tests where
 
-import Test.Hspec.Monadic
-import Test.Hspec.QuickCheck (property)
-import Test.QuickCheck ((==>))
+import Test.Hspec
+import Test.QuickCheck (property, (==>))
 import Data.AEq
 
 import TestUtil
@@ -23,7 +22,7 @@ main = hspec specs
 specs = do
   spec_fundamentals
   spec_plusMinusPi
-  spec_plusTwoPi
+  spec_zeroTwoPi
 
 
 -- | Verify some basic properties not strictly related to orbit representations.
@@ -67,28 +66,28 @@ spec_plusMinusPi = describe "plusMinusPi" $ do
 
 
 -- ----------------------------------------------------------
-spec_plusTwoPi = describe "plusTwoPi" $ do
+spec_zeroTwoPi = describe "zeroTwoPi" $ do
 
-  it "plusTwoPi -2*pi = 0"
-    (plusTwoPi (negate _2 * pi) == _0)
+  it "zeroTwoPi -2*pi = 0"
+    (zeroTwoPi (negate _2 * pi) == _0)
 
-  it "plusTwoPi -pi = pi"
-    (plusTwoPi (negate pi) == pi)
+  it "zeroTwoPi -pi = pi"
+    (zeroTwoPi (negate pi) == pi)
 
-  it "plusTwoPi 0 = 0"
-    (plusTwoPi _0 == _0)
+  it "zeroTwoPi 0 = 0"
+    (zeroTwoPi _0 == _0)
 
-  it "plusTwoPi pi = pi"
-    (plusTwoPi pi == pi)
+  it "zeroTwoPi pi = pi"
+    (zeroTwoPi pi == pi)
 
-  it "plusTwoPi 2*pi = 0"
-    (plusTwoPi (_2 * pi) == _0)
+  it "zeroTwoPi 2*pi = 0"
+    (zeroTwoPi (_2 * pi) == _0)
 
-  it "plusTwoPi x = x for x in [0,2*pi)"
-    (property $ \x' -> let x = zero2one x' * _2 * pi in plusTwoPi x ~== x)
+  it "zeroTwoPi x = x for x in [0,2*pi)"
+    (property $ \x' -> let x = zero2one x' * _2 * pi in zeroTwoPi x ~== x)
 
-  it "plusTwoPi returns values in [0,2*pi)"
-    (property $ \x -> plusTwoPi x >= _0 && plusTwoPi x < (_2 * pi::Angle Double))
+  it "zeroTwoPi returns values in [0,2*pi)"
+    (property $ \x -> zeroTwoPi x >= _0 && zeroTwoPi x < (_2 * pi::Angle Double))
 
-  it "plusTwoPi x + 2 pi = plusTwoPi x"
-    (property $ \x -> plusTwoPi (x + _2 * pi) ~== (plusTwoPi x::Angle Double))
+  it "zeroTwoPi x + 2 pi = zeroTwoPi x"
+    (property $ \x -> zeroTwoPi (x + _2 * pi) ~== (zeroTwoPi x::Angle Double))

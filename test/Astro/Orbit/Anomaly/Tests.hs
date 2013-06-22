@@ -3,9 +3,8 @@
 
 module Astro.Orbit.Anomaly.Tests where
 
-import Test.Hspec.Monadic
-import Test.Hspec.QuickCheck (property)
-import Test.QuickCheck ((==>))
+import Test.Hspec
+import Test.QuickCheck (property, (==>))
 import Data.AEq
 
 import TestUtil

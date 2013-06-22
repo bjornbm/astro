@@ -2,7 +2,7 @@ import qualified Astro.Orbit.Types.Tests
 import qualified Astro.Orbit.Anomaly.Tests
 import qualified Astro.Orbit.Conversion.Tests
 import qualified Astro.Orbit.Interpolate.Tests
-import Test.Hspec.Monadic
+import Test.Hspec
 
 main = hspec $ do
   Astro.Orbit.Types.Tests.specs

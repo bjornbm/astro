@@ -40,14 +40,14 @@ instance (RealFloat a, Eq a) => Eq (Anomaly t a) where
 
 instance (RealFloat a, AEq a) => AEq (Anomaly t a) where
   (Anom x) ~== (Anom y) = plusMinusPi x ~== plusMinusPi y
-                       || plusTwoPi x ~== plusTwoPi y  -- move the boundaries.
+                       ||   zeroTwoPi x ~==   zeroTwoPi y  -- move the boundaries.
 
 instance (RealFloat a, Eq a) => Eq (Longitude l a) where
   (Long x) == (Long y) = plusMinusPi x == plusMinusPi y
 
 instance (RealFloat a, AEq a) => AEq (Longitude l a) where
   (Long x) ~== (Long y) = plusMinusPi x ~== plusMinusPi y
-                       || plusTwoPi x ~== plusTwoPi y  -- move the boundaries.
+                       ||   zeroTwoPi x ~==   zeroTwoPi y  -- move the boundaries.
 
 deriving instance (RealFloat a,  Eq a) =>  Eq (MEOE l a)
 --deriving instance (RealFloat a, AEq a) => AEq (MEOE l a)

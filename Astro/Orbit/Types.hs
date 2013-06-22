@@ -37,8 +37,8 @@ newtype Longitude t a = Long { long :: Angle a } deriving (Show)
 -- =======
 
 -- | @normalizeAngle center a@ normalizes the angle @a@ to
--- be within ±π of @center@. Algorithm from:
--- http://www.java2s.com/Tutorial/Java/0120__Development/Normalizeanangleina2piwideintervalaroundacentervalue.htm
+-- be within ±π of @center@. Algorithm from
+-- <http://www.java2s.com/Tutorial/Java/0120__Development/Normalizeanangleina2piwideintervalaroundacentervalue.htm>.
 normalizeAngle :: RealFloat a => Angle a -> Angle a -> Angle a
 normalizeAngle center a = a - _2 * pi * floor' ((a + pi - center) / (_2 * pi))
   where floor' = (*~ one) . fromIntegral . floor . (/~ one)
@@ -47,5 +47,5 @@ normalizeAngle center a = a - _2 * pi * floor' ((a + pi - center) / (_2 * pi))
 plusMinusPi :: RealFloat a => Angle a -> Angle a
 plusMinusPi = normalizeAngle _0
 -- | Constrains an angle to the range [0,2*pi).
-plusTwoPi   :: RealFloat a => Angle a -> Angle a
-plusTwoPi   = normalizeAngle pi
+zeroTwoPi   :: RealFloat a => Angle a -> Angle a
+zeroTwoPi   = normalizeAngle pi

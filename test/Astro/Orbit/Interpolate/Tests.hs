@@ -2,9 +2,8 @@
 
 module Astro.Orbit.Interpolate.Tests (main, specs) where
 
-import Test.Hspec.Monadic
-import Test.Hspec.QuickCheck (property)
-import Test.QuickCheck ((==>), Positive(..))
+import Test.Hspec
+import Test.QuickCheck (property, (==>), Positive(..))
 import Data.AEq
 
 import Astro.Time
