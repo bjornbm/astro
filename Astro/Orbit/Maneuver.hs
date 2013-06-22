@@ -7,6 +7,7 @@ module Astro.Orbit.Maneuver where
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import Astro.Time
+import Astro.Time.At
 import Astro.Orbit.Types
 import Astro.Trajectory
 import Data.List

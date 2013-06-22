@@ -17,6 +17,7 @@ import Numeric.Units.Dimensional.LinearAlgebra.PosVel hiding (longitude)
 
 import Astro.Orbit.Types
 import Astro.Orbit.MEOE
+import Astro.Time.At
 import Astro.Trajectory (Datum)
 import qualified Prelude as P
 

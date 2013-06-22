@@ -7,6 +7,7 @@ import Test.QuickCheck (property, (==>), Positive(..))
 import Data.AEq
 
 import Astro.Time
+import Astro.Time.At
 import TestUtil
 import Astro.Orbit.Types
 import Astro.Orbit.Interpolate
