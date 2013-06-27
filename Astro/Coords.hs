@@ -30,8 +30,8 @@ apply (CS f) = S . f . c
 apply (SC f) = C . f . s
 apply (SS f) = S . f . s
 
-diffCoords :: Floating a => Coord s a -> Coord s a -> Coord s a
-diffCoords c1 c2 = C $ elemSub (c c1) (c c2)
+diffCoords :: Floating a => Coord s a -> Coord s a -> CPos a
+diffCoords c1 c2 = elemSub (c c1) (c c2)
 
 -- Some coordinate systems
 data ECI = ECI deriving (Show, Read) -- ICRS

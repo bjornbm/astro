@@ -42,7 +42,7 @@ topocentricCoordSys p = consRow   (topocentricX p)
 -- to a position in the topocentric coordinate system defined by the
 -- given geodetic place.
 ecrToTopocentric :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Coord Topocentric a
-ecrToTopocentric gs sc = C $ topocentricCoordSys gs `matVec` c (diffCoords sc (geodeticToECR gs))
+ecrToTopocentric gs sc = C $ topocentricCoordSys gs `matVec` diffCoords sc (geodeticToECR gs)
 
 -- Causes NaNs when the geodetic place is at the center of the ellipsoid!
 topocentricToECR :: RealFloat a => GeodeticPlace a -> Coord Topocentric a -> Coord ECR a
@@ -75,7 +75,7 @@ azimuth'   gs = azimuth' . s . ecrToTopocentric gs
 -- | Computes the range from the given geodetic place to the given
 -- geocentric position.
 range' :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Length a
-range' gs = vNorm . c . diffCoords (geodeticToECR gs)  -- More efficient.
+range' gs = vNorm . diffCoords (geodeticToECR gs)  -- More efficient.
 --range gs = radius . s . ecrToTopocentric gs  -- Rather inefficient!
 
 -- Convert a tripple of azimuth, elevation, and range observations into
