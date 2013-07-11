@@ -39,16 +39,6 @@ parseEpoch = do
                         (UTCTime (fromGregorian y 1 1) 0)
            -- TODO upgrade attoparsec and remove `realToFrac`.
 
-parseDmdt' = do
-    s <- anyChar
-    char '.'
-    d <- mappend "0." <$> takeWhile isDigit
-    n <- (*_2) . (*~ day^neg2) <$> parseLeft rational d
-    case s of '+' -> return n
-              '-' -> return (negate n)
-              ' ' -> return n
-              _   -> fail ("Invalid sign: " ++ [s])
-
 -- | Massage the sign of numbers on the format +.NNNNNNNN or +NNNNN-N.
 sign =  (char '-' >> return "-0.")
     <|> (char '+' <|> char ' ' >> return "0.")
@@ -59,11 +49,11 @@ expo =  (char '-' >> return "e-")
 
 parseDMdt = parseLeft' $ mappend <$> sign <*> (char '.' >> take 8)
                      >>= parseLeft rational
-                     >>= return . \x -> x *~ day^neg2 * _2
+                     >>= return . \x -> x *~ (revolution * day^neg2) * _2
 
 parseD2Mdt2 = parseLeft' $ mconcat <$> sequence [sign, take 5, expo, take 1]
                        >>= parseLeft rational
-                       >>= return . \x -> x *~ day^neg3 * _6
+                       >>= return . \x -> x *~ (revolution * day^neg3) * _6
 
 parseBStar = parseLeft' $ mconcat <$> sequence [sign, take 5, expo, take 1]
                       >>= parseLeft rational
@@ -91,8 +81,6 @@ parseEphemerisType = do
 
 --trace' :: Show a => a -> a
 --trace' x = traceShow x x
-
-isEndOfLine c = c == '\n' || c == '\r'
 
 parseTLE :: Parser (TLE Double)
 parseTLE = do
