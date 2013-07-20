@@ -14,7 +14,7 @@ import Numeric.Units.Dimensional.LinearAlgebra
 import qualified Prelude
 
 import Astro.Orbit.COE
-import Astro.Orbit.MEOE
+import Astro.Orbit.MEOE (longitude)
 import Astro.Orbit.SV
 import Astro.Orbit.Conversion
 import Astro.Orbit.Types
@@ -39,7 +39,7 @@ spec_coe2meoe2coe = describe "coe2meoe2coe" $ do
 
   it "Converting a COE (generated from a random SV) to a MEOE and back to a COE does not change it"
     (property $ \mu r v -> let coe = sv2coe mu r v :: COE True Double; i = inc coe
-      in mu > 0*~(meter^pos3/second^pos2) && i /= pi && i /= negate pi
+      in mu > 0*~(meter^pos3/second^pos2) && i /= pi && i >= _0
       ==> coe2vec coe ~== (coe2vec . meoe2coe . coe2meoe) coe
     )
 

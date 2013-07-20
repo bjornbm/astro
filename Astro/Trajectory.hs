@@ -1,7 +1,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 module Astro.Trajectory
-  ( Trajectory, startTime, endTime, ephemeris, ephemeris'
+  ( Trajectory, startTime, endTime, ephemeris, ephemeris', datum
   , Datum
   ) where
 
@@ -10,6 +10,7 @@ import Astro.Time.At
 import Astro.Orbit.MEOE
 import Astro.Orbit.Types
 import Numeric.Units.Dimensional.Prelude
+import Data.Maybe (listToMaybe)
 
 type Datum t a = At t a (MEOE Mean a)
 
@@ -26,10 +27,14 @@ class (Fractional a, Ord a) => Trajectory x t a
     -- epochs are encountered behaviour is unspecified (one or
     -- two data may be produced for that epoch).
     ephemeris  :: x t a -> [E t a] -> [Datum t a]
-    -- | @ephemeris' t0 t1 dt@ produces an ephemeris starting
+    -- | @ephemeris' traj t0 t1 dt@ produces an ephemeris starting
     -- at @t0@ with data every @dt@ until @t1@. A datum at @t1@
     -- is produced only if @(t1 - t0) / dt@ is an integer.
     ephemeris' :: x t a -> E t a -> E t a -> Time a -> [Datum t a]
     ephemeris' x t0 t1 dt = ephemeris x ts
       where
         ts = takeWhile (<=t1) $ iterate (`addTime` dt) t0
+    -- | @datum traj t@ produces a datum at the time @t@, if the
+    -- trajectory is valid for time @t@.
+    datum :: x t a -> E t a -> Maybe (Datum t a)
+    datum x = listToMaybe . ephemeris x . return

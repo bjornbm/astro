@@ -4,7 +4,7 @@
 module Astro.Orbit.Maneuver.Tests where
 
 import Test.Hspec
-import Test.QuickCheck (Property, (==>))
+import Test.QuickCheck (property, (==>))
 import Data.AEq
 
 import TestUtil
@@ -72,10 +72,20 @@ spec_randomManeuver = describe "Random maneuver at time t" $ do
 
   it "does not affect data prior to time t"
     (property $ \m
-      -> ephemeris (applyManeuver testTrajectory (m`At`mjd' 5)) (map mjd' [0..4])
+      -> absoluteDV m > _0
+      ==> ephemeris (applyManeuver testTrajectory (m`At`mjd' 5)) (map mjd' [0..4])
       == ephemeris testTrajectory (map mjd' [0..4])
     )
 
+  it "affects data after time t"
+    (property $ \m
+      -> absoluteDV m > _0
+      ==> ephemeris (applyManeuver testTrajectory (m`At`mjd' 5)) (map mjd' [6])
+      /= ephemeris testTrajectory (map mjd' [6])
+    )
+
+absoluteDV :: Floating a => Maneuver a -> Velocity a
+absoluteDV ImpulsiveRTN {..} = sqrt (dvr^pos2 + dvt^pos2 + dvn^pos2)
 
 -- ----------------------------------------
 mps = meter / second

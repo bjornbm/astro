@@ -11,7 +11,8 @@ import Numeric.Units.Dimensional.LinearAlgebra.PosVel (CPos, CVel)
 import qualified Prelude
 import Astro.Orbit.SV
 import Astro.Orbit.COE
-import Astro.Orbit.MEOE
+import Astro.Orbit.MEOE hiding (anomaly, raan)
+import qualified Astro.Orbit.MEOE as M (anomaly, raan)
 import Astro.Orbit.Types
 import Astro.Orbit.Anomaly
 import Data.AEq
@@ -84,19 +85,15 @@ sv2meoe mu r v = coe2meoe $ sv2coe mu r v
 -- not be in the range [-pi,pi). This converision is valid
 -- for true, eccentric, and mean longitude/anomaly.
 meoe2coe :: RealFloat a => MEOE t a -> COE t a
-meoe2coe MEOE{..} = COE
+meoe2coe m@MEOE{..} = COE
   { mu   = mu
   , slr  = p
-  , ecc  = sqrt (f ^ pos2 + g ^ pos2)
-  , inc  = atan2 (_2 * sqrt (h ^ pos2 + k ^ pos2)) (_1 - h ^ pos2 - k ^ pos2)
-  , aop  = aop
-  , raan = raan
-  , anomaly = Anom $ long longitude - aop - raan  -- May be beyond [-pi,pi).
-  -- , anomaly = Anom $ long longitude - atan2 g f  -- May be beyond [-pi,pi).
+  , ecc  = eccentricity m
+  , inc  = inclination m
+  , aop  = argumentOfPeriapsis m
+  , raan = M.raan m
+  , anomaly = M.anomaly m -- May be beyond [-pi,pi).
   }
-  where
-    raan = atan2 k h
-    aop  = atan2 (g * h - f * k) (f * h + g * k)
 
 
 -- | Convert a MEOE to a cartesian State Vector. Algorithm from Eagle.
@@ -149,7 +146,7 @@ meoe2meoeM :: RealFloat a => MEOE True a -> MEOE Mean a
 -- Implementation where conversion limited to (that necessary for) longitude.
 meoe2meoeM m = m { longitude = (longitude . coe2meoe . coe2coeM . meoe2coe) m }
 
--- | Convert MEOE with true anomaly to MEOE with mean anomaly.
+-- | Convert MEOE with mean anomaly to MEOE with true anomaly.
 meoeM2meoe :: (AEq a, RealFloat a) => MEOE Mean a -> MEOE True a
 -- Naive implementation, converts everything and not only anomaly.
 --meoeM2meoe = coe2meoe . coeM2coe . meoe2coe
