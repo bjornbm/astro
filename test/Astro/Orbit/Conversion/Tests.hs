@@ -41,7 +41,7 @@ spec_coe2meoe2coe = describe "coe2meoe2coe" $ do
     (coe2vec testCOE1 ~== (coe2vec . meoe2coe . coe2meoe) testCOE1)
 
   it "Converting a COE (generated from a random SV) to a MEOE and back to a COE does not change it"
-    (property $ \mu r v -> let coe = sv2coe mu r v :: CT; i = inc coe
+    (property $ \mu sv -> let coe = sv2coe mu sv :: CT; i = inc coe
       in mu > _0 && i /= pi && i >= _0
       ==> coe2vec coe ~== (coe2vec . meoe2coe . coe2meoe) coe
     )
@@ -53,34 +53,33 @@ angmom (r, v) = vNorm (r `crossProduct` v)
 spec_sv2coe2meoe2sv = describe "sv2coe2meoe2sv" $ do
 
   it "Converting a random SV to a MEOE and back to a SV does not change it"
-    (property $ \mu (sv :: SVD) -> angmom sv /= _0 && mu > _0 ==>
-      (meoe2sv . coe2meoe . uncurry (sv2coe mu)) sv ~== sv)
+    (property $ \mu (sv :: SVD) -> mu > _0 && angmom sv /= _0 ==>
+      (meoe2sv . coe2meoe . sv2coe mu) sv ~== sv)
 
   it "Converting a prograde SV to a MEOE and back to a SV does not change it"
-    ((meoe2sv . coe2meoe . sv2coe') testSV0 ~== testSV0)
+    ((meoe2sv . sv2meoe mu_Earth) testSV0 ~== testSV0)
 
   it "Converting a retrograde SV to a MEOE and back to a SV does not change it – surprisingly!"
-    ((fudgeSV . meoe2sv . coe2meoe . sv2coe') testSV0R ~== fudgeSV testSV0R)
+    ((fudgeSV . meoe2sv . sv2meoe mu_Earth) testSV0R ~== fudgeSV testSV0R)
 
   it "Converting a prograde SV to a MEOE and back to a SV does not change it"
-    ((fudgeSV . meoe2sv . coe2meoe . sv2coe') testSV1 ~== fudgeSV testSV1)
+    ((fudgeSV . meoe2sv . sv2meoe mu_Earth) testSV1 ~== fudgeSV testSV1)
 
   it "Converting a prograde SV to a MEOE and back to a SV does not change it"
-    ((meoe2sv . coe2meoe . sv2coe') testSV2 ~== testSV2)
+    ((meoe2sv . sv2meoe mu_Earth) testSV2 ~== testSV2)
 
   it "Converting a retrograde SV to a MEOE and back to a SV does not change it – surprisingly!"
-    ((meoe2sv . coe2meoe . sv2coe') testSV2R ~== testSV2R)
+    ((meoe2sv . sv2meoe mu_Earth) testSV2R ~== testSV2R)
 
   it "Converting a prograde SV to a MEOE and back to a SV does not change it significantly"
-    ((fudgeSV . meoe2sv . coe2meoe . sv2coe') testSV3 ~== fudgeSV testSV3)
+    ((fudgeSV . meoe2sv . sv2meoe mu_Earth) testSV3 ~== fudgeSV testSV3)
 
   it "Converting a prograde SV to a MEOE and back to a SV does not change it significantly"
-    ((fudgeSV . meoe2sv . coe2meoe . sv2coe') testSV4 ~== fudgeSV testSV4)
+    ((fudgeSV . meoe2sv . sv2meoe mu_Earth) testSV4 ~== fudgeSV testSV4)
 
   it "Converting a random SV to a MEOE and back to a SV does not change it"
-    (property $ \mu r v -> let coe = sv2coe mu r v :: CT; i = inc coe
-      in mu > _0 && i /= pi && i /= negate pi
-      ==> (r,v) ~== (meoe2sv $ coe2meoe $ sv2coe mu r v)
+    (property $ \mu (sv :: SVD) -> mu > _0 && angmom sv > _0 ==>
+      (meoe2sv . sv2meoe mu) sv ~== sv
     )
 
 
@@ -88,68 +87,68 @@ spec_sv2coe2meoe2sv = describe "sv2coe2meoe2sv" $ do
 spec_sv2coe = describe "sv2coe" $ do
 
   it "Inclination of prograde orbit in xy-plane is zero"
-    (inc (sv2coe' testSV0) == _0)
+    (inc (sv2coe mu_Earth testSV0) == _0)
 
   it "Inclination of retrograde orbit in xy-plane is pi"
-    (inc (sv2coe' testSV0R) == pi)
+    (inc (sv2coe mu_Earth testSV0R) == pi)
 
   it "Inclination of orbit in xy-plane is zero (prograde) or pi (retrograde)"
     (property $ \mu x y vx vy -> mu > _0 ==>
       let r =  x <:  y <:. 0 *~ meter
           v = vx <: vy <:. 0 *~ mps
-          i = inc (sv2coe mu r v) :: Angle Double
+          i = inc (sv2coe mu (r,v)) :: Angle Double
       in i == _0 || i == pi
     )
 
   it "RAAN of prograde orbit in xy-plane is pi"
-    (raan (sv2coe' testSV0) == pi)
+    (raan (sv2coe mu_Earth testSV0) == pi)
 
   it "RAAN of retrograde orbit in xy-plane is pi"
-    (raan (sv2coe' testSV0R) == pi)
+    (raan (sv2coe mu_Earth testSV0R) == pi)
 
   it "RAAN of orbit in xy-plane is ±pi or zero"
     (property $ \mu x y vx vy -> mu > _0 ==>
       let r =  x <:  y <:. 0 *~ meter
           v = vx <: vy <:. 0 *~ mps
-          ra = raan (sv2coe mu r v) :: Angle Double
+          ra = raan (sv2coe mu (r,v)) :: Angle Double
       in ra ~== pi || ra ~== negate pi || ra == _0
     )
 
   it "For prograde orbit at perigee trueAnomaly = 0"
-    (anomaly (sv2coe' testSV0) == Anom _0)
+    (anomaly (sv2coe mu_Earth testSV0) == Anom _0)
 
   it "For retrograde orbit at perigee trueAnomaly = 0"
-    (anomaly (sv2coe' testSV0R) == Anom _0)
+    (anomaly (sv2coe mu_Earth testSV0R) == Anom _0)
 
   it "For prograde orbit at apogee trueAnomaly = -pi"
-    (anomaly (sv2coe' testSV1) == Anom (negate pi))
+    (anomaly (sv2coe mu_Earth testSV1) == Anom (negate pi))
 
   it "For retrograde orbit at apogee trueAnomaly = pi"
-    (anomaly (sv2coe' testSV1R) == Anom pi)
+    (anomaly (sv2coe mu_Earth testSV1R) == Anom pi)
 
   it "Prograde orbit with AN, perigee, and anomaly coinciding on +x"
-    (let coe = sv2coe' testSV2
+    (let coe = sv2coe mu_Earth testSV2
       in raan coe == _0 && aop coe == _0 && anomaly coe == Anom _0
     )
 
   it "Retrograde orbit with AN, perigee, and anomaly coinciding on +x"
-    (let coe = sv2coe' testSV2R
+    (let coe = sv2coe mu_Earth testSV2R
       in raan coe == _0 && aop coe == _0 && anomaly coe == Anom _0
     )
 
   it "Prograde orbit with DN, perigee, and anomaly coinciding on +x"
-    (let coe = sv2coe' testSV3
+    (let coe = sv2coe mu_Earth testSV3
       in raan coe == negate pi && aop coe == pi && anomaly coe == Anom _0
     )
 
   it "Prograde orbit with DN, apogee, and anomaly coinciding on +x"
-    (let coe = sv2coe' testSV4
+    (let coe = sv2coe mu_Earth testSV4
       in raan coe == negate pi && aop coe ~== _0 && anomaly coe == Anom pi
     )
 
   it "Converting a SV to a COE and back to a SV does not change it"
-    (property $ \mu (sv :: SVD) -> angmom sv > _0 && mu > _0 ==>
-      (coe2sv . uncurry (sv2coe mu)) sv ~== sv)
+    (property $ \mu (sv :: SVD) -> mu > _0 && angmom sv > _0 ==>
+      (coe2sv . sv2coe mu) sv ~== sv)
 
 -- ----------------------------------------------------------
 spec_coe2coeM = describe "coe2meoe2coe" $ do
@@ -175,9 +174,6 @@ mps = meter / second
 
 -- | From Wikipedia.
 mu_Earth = 398600.4418 *~ (kilo meter ^ pos3 / second ^ pos2)
-
--- | Convert an SV to a COE assuming Earth is central body.
-sv2coe' = uncurry (sv2coe mu_Earth)
 
 -- | Fudge a state vector to avoid comparing to zero elements
 -- where the deviation may be greated than epsilon.

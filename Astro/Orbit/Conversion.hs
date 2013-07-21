@@ -24,8 +24,8 @@ import Data.AEq
 --   i = 0   ->  RAAN = one of [-pi,-0,0,pi]
 --   i = pi  ->  RAAN = pi
 --   e = 0   ->  AoP  = 0
-sv2coe :: RealFloat a => GravitationalParameter a -> CPos a -> CVel a -> COE True a
-sv2coe mu r' v' = COE
+sv2coe :: RealFloat a => GravitationalParameter a -> SV a -> COE True a
+sv2coe mu (r', v') = COE
   { mu   = mu
   , slr  = p
   , ecc  = vNorm e'
@@ -76,8 +76,8 @@ coe2meoe COE {..} = MEOE
 
 -- | Convert a SV into a COE.
 sv2meoe :: RealFloat a
-        => GravitationalParameter a -> CPos a -> CVel a -> MEOE True a
-sv2meoe mu r v = coe2meoe $ sv2coe mu r v
+        => GravitationalParameter a -> SV a -> MEOE True a
+sv2meoe mu = coe2meoe . sv2coe mu
 
 -- | Convert a MEOE into a COE. Use the algoritm from Eagle
 -- except for anomaly for which it has a singularity.
