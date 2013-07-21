@@ -15,6 +15,7 @@ import qualified Prelude
 import Astro.Util (plusMinusPi, zeroTwoPi)
 import Astro.Orbit.Types
 import Astro.Orbit.MEOE (MEOE (MEOE))
+import Astro.Orbit.COE (COE (COE), coe2vec)
 import Astro.Orbit.SV (SV)
 import Astro.Orbit.Conversion (sv2meoe)
 import Astro.Orbit.Maneuver
@@ -39,7 +40,7 @@ instance Arbitrary a => Arbitrary (Maneuver a) where
 instance (RealFloat a, Ord a, Arbitrary a) => Arbitrary (MEOE True a) where
   arbitrary = do
     Positive mu <- arbitrary
-    uncurry (sv2meoe (mu *~ (kilo meter ^ pos3 / second ^ pos2))) <$> arbitrary
+    sv2meoe (mu *~ (kilo meter ^ pos3 / second ^ pos2)) <$> arbitrary
 -- -}
 
 instance (RealFrac a, Ord a, Arbitrary a) => Arbitrary (MEOE True a) where
@@ -69,4 +70,8 @@ instance (RealFloat a, AEq a) => AEq (Longitude l a) where
   (Long x) ~== (Long y) = x ~==~ y
 
 deriving instance (RealFloat a,  Eq a) =>  Eq (MEOE l a)
+deriving instance (RealFloat a,  Eq a) =>  Eq (COE t a)
+
+instance (RealFloat a, AEq a) => AEq (COE t a) where
+  c ~== c' = coe2vec c ~== coe2vec c
 --deriving instance (RealFloat a, AEq a) => AEq (MEOE l a)

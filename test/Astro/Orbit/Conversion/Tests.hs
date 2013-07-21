@@ -35,26 +35,25 @@ type CT = COE True Double
 spec_coe2meoe2coe = describe "coe2meoe2coe" $ do
 
   it "Converting a COE to a MEOE and back to a COE does not change it"
-    (coe2vec testCOE0 ~== (coe2vec . meoe2coe . coe2meoe) testCOE0)
+    (testCOE0 ~== (meoe2coe . coe2meoe) testCOE0)
 
   it "Converting a COE to a MEOE and back to a COE does not change it"
-    (coe2vec testCOE1 ~== (coe2vec . meoe2coe . coe2meoe) testCOE1)
+    (testCOE1 ~== (meoe2coe . coe2meoe) testCOE1)
 
   it "Converting a COE (generated from a random SV) to a MEOE and back to a COE does not change it"
-    (property $ \mu sv -> let coe = sv2coe mu sv :: CT; i = inc coe
-      in mu > _0 && i /= pi && i >= _0
-      ==> coe2vec coe ~== (coe2vec . meoe2coe . coe2meoe) coe
+    (property $ \mu sv -> let coe = sv2coe mu sv :: CT in
+      mu > _0 && orbmom sv /= _0
+      ==> coe ~== (meoe2coe . coe2meoe) coe
     )
 
 
 -- ----------------------------------------------------------
---angmom :: SV Double -> AngularMomentum Double
-angmom (r, v) = vNorm (r `crossProduct` v)
+
 spec_sv2coe2meoe2sv = describe "sv2coe2meoe2sv" $ do
 
   it "Converting a random SV to a MEOE and back to a SV does not change it"
-    (property $ \mu (sv :: SVD) -> mu > _0 && angmom sv /= _0 ==>
-      (meoe2sv . coe2meoe . sv2coe mu) sv ~== sv)
+    (property $ \mu (sv :: SVD) -> mu > _0 && orbmom sv /= _0 ==>
+      (meoe2sv . sv2meoe mu) sv ~== sv)
 
   it "Converting a prograde SV to a MEOE and back to a SV does not change it"
     ((meoe2sv . sv2meoe mu_Earth) testSV0 ~== testSV0)
@@ -77,14 +76,13 @@ spec_sv2coe2meoe2sv = describe "sv2coe2meoe2sv" $ do
   it "Converting a prograde SV to a MEOE and back to a SV does not change it significantly"
     ((fudgeSV . meoe2sv . sv2meoe mu_Earth) testSV4 ~== fudgeSV testSV4)
 
-  it "Converting a random SV to a MEOE and back to a SV does not change it"
-    (property $ \mu (sv :: SVD) -> mu > _0 && angmom sv > _0 ==>
-      (meoe2sv . sv2meoe mu) sv ~== sv
-    )
-
 
 -- ----------------------------------------------------------
 spec_sv2coe = describe "sv2coe" $ do
+
+  it "Converting a SV to a COE and back to a SV does not change it"
+    (property $ \mu (sv :: SVD) -> mu > _0 && orbmom sv > _0 ==>
+      (coe2sv . sv2coe mu) sv ~== sv)
 
   it "Inclination of prograde orbit in xy-plane is zero"
     (inc (sv2coe mu_Earth testSV0) == _0)
@@ -146,29 +144,26 @@ spec_sv2coe = describe "sv2coe" $ do
       in raan coe == negate pi && aop coe ~== _0 && anomaly coe == Anom pi
     )
 
-  it "Converting a SV to a COE and back to a SV does not change it"
-    (property $ \mu (sv :: SVD) -> mu > _0 && angmom sv > _0 ==>
-      (coe2sv . sv2coe mu) sv ~== sv)
-
 -- ----------------------------------------------------------
 spec_coe2coeM = describe "coe2meoe2coe" $ do
 
   it "Converting a COE to a COEm and back to a COE does not change it"
-    (coe2vec testCOE0 ~== (coe2vec . coeM2coe . coe2coeM) testCOE0)
+    (testCOE0 ~== (coeM2coe . coe2coeM) testCOE0)
 
   it "Converting a COE to a COEm and back to a COE does not change it"
-    (coe2vec testCOE1 ~== (coe2vec . coeM2coe . coe2coeM) testCOE1)
+    (testCOE1 ~== (coeM2coe . coe2coeM) testCOE1)
 
-  {-
   -- This doesn't work for hyperbolic orbits(?).
   it "Converting a COE (generated from a random SV) to a COEm and back to a COE does not change it"
-    (property $ \mu r v -> let coe = sv2coe mu r v :: CT; i = inc coe
+    (property $ \mu sv -> let coe = sv2coe mu sv :: CT; i = inc coe
       in mu > _0 && i /= pi && i /= negate pi
-      ==> coe2vec coe ~== (coe2vec . coeM2coe . coe2coeM) coe
+      ==> coe ~== (coeM2coe . coe2coeM) coe
     )
-  -- -}
 
 -- Convenience and utility functions.
+
+-- | Magnitude of orbit angular momentum per mass unit.
+orbmom (r, v) = vNorm (r `crossProduct` v)
 
 mps = meter / second
 
