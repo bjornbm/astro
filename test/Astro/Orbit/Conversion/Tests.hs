@@ -28,6 +28,9 @@ specs = do
   spec_coe2coeM
 
 
+type SVD = SV Double
+type CT = COE True Double
+
 -- ----------------------------------------------------------
 spec_coe2meoe2coe = describe "coe2meoe2coe" $ do
 
@@ -38,14 +41,20 @@ spec_coe2meoe2coe = describe "coe2meoe2coe" $ do
     (coe2vec testCOE1 ~== (coe2vec . meoe2coe . coe2meoe) testCOE1)
 
   it "Converting a COE (generated from a random SV) to a MEOE and back to a COE does not change it"
-    (property $ \mu r v -> let coe = sv2coe mu r v :: COE True Double; i = inc coe
+    (property $ \mu r v -> let coe = sv2coe mu r v :: CT; i = inc coe
       in mu > _0 && i /= pi && i >= _0
       ==> coe2vec coe ~== (coe2vec . meoe2coe . coe2meoe) coe
     )
 
 
 -- ----------------------------------------------------------
+--angmom :: SV Double -> AngularMomentum Double
+angmom (r, v) = vNorm (r `crossProduct` v)
 spec_sv2coe2meoe2sv = describe "sv2coe2meoe2sv" $ do
+
+  it "Converting a random SV to a MEOE and back to a SV does not change it"
+    (property $ \mu (sv :: SVD) -> angmom sv /= _0 && mu > _0 ==>
+      (meoe2sv . coe2meoe . uncurry (sv2coe mu)) sv ~== sv)
 
   it "Converting a prograde SV to a MEOE and back to a SV does not change it"
     ((meoe2sv . coe2meoe . sv2coe') testSV0 ~== testSV0)
@@ -69,7 +78,7 @@ spec_sv2coe2meoe2sv = describe "sv2coe2meoe2sv" $ do
     ((fudgeSV . meoe2sv . coe2meoe . sv2coe') testSV4 ~== fudgeSV testSV4)
 
   it "Converting a random SV to a MEOE and back to a SV does not change it"
-    (property $ \mu r v -> let coe = sv2coe mu r v :: COE True Double; i = inc coe
+    (property $ \mu r v -> let coe = sv2coe mu r v :: CT; i = inc coe
       in mu > _0 && i /= pi && i /= negate pi
       ==> (r,v) ~== (meoe2sv $ coe2meoe $ sv2coe mu r v)
     )
@@ -138,6 +147,9 @@ spec_sv2coe = describe "sv2coe" $ do
       in raan coe == negate pi && aop coe ~== _0 && anomaly coe == Anom pi
     )
 
+  it "Converting a SV to a COE and back to a SV does not change it"
+    (property $ \mu (sv :: SVD) -> angmom sv > _0 && mu > _0 ==>
+      (coe2sv . uncurry (sv2coe mu)) sv ~== sv)
 
 -- ----------------------------------------------------------
 spec_coe2coeM = describe "coe2meoe2coe" $ do
@@ -151,7 +163,7 @@ spec_coe2coeM = describe "coe2meoe2coe" $ do
   {-
   -- This doesn't work for hyperbolic orbits(?).
   it "Converting a COE (generated from a random SV) to a COEm and back to a COE does not change it"
-    (property $ \mu r v -> let coe = sv2coe mu r v :: COE True Double; i = inc coe
+    (property $ \mu r v -> let coe = sv2coe mu r v :: CT; i = inc coe
       in mu > _0 && i /= pi && i /= negate pi
       ==> coe2vec coe ~== (coe2vec . coeM2coe . coe2coeM) coe
     )
