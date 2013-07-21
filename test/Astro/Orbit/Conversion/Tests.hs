@@ -17,7 +17,7 @@ import Astro.Orbit.COE
 import Astro.Orbit.MEOE (longitude)
 import Astro.Orbit.SV
 import Astro.Orbit.Conversion
-import Astro.Orbit.Types
+import Astro.Orbit.Types hiding (ecc)
 
 
 main = hspec specs
@@ -153,12 +153,9 @@ spec_coe2coeM = describe "coe2meoe2coe" $ do
   it "Converting a COE to a COEm and back to a COE does not change it"
     (testCOE1 ~== (coeM2coe . coe2coeM) testCOE1)
 
-  -- This doesn't work for hyperbolic orbits(?).
-  it "Converting a COE (generated from a random SV) to a COEm and back to a COE does not change it"
-    (property $ \mu sv -> let coe = sv2coe mu sv :: CT; i = inc coe
-      in mu > _0 && i /= pi && i /= negate pi
-      ==> coe ~== (coeM2coe . coe2coeM) coe
-    )
+  -- This doesn't work for hyperbolic orbits.
+  it "Converting an arbitrary COE to a COEm and back to a COE does not change it"
+    (property $ \(c::CT) -> ecc c < _1 ==> c ~== (coeM2coe . coe2coeM) c)
 
 -- Convenience and utility functions.
 

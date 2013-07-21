@@ -110,8 +110,9 @@ longitudeRate MEOE{..} = sqrt (mu * p) * (w / p) ^ pos2
 -- | Apply an impulsive perturbation (delta-velocity) specified in TNR
 -- coordinates to the MEOE. See Eagle.
 impulsivePerturbation :: RealFloat a => MEOE True a -> Velocity a -> Velocity a -> Velocity a -> MEOE True a
-impulsivePerturbation m@MEOE{..} dvr dvt dvn = m
-  { p = p + dp
+impulsivePerturbation MEOE{..} dvr dvt dvn = MEOE
+  { mu = mu
+  , p = p + dp
   , f = f + df
   , g = g + dg
   , h = h + dh
