@@ -5,6 +5,7 @@ module Astro.Orbit.MEOE where
 
 import Numeric.NumType (incr)
 import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional.NonSI (revolution)
 import Numeric.Units.Dimensional.LinearAlgebra
 import Astro.Orbit.Types
 import qualified Prelude
@@ -12,14 +13,15 @@ import qualified Prelude
 -- | Modified Equinoctial Orbital Elements as defined by Walker et al.
 data MEOE long a = MEOE
   { mu :: GravitationalParameter a
-  , p  :: Length a
+  , p  :: Length a  -- Also known as semi latus rectum.
   , f  :: Dimensionless a
   , g  :: Dimensionless a
   , h  :: Dimensionless a
   , k  :: Dimensionless a
   , longitude :: Longitude long a
-              -- ^ Longitude in the sense of RAAN + AoP + Anomaly,
-              -- not in the geographic sense.
+  -- ^ Longitude in the sense of RAAN + AoP + Anomaly, not in the
+  -- geographic sense. See Eagle. It is equal to Right Ascension
+  -- for an orbit with inclinaton = 0°.
   } deriving (Show)
 
 -- | Convert a MEOE into a vector (not a State Vector) of its
@@ -49,6 +51,10 @@ eccentricity = sqrt . eccentricity2
 -- itself.
 eccentricity2 :: Fractional a => MEOE t a -> Dimensionless a
 eccentricity2 MEOE{..} = f ^ pos2 + g ^ pos2
+
+-- | The semi latus rectum is the @p@ element of a MEOE 
+semiLatusRectum :: Fractional a => MEOE t a -> Length a
+semiLatusRectum = p
 
 semiMajorAxis :: Fractional a => MEOE t a -> SemiMajorAxis a
 semiMajorAxis m = SMA $ p m / (_1 - eccentricity2 m)
@@ -81,3 +87,52 @@ argumentOfLatitude :: RealFloat a => MEOE True a -> Angle a
 argumentOfLatitude MEOE{..} = let l = long longitude in
                               atan2 (h * sin l - k * cos l)
                                     (h * cos l + k * sin l)
+
+
+-- --------------------------------
+-- Perturbations
+-- --------------------------------
+
+-- | The mean rate of the MEOE longitude, not taking into account
+-- variations in rate due to eccentricity.
+meanLongitudeRate :: Floating a => MEOE t a -> AngularVelocity a
+meanLongitudeRate m = 1 *~ revolution / meoeOrbitalPeriod m
+--meanLongitudeRate m = tau / meoeOrbitalPeriod m
+
+-- | The instantaneous rate of change of the MEOE longitude due to
+-- keplerian motion around the central body only.
+longitudeRate :: Floating a => MEOE True a -> AngularVelocity a
+longitudeRate MEOE{..} = sqrt (mu * p) * (w / p) ^ pos2
+  where
+    l = long longitude
+    w = _1 + f * cos l + g * sin l
+
+-- | Apply an impulsive perturbation (delta-velocity) specified in TNR
+-- coordinates to the MEOE. See Eagle.
+impulsivePerturbation :: RealFloat a => MEOE True a -> Velocity a -> Velocity a -> Velocity a -> MEOE True a
+impulsivePerturbation m@MEOE{..} dvr dvt dvn = m
+  { p = p + dp
+  , f = f + df
+  , g = g + dg
+  , h = h + dh
+  , k = k + dk
+  , longitude = Long $ l + dl
+  } where
+    -- Helpers
+    l = long longitude
+    s2 = _1 + h ^ pos2 + k ^ pos2
+    w = _1 + f * cos l + g * sin l
+    sqpmu = sqrt (p / mu)
+    -- Element changes
+    dp = sqpmu * _2 * p / w * dvt
+    df = sqpmu * ( sin l  * dvr
+                 + ((w + _1) * cos l + f) / w * dvt
+                 - (h * sin l - k * cos l) * g / w * dvn
+                 )
+    dg = sqpmu * ( negate (cos l) * dvr
+                 + ((w + _1) * sin l + g) / w * dvt
+                 + (h * sin l - k * cos l) * g / w * dvn
+                 )
+    dh = sqpmu * s2 / (_2 * w) * cos l * dvn
+    dk = sqpmu * s2 / (_2 * w) * sin l * dvn
+    dl = sqpmu / w * (h * sin l - k * cos l) * dvn
