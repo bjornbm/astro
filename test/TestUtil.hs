@@ -11,12 +11,13 @@ import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.LinearAlgebra.Vector (Vec (ListVec))
 import Numeric.Units.Dimensional.AEq
 import qualified Prelude
-import Astro.Time
 import Astro.Coords
 import Astro.Coords.PosVel
 import Astro.Place
 import Astro.Place.Topocentric
 import Astro.Place.ReferenceEllipsoid
+import Astro.Time
+import Astro.Util
 import Test.QuickCheck
 import Control.Applicative
 import Data.AEq
@@ -107,3 +108,14 @@ trace s x = Debug.Trace.trace (s ++ ": " ++ show x) x
 -- interval [0,1).
 fractionalPart :: Dimensionless Double -> Dimensionless Double
 fractionalPart x = x - fromIntegral (floor (x /~ one)) *~ one
+
+
+-- Angle comparisons
+-- =================
+
+-- | Compares two angles for cyclic (approximate) equality.
+(~==~) :: (RealFloat a, AEq a) => Angle a -> Angle a -> Bool
+x ~==~ y = plusMinusPi x ~== plusMinusPi y
+        ||   zeroTwoPi x ~==   zeroTwoPi y  -- move the boundaries.
+
+infixl 4 ~==~

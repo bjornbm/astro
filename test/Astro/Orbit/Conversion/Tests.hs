@@ -39,7 +39,7 @@ spec_coe2meoe2coe = describe "coe2meoe2coe" $ do
 
   it "Converting a COE (generated from a random SV) to a MEOE and back to a COE does not change it"
     (property $ \mu r v -> let coe = sv2coe mu r v :: COE True Double; i = inc coe
-      in mu > 0*~(meter^pos3/second^pos2) && i /= pi && i >= _0
+      in mu > _0 && i /= pi && i >= _0
       ==> coe2vec coe ~== (coe2vec . meoe2coe . coe2meoe) coe
     )
 
@@ -70,7 +70,7 @@ spec_sv2coe2meoe2sv = describe "sv2coe2meoe2sv" $ do
 
   it "Converting a random SV to a MEOE and back to a SV does not change it"
     (property $ \mu r v -> let coe = sv2coe mu r v :: COE True Double; i = inc coe
-      in mu > 0*~(meter^pos3/second^pos2) && i /= pi && i /= negate pi
+      in mu > _0 && i /= pi && i /= negate pi
       ==> (r,v) ~== (meoe2sv $ coe2meoe $ sv2coe mu r v)
     )
 
@@ -85,7 +85,7 @@ spec_sv2coe = describe "sv2coe" $ do
     (inc (sv2coe' testSV0R) == pi)
 
   it "Inclination of orbit in xy-plane is zero (prograde) or pi (retrograde)"
-    (property $ \mu x y vx vy -> mu > 0 *~ (meter ^ pos3 / second ^ pos2) ==>
+    (property $ \mu x y vx vy -> mu > _0 ==>
       let r =  x <:  y <:. 0 *~ meter
           v = vx <: vy <:. 0 *~ mps
           i = inc (sv2coe mu r v) :: Angle Double
@@ -99,7 +99,7 @@ spec_sv2coe = describe "sv2coe" $ do
     (raan (sv2coe' testSV0R) == pi)
 
   it "RAAN of orbit in xy-plane is ±pi or zero"
-    (property $ \mu x y vx vy -> mu > 0 *~ (meter ^ pos3 / second ^ pos2) ==>
+    (property $ \mu x y vx vy -> mu > _0 ==>
       let r =  x <:  y <:. 0 *~ meter
           v = vx <: vy <:. 0 *~ mps
           ra = raan (sv2coe mu r v) :: Angle Double
@@ -151,11 +151,11 @@ spec_coe2coeM = describe "coe2meoe2coe" $ do
   {-
   -- This doesn't work for hyperbolic orbits(?).
   it "Converting a COE (generated from a random SV) to a COEm and back to a COE does not change it"
-    (property $ \mu r v -> let coe = sv2coe mu r v :: COE Double; i = inc coe
-      in mu > 0*~(meter^pos3/second^pos2) && i /= pi && i /= negate pi
+    (property $ \mu r v -> let coe = sv2coe mu r v :: COE True Double; i = inc coe
+      in mu > _0 && i /= pi && i /= negate pi
       ==> coe2vec coe ~== (coe2vec . coeM2coe . coe2coeM) coe
     )
-  -}
+  -- -}
 
 -- Convenience and utility functions.
 
