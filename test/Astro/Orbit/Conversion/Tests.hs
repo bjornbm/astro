@@ -14,7 +14,7 @@ import Numeric.Units.Dimensional.LinearAlgebra
 import qualified Prelude
 
 import Astro.Orbit.COE
-import Astro.Orbit.MEOE (longitude)
+import Astro.Orbit.MEOE (MEOE (..), eccentricity2)
 import Astro.Orbit.SV
 import Astro.Orbit.Conversion
 import Astro.Orbit.Types hiding (ecc)
@@ -26,10 +26,12 @@ specs = do
   spec_coe2meoe2coe
   spec_sv2coe2meoe2sv
   spec_coe2coeM
+  spec_meoe2meoeM
 
 
 type SVD = SV Double
 type CT = COE True Double
+type MT = MEOE True Double
 
 -- ----------------------------------------------------------
 spec_coe2meoe2coe = describe "coe2meoe2coe" $ do
@@ -145,7 +147,7 @@ spec_sv2coe = describe "sv2coe" $ do
     )
 
 -- ----------------------------------------------------------
-spec_coe2coeM = describe "coe2meoe2coe" $ do
+spec_coe2coeM = describe "coe2coeM2coe" $ do
 
   it "Converting a COE to a COEm and back to a COE does not change it"
     (testCOE0 ~== (coeM2coe . coe2coeM) testCOE0)
@@ -156,6 +158,31 @@ spec_coe2coeM = describe "coe2meoe2coe" $ do
   -- This doesn't work for hyperbolic orbits.
   it "Converting an arbitrary COE to a COEm and back to a COE does not change it"
     (property $ \(c::CT) -> ecc c < _1 ==> c ~== (coeM2coe . coe2coeM) c)
+
+  it "Converting an COE with zero eccentricity to a COEm doesn't change the anomaly"
+    (property $ \(c'::CT) -> let c = c'{ ecc = _0 } in
+      anom (anomaly c) ~==~ anom (anomaly (coe2coeM c)))
+
+  it "Converting an COE with non-zero eccentricity to a COEm changes the anomaly"
+    (property $ \(c::CT) -> ecc c < _1 && ecc c /= _0 ==>
+      not (anom (anomaly c) ~==~ anom (anomaly (coe2coeM c))))
+
+-- ----------------------------------------------------------
+spec_meoe2meoeM = describe "meoe2meoeM2meoe" $ do
+
+  -- This doesn't work for hyperbolic orbits.
+  it "Converting an arbitrary MEOE to a MEOEm and back to a MEOE does not change it"
+    (property $ \(m::MT) -> eccentricity2 m < _1 ==>
+      m ~== (meoeM2meoe . meoe2meoeM) m)
+
+  it "Converting an MEOE with zero eccentricity to a MEOEm doesn't change the longitude"
+    (property $ \(m'::MT) -> let m = m'{ f = _0, g = _0 } in
+      long (longitude m) ~==~ long (longitude (meoe2meoeM m)))
+
+  it "Converting an MEOE with non-zero eccentricity to a MEOEm changes the longitude"
+    (property $ \(m::MT) -> eccentricity2 m < _1 && eccentricity2 m /= _0 ==>
+      not (long (longitude m) ~==~ long (longitude (meoe2meoeM m))))
+
 
 -- Convenience and utility functions.
 
