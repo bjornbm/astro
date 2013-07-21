@@ -113,9 +113,13 @@ fractionalPart x = x - fromIntegral (floor (x /~ one)) *~ one
 -- Angle comparisons
 -- =================
 
--- | Compares two angles for cyclic (approximate) equality.
+-- | Compares two angles for cyclic equality.
+(==~) :: (RealFloat a, Eq a) => Angle a -> Angle a -> Bool
+x ==~ y = plusMinusPi x == plusMinusPi y
+
+-- | Compares two angles for approximate cyclic equality.
 (~==~) :: (RealFloat a, AEq a) => Angle a -> Angle a -> Bool
 x ~==~ y = plusMinusPi x ~== plusMinusPi y
         ||   zeroTwoPi x ~==   zeroTwoPi y  -- move the boundaries.
 
-infixl 4 ~==~
+infixl 4 ==~, ~==~
