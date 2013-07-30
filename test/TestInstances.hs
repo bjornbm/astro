@@ -19,7 +19,7 @@ import qualified Astro.Orbit.COE as C -- (COE (COE), coe2vec)
 import Astro.Orbit.SV (SV)
 import Astro.Orbit.Conversion (meoe2coe)
 import Astro.Orbit.Maneuver
-
+import Astro.Time.At
 
 -- Instances
 deriving instance Arbitrary a => Arbitrary (SemiMajorAxis a)
@@ -48,8 +48,9 @@ instance (RealFrac a, Ord a, Arbitrary a) => Arbitrary (M.MEOE t a) where
   arbitrary = do
     Positive mu <- arbitrary
     Positive p  <- arbitrary
-    M.MEOE (mu *~ (kilo meter ^ pos3 / second ^ pos2)) (p *~ meter)
-      <$> arbitrary1 <*> arbitrary1 <*> arbitrary1 <*> arbitrary1 <*> arbitrary
+    let m = M.MEOE (mu *~ (kilo meter ^ pos3 / second ^ pos2)) (p *~ meter)
+            <$> arbitrary1 <*> arbitrary1 <*> arbitrary1 <*> arbitrary1 <*> arbitrary
+    suchThat m (\m -> semiMajorAxis m > SMA _0)
     where arbitrary1 = (*~one) . snd . properFraction <$> arbitrary
 
 instance (RealFloat a, Ord a, Arbitrary a) => Arbitrary (C.COE t a) where
@@ -93,3 +94,6 @@ instance (RealFloat a, AEq a) => AEq (C.COE t a) where
            && C.aop  c0 ~== C.aop  c1
            && C.raan c0 ~== C.raan c1
            && anom (C.anomaly c0) ~==~ anom (C.anomaly c1)
+
+instance (RealFloat a, AEq a, AEq x) => AEq (At t a x) where
+  (x0 `At` t0) ~== (x1 `At` t1) = x0 ~== x1 && t0 ~== t1
