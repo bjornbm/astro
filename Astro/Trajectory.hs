@@ -26,14 +26,16 @@ class (Fractional a, Ord a) => Trajectory x t a
     -- The list of epochs must be increasing. If two identical
     -- epochs are encountered behaviour is unspecified (one or
     -- two data may be produced for that epoch).
+    -- Epochs outside the span of validity of the trajectory are ignored.
     ephemeris  :: x t a -> [E t a] -> [Datum t a]
     -- | @ephemeris' traj t0 t1 dt@ produces an ephemeris starting
     -- at @t0@ with data every @dt@ until @t1@. A datum at @t1@
     -- is produced only if @(t1 - t0) / dt@ is an integer.
+    -- Epochs outside the span of validity of the trajectory are ignored.
     ephemeris' :: x t a -> E t a -> E t a -> Time a -> [Datum t a]
     ephemeris' x t0 t1 dt = ephemeris x ts
       where
-        ts = takeWhile (<=t1) $ iterate (`addTime` dt) t0
+        ts = takeWhile (<= t1) $ iterate (`addTime` dt) t0
     -- | @datum traj t@ produces a datum at the time @t@, if the
     -- trajectory is valid for time @t@.
     datum :: x t a -> E t a -> Maybe (Datum t a)
