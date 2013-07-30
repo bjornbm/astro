@@ -1,4 +1,4 @@
-module Astro.Trajectory.Tests where
+module Astro.Trajectory.Cropped.Tests where
 
 import Test.Hspec
 --import Test.QuickCheck (property, (==>))
