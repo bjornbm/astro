@@ -9,10 +9,10 @@ import qualified Prelude
 
 
 -- Parameters.
-newtype SemiMajorAxis a = SMA { sma :: Length a } deriving (Show, Eq)
-newtype SemiLatusRectum a = SLR { slr :: Length a } deriving (Show, Eq)
+newtype SemiMajorAxis a = SMA { sma :: Length a } deriving (Show, Eq, Ord)
+newtype SemiLatusRectum a = SLR { slr :: Length a } deriving (Show, Eq, Ord)
 -- | Eccentricity. Should be >= 0.
-newtype Eccentricity a = Ecc { ecc :: Dimensionless a } deriving (Show, Eq)
+newtype Eccentricity a = Ecc { ecc :: Dimensionless a } deriving (Show, Eq, Ord)
 
 -- Angles
 -- ======
