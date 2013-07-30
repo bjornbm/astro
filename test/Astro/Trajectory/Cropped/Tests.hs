@@ -24,6 +24,7 @@ main = hspec specs
 specs = do
   spec_croppedStartTime
   spec_croppedEndTime
+  spec_badValidity
   spec_croppedEphemeris
   spec_croppedEphemeris'
 
@@ -71,6 +72,18 @@ spec_croppedEndTime = describe "Cropped trajectory endTime" $ do
   it "changes when cropping endTime"
     (property $ \m m' -> let t = ET [m `At` t2, m' `At` t4] in
       endTime (cropTrajectory Nothing (Just t3) t) == t3)
+
+spec_badValidity = describe "Trajectory with cropping disjunct from validity" $ do
+
+  it "doesn't generate ephemeris when cropped early"
+    (property $ \m m' ->
+      let t = cropTrajectory (Just t1) (Just t2) $ ET [m `At` t3, m' `At` t4] in
+      ephemeris t [startTime t, endTime t] == [])
+
+  it "doesn't generate ephemeris when cropped late"
+    (property $ \m m' ->
+      let t = cropTrajectory (Just t3) (Just t4) $ ET [m `At` t1, m' `At` t2] in
+      ephemeris t [startTime t, endTime t] == [])
 
 -- ----------------------------------------------------------------------
 
