@@ -22,6 +22,8 @@ import Astro.Orbit.Types
 
 main = hspec specs
 specs = do
+  spec_croppedStartTime
+  spec_croppedEndTime
   spec_croppedEphemeris
   spec_croppedEphemeris'
 
@@ -29,6 +31,48 @@ specs = do
 -- the test MEOEs are very random. We implement our own 'property'
 -- instead which feed the test MEOEs.
 property f = f testM1 testM2
+
+-- ----------------------------------------------------------------------
+
+spec_croppedStartTime = describe "Cropped trajectory startTime" $ do
+
+  it "does not change when not cropping"
+    (property $ \m m' -> let t = ET [m `At` t2, m' `At` t4] in
+      startTime (cropTrajectory Nothing Nothing t) == t2)
+
+  it "does not change when cropping before validity"
+    (property $ \m m' -> let t = ET [m `At` t2, m' `At` t4] in
+      startTime (cropTrajectory (Just t1) Nothing t) == t2)
+
+  it "does not change when cropping endTime"
+    (property $ \m m' -> let t = ET [m `At` t2, m' `At` t4] in
+      startTime (cropTrajectory Nothing (Just t3) t) == t2)
+
+  it "changes when cropping startTime"
+    (property $ \m m' -> let t = ET [m `At` t2, m' `At` t4] in
+      startTime (cropTrajectory (Just t3) Nothing t) == t3)
+
+-- ----------------------------------------------------------------------
+
+spec_croppedEndTime = describe "Cropped trajectory endTime" $ do
+
+  it "does not change when not cropping"
+    (property $ \m m' -> let t = ET [m `At` t2, m' `At` t4] in
+      endTime (cropTrajectory Nothing Nothing t) == t4)
+
+  it "does not change when cropping after validity"
+    (property $ \m m' -> let t = ET [m `At` t2, m' `At` t4] in
+      endTime (cropTrajectory (Just t1) (Just t5) t) == t4)
+
+  it "does not change when cropping startTime"
+    (property $ \m m' -> let t = ET [m `At` t2, m' `At` t4] in
+      endTime (cropTrajectory (Just t3) Nothing t) == t4)
+
+  it "changes when cropping endTime"
+    (property $ \m m' -> let t = ET [m `At` t2, m' `At` t4] in
+      endTime (cropTrajectory Nothing (Just t3) t) == t3)
+
+-- ----------------------------------------------------------------------
 
 spec_croppedEphemeris' = describe "Cropped trajectory (ephemeris')" $ do
 
@@ -77,6 +121,7 @@ spec_croppedEphemeris' = describe "Cropped trajectory (ephemeris')" $ do
       (ephemeris' (cropTrajectory (Just t2) (Just t3) t) t0 t5 dt
       `isInfixOf` ephemeris' t t0 t5 dt))
 
+-- ----------------------------------------------------------------------
 
 spec_croppedEphemeris = describe "Cropped trajectory (ephemeris)" $ do
 
@@ -129,6 +174,8 @@ spec_croppedEphemeris = describe "Cropped trajectory (ephemeris)" $ do
       let t = ET [m `At` t1, m' `At` t4]; ts = [t0, t0 `addTime` dt..t5] in
       (ephemeris (cropTrajectory (Just t2) (Just t3) t) ts
       `isInfixOf` ephemeris t ts))
+
+-- ----------------------------------------------------------------------
 
 t0 = mjd 0.0 UT1
 t1 = mjd 1 UT1
