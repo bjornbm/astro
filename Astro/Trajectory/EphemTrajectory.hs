@@ -44,7 +44,7 @@ meoes :: (RealFloat a, Ord a) => [Datum t a] -> [E t a] -> [Datum t a]
 meoes [] _ = []
 meoes (x:xs) ts = go (x:xs) $ dropWhile (< epoch x) ts
   where
-    -- We already know that @xs@ is non-empty and @t >= fst x@.
+    -- We already know that @xs@ is non-empty and @t >= epoch x@.
     go :: (RealFloat a, Ord a) => [Datum t a] -> [E t a] -> [Datum t a]
     go _    []   = []
     go [x] (t:_) = if t == epoch x then [x] else []
