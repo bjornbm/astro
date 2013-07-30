@@ -1,5 +1,5 @@
 Name:                astro-orbit
-Version:             0.5
+Version:             0.6
 License:             BSD3
 License-File:        LICENSE
 Copyright:           Bjorn Buckwalter 2011
@@ -27,5 +27,6 @@ Exposed-Modules:     Astro.Orbit.Anomaly,
                      Astro.Orbit.Types,
                      Astro.Orbit.Maneuver,
                      Astro.Trajectory,
+                     Astro.Trajectory.Cropped
                      Astro.Trajectory.EphemTrajectory
 Extra-source-files:  README
