@@ -61,6 +61,9 @@ linearPolateVecT (v1`At`t1) (v2`At`t2) t = linearPolateVec (f t1,v1) (f t2,v2) (
 -- | Interpolate two MEOEs with mean anomaly. In interpolating mean
 -- anomaly the orbital period is taken into account to ensure proper
 -- interpolation.
+-- NOTE: this does not work for hyperbolic orbits, and probably not
+-- when t1 and t0 are separated by more than one (or a half?) orbital
+-- period?
 linearPolateMEOEm :: RealFloat a
                   => Datum t a -> Datum t a
                   -> E t a -> MEOE Mean a
