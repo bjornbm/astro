@@ -97,7 +97,7 @@ spec_croppedEndTime = describe "Cropped trajectory endTime" $ do
 
   it "does not change when cropping after validity"
     (property $ \m m' -> let t = ET [m `At` t2, m' `At` t4] in
-      endTime (cropStart t1 $ cropEnd t5 t) == t4)
+      endTime (crop t1 t5 t) == t4)
 
   it "does not change when cropping startTime"
     (property $ \m m' -> let t = ET [m `At` t2, m' `At` t4] in
@@ -111,22 +111,22 @@ spec_badValidity = describe "Trajectory with cropping disjunct from validity" $ 
 
   it "doesn't generate ephemeris when cropped early"
     (property $ \m m' ->
-      let t = cropStart t1 $ cropEnd t2 $ ET [m `At` t3, m' `At` t4] in
+      let t = crop t1 t2 $ ET [m `At` t3, m' `At` t4] in
       ephemeris t [startTime t, endTime t] == [])
 
   it "doesn't generate ephemeris when cropped late"
     (property $ \m m' ->
-      let t = cropStart t3 $ cropEnd t4 $ ET [m `At` t1, m' `At` t2] in
+      let t = crop t3 t4 $ ET [m `At` t1, m' `At` t2] in
       ephemeris t [startTime t, endTime t] == [])
 
   it "doesn't generate ephemeris' when cropped early"
     (property $ \m m' ->
-      let t = cropStart t1 $ cropEnd t2 $ ET [m `At` t3, m' `At` t4] in
+      let t = crop t1 t2 $ ET [m `At` t3, m' `At` t4] in
       ephemeris' t (startTime t) (endTime t) dt == [])
 
   it "doesn't generate ephemeris' when cropped late"
     (property $ \m m' ->
-      let t = cropStart t3 $ cropEnd t4 $ ET [m `At` t1, m' `At` t2] in
+      let t = crop t3 t4 $ ET [m `At` t1, m' `At` t2] in
       ephemeris' t (startTime t) (endTime t) dt == [])
 
 -- ----------------------------------------------------------------------
@@ -136,16 +136,16 @@ spec_croppedEphemeris' = describe "Cropped trajectory (ephemeris')" $ do
   it "does not change when cropping beyond validity"
     (property $ \m m' -> let t = ET [m `At` t2, m' `At` t3] in
       ephemeris' t t0 t5 dt
-      == ephemeris' (cropStart t1 $ cropEnd t4 t) t0 t5 dt)
+      == ephemeris' (crop t1 t4 t) t0 t5 dt)
 
   it "with cropped startTime is not equal to uncropped trajectory"
     (property $ \m m' -> let t = ET [m `At` t1, m' `At` t3] in
-      (ephemeris' (cropStart t2 $ cropEnd t4 t) t0 t5 dt
+      (ephemeris' (crop t2 t4 t) t0 t5 dt
       /= ephemeris' t t0 t5 dt))
 
   it "with cropped startTime is suffix of uncropped trajectory"
     (property $ \m m' -> let t = ET [m `At` t1, m' `At` t3] in
-      (ephemeris' (cropStart t2 $ cropEnd t4 t) t0 t5 dt
+      (ephemeris' (crop t2 t4 t) t0 t5 dt
       `isSuffixOf` ephemeris' t t0 t5 dt))
 
   it "with cropped endTime is not equal to of uncropped trajectory"
@@ -160,26 +160,26 @@ spec_croppedEphemeris' = describe "Cropped trajectory (ephemeris')" $ do
 
   it "with cropped start and end is not prefix of uncropped trajectory"
     (property $ \m m' -> let t = ET [m `At` t1, m' `At` t4] in
-      not (ephemeris' (cropStart t2 $ cropEnd t3 t) t0 t5 dt
+      not (ephemeris' (crop t2 t3 t) t0 t5 dt
       `isPrefixOf` ephemeris' t t0 t5 dt))
 
   it "with cropped start and end is not suffix of uncropped trajectory"
     (property $ \m m' -> let t = ET [m `At` t1, m' `At` t4] in
-      not (ephemeris' (cropStart t2 $ cropEnd t3 t) t0 t5 dt
+      not (ephemeris' (crop t2 t3 t) t0 t5 dt
       `isSuffixOf` ephemeris' t t0 t5 dt))
 
   it "with cropped start and end is infix of uncropped trajectory"
     (property $ \m m' -> let t = ET [m `At` t1, m' `At` t4] in
-      (ephemeris' (cropStart t2 $ cropEnd t3 t) t0 t5 dt
+      (ephemeris' (crop t2 t3 t) t0 t5 dt
       `isInfixOf` ephemeris' t t0 t5 dt))
 
   it "returns no ephemeris' beyond lower validity"
     (property $ \m m' -> let t = ET [m `At` t0, m' `At` t5] in
-      ephemeris' (cropStart t2 $ cropEnd t3 t) t0 t1 dt == [])
+      ephemeris' (crop t2 t3 t) t0 t1 dt == [])
 
   it "returns no ephemeris' beyond upper validity"
     (property $ \m m' -> let t = ET [m `At` t0, m' `At` t5] in
-      ephemeris' (cropStart t2 $ cropEnd t3 t) t4 t5 dt == [])
+      ephemeris' (crop t2 t3 t) t4 t5 dt == [])
 
 -- ----------------------------------------------------------------------
 
@@ -188,17 +188,17 @@ spec_croppedEphemeris = describe "Cropped trajectory (ephemeris)" $ do
   it "does not change when cropping beyond validity"
     (property $ \m m' ->
       let t = ET [m `At` t2, m' `At` t3]; ts = [t0, t0 `addTime` dt..t5] in
-       ephemeris t ts == ephemeris (cropStart t1 $ cropEnd t4 t) ts)
+       ephemeris t ts == ephemeris (crop t1 t4 t) ts)
 
   it "with cropped startTime is not equal to uncropped trajectory"
     (property $ \m m' ->
       let t = ET [m `At` t1, m' `At` t3]; ts = [t0, t0 `addTime` dt..t5] in
-      ephemeris (cropStart t2 $ cropEnd t4 t) ts /= ephemeris t ts)
+      ephemeris (crop t2 t4 t) ts /= ephemeris t ts)
 
   it "with cropped startTime is suffix of uncropped trajectory"
     (property $ \m m' ->
       let t = ET [m `At` t1, m' `At` t3]; ts = [t0, t0 `addTime` dt..t5] in
-      (ephemeris (cropStart t2 $ cropEnd t4 t) ts
+      (ephemeris (crop t2 t4 t) ts
       `isSuffixOf` ephemeris t ts))
 
   it "with cropped endTime is not equal to of uncropped trajectory"
@@ -215,30 +215,30 @@ spec_croppedEphemeris = describe "Cropped trajectory (ephemeris)" $ do
   it "with cropped start and end is not prefix of uncropped trajectory"
     (property $ \m m' ->
       let t = ET [m `At` t1, m' `At` t4]; ts = [t0, t0 `addTime` dt..t5] in
-      not (ephemeris (cropStart t2 $ cropEnd t3 t) ts
+      not (ephemeris (crop t2 t3 t) ts
       `isPrefixOf` ephemeris t ts))
 
   it "with cropped start and end is not suffix of uncropped trajectory"
     (property $ \m m' ->
       let t = ET [m `At` t1, m' `At` t4]; ts = [t0, t0 `addTime` dt..t5] in
-      not (ephemeris (cropStart t2 $ cropEnd t3 t) ts
+      not (ephemeris (crop t2 t3 t) ts
       `isSuffixOf` ephemeris t ts))
 
   it "with cropped start and end is infix of uncropped trajectory (ephemeris')"
     (property $ \m m' ->
       let t = ET [m `At` t1, m' `At` t4]; ts = [t0, t0 `addTime` dt..t5] in
-      (ephemeris (cropStart t2 $ cropEnd t3 t) ts
+      (ephemeris (crop t2 t3 t) ts
       `isInfixOf` ephemeris t ts))
 
   it "returns no ephemeris beyond lower validity"
     (property $ \m m' ->
       let t = ET [m `At` t0, m' `At` t5]; ts = [t0, t0 `addTime` dt..t1] in
-      ephemeris (cropStart t2 $ cropEnd t3 t) ts == [])
+      ephemeris (crop t2 t3 t) ts == [])
 
   it "returns no ephemeris beyond upper validity"
     (property $ \m m' ->
       let t = ET [m `At` t0, m' `At` t5]; ts = [t4, t4 `addTime` dt..t5] in
-      ephemeris (cropStart t2 $ cropEnd t3 t) ts == [])
+      ephemeris (crop t2 t3 t) ts == [])
 
 -- ----------------------------------------------------------------------
 

@@ -1,8 +1,10 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-module Astro.Trajectory.Cropped (cropStart, cropEnd) where
+module Astro.Trajectory.Cropped ( cropStart, cropEnd, crop
+                                , cropStart', cropEnd', crop') where
 
+import Data.Maybe (fromMaybe)
 import Astro.Time
 import Astro.Trajectory
 
@@ -36,9 +38,20 @@ instance (Trajectory x t a) => Trajectory (CroppedTraj x) t a where
 -- | @cropStart t0 traj@ crops @traj@ so it starts no earlier than @t0@.
 -- If @startTime traj >= t0@ the @Trajectory@ is effectively unchanged.
 cropStart :: Trajectory x t a => E t a -> x t a -> CroppedTraj x t a
-cropStart t x = CS t x
+cropStart t0 x = CS t0 x
 
 -- | @cropEnd t1 traj@ crops @traj@ so it end no later than @t1@.
 -- If @endTime traj <= t1@ the @Trajectory@ is effectively unchanged.
 cropEnd :: Trajectory x t a => E t a -> x t a -> CroppedTraj x t a
-cropEnd t x = CE t x
+cropEnd t1 x = CE t1 x
+
+crop :: Trajectory x t a
+     => E t a -> E t a -> x t a -> CroppedTraj (CroppedTraj x) t a
+crop t0 t1 = cropStart t0 . cropEnd t1
+
+cropStart' :: Trajectory x t a => Maybe (E t a) -> x t a -> CroppedTraj x t a
+cropStart' t0 x = cropStart (fromMaybe (startTime x) t0) x
+cropEnd'   :: Trajectory x t a => Maybe (E t a) -> x t a -> CroppedTraj x t a
+cropEnd'   t1 x = cropEnd   (fromMaybe (endTime   x) t1) x
+crop' :: Trajectory x t a => Maybe (E t a) -> Maybe (E t a) -> x t a -> CroppedTraj (CroppedTraj x) t a
+crop' t0 t1 = cropStart' t0 . cropEnd' t1
