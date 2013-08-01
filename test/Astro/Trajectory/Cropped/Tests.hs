@@ -41,39 +41,39 @@ spec_uncropped = describe "Uncropped trajectory" $ do
 
   it "does not change startTime when not cropping"
     (property $ \m m' -> let t = ET [m `At` t2, m' `At` t4] in
-      startTime t == t2)
+      startTime (crop' Nothing Nothing t) == t2)
 
   it "does not change endTime when not cropping"
     (property $ \m m' -> let t = ET [m `At` t2, m' `At` t4] in
-      endTime t == t4)
+      endTime (crop' Nothing Nothing t) == t4)
 
   it "does not change ephemeris' when not cropping"
     (property $ \m m' -> let t = ET [m `At` t2, m' `At` t3] in
-      ephemeris' t t0 t5 dt
+      ephemeris' (crop' Nothing Nothing t) t0 t5 dt
       == ephemeris' t t0 t5 dt)
 
   it "returns no ephemeris' beyond lower validity"
     (property $ \m m' -> let t = ET [m `At` t2, m' `At` t3] in
-      ephemeris' t t0 t1 dt == [])
+      ephemeris' (crop' Nothing Nothing t) t0 t1 dt == [])
 
   it "returns no ephemeris' beyond upper validity"
     (property $ \m m' -> let t = ET [m `At` t2, m' `At` t3] in
-      ephemeris' t t4 t5 dt == [])
+      ephemeris' (crop' Nothing Nothing t) t4 t5 dt == [])
 
   it "does not change ephemeris when not cropping"
     (property $ \m m' ->
       let t = ET [m `At` t2, m' `At` t3]; ts = [t0, t0 `addTime` dt..t5] in
-      ephemeris t ts == ephemeris t ts)
+      ephemeris (crop' Nothing Nothing t) ts == ephemeris t ts)
 
   it "returns no ephemeris beyond lower validity"
     (property $ \m m' ->
       let t = ET [m `At` t2, m' `At` t3]; ts = [t0, t0 `addTime` dt..t1] in
-      ephemeris t ts == [])
+      ephemeris (crop' Nothing Nothing t) ts == [])
 
   it "returns no ephemeris beyond upper validity"
     (property $ \m m' ->
       let t = ET [m `At` t2, m' `At` t3]; ts = [t4, t4 `addTime` dt..t5] in
-      ephemeris t ts == [])
+      ephemeris (crop' Nothing Nothing t) ts == [])
 
 -- ----------------------------------------------------------------------
 
