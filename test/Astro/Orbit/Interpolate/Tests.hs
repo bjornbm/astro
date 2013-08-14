@@ -9,11 +9,13 @@ import Data.AEq
 import Astro.Time
 import Astro.Time.At
 import TestUtil
+import TestInstances
 import Astro.Orbit.Types
 import Astro.Orbit.Interpolate
+import Astro.Trajectory (Datum)
 
 import Numeric.Units.Dimensional.Prelude
-import Numeric.Units.Dimensional.LinearAlgebra.PosVel
+import Numeric.Units.Dimensional.LinearAlgebra.PosVel (SPos)
 import qualified Prelude
 
 
@@ -25,6 +27,7 @@ specs = do
   spec_linearPolateT
   spec_linearPolateVec
   spec_linearPolateVecT
+  spec_linearPolateMEOEm
   spec_adjustCyclic
 
 
@@ -81,27 +84,49 @@ spec_linearPolateVecT = describe "Interpolate.polateVecT" $ do
       ==> linearPolateVecT (x1`At`t1) (x2`At`t2) t2 ~== x2)
 
 
+spec_linearPolateMEOEm = describe "linearPolateMEOEm (m0`At`t0) (m1`At`t1) t" $ do
+
+  it "returns m0 when interpolating at t0."
+    (property $ \(m0`At`t0::Datum UT1 D) (m1`At`t1) -> t0 /= t1
+      ==> linearPolateMEOEm (m0`At`t0) (m1`At`t1) t0 == m0)
+
+  it "returns m1 when interpolating at t1."
+    (property $ \(m0`At`t0::Datum UT1 D) (m1`At`t1) -> t0 /= t1
+      ==> linearPolateMEOEm (m0`At`t0) (m1`At`t1) t1 ~== m1)
+
+  it "No2 returns m0 when interpolating at t0."
+    (property $ \(m0`At`t0::Datum UT1 D) (m1`At`t1) -> t0 /= t1
+      ==> linearPolateMEOEm2 (m0`At`t0) (m1`At`t1) t0 == m0)
+
+  it "No2 returns m1 when interpolating at t1."
+    (property $ \(m0`At`t0::Datum UT1 D) (m1`At`t1) -> t0 /= t1
+      ==> linearPolateMEOEm2 (m0`At`t0) (m1`At`t1) t1 ~== m1)
+
+  it "No2 is equivalent."
+    (property $ \(m0`At`t0::Datum UT1 D) (m1`At`t1) t -> t0 /= t1
+      ==> linearPolateMEOEm2 (m0`At`t0) (m1`At`t1) t ~== linearPolateMEOEm (m0`At`t0) (m1`At`t1) t)
+
 -- ---------------------------------------------------------------------
 
 spec_adjustCyclic = describe "adjustCyclic1 (x0,y0) (x1,y1) period cycle" $ do
 
   it "seems to work correctly"
-    (adjustCyclic (_0, negate _3) (_1, _3) _1 (_2 * pi) == _3)
+    (adjustCyclic (_0, negate _3) (_1, _3) _1 (_2 * pi) `shouldBe` _3)
 
   it "seems to work correctly"
-    (adjustCyclic (_0, negate _3) (_1,_3) _1 _8 == _3)
+    (adjustCyclic (_0, negate _3) (_1,_3) _1 _8 `shouldBe` _3)
 
   it "seems to work correctly"
-    (adjustCyclic (_0, negate _3) (_1,_5) _5 _8 == negate _3)
+    (adjustCyclic (_0, negate _3) (_1,_5) _5 _8 `shouldBe` negate _3)
 
   it "seems to work correctly"
-    (adjustCyclic (_0,_3) (_1, negate _3) _5 _8 == _5)
+    (adjustCyclic (_0,_3) (_1, negate _3) _5 _8 `shouldBe` _5)
 
   it "seems to work correctly"
-    (adjustCyclic (_0,_3) (_1, negate _3) _5 _8 == _5)
+    (adjustCyclic (_0,_3) (_1, negate _3) _5 _8 `shouldBe` _5)
 
   it "seems to work correctly"
-    (adjustCyclic (_0,_3) (_1, negate _3) _1 _8 == 13*~one)
+    (adjustCyclic (_0,_3) (_1, negate _3) _1 _8 `shouldBe` 13*~one)
 
   it "seems to work correctly on a previously failing case"
     (let (x0,y0) = ((-9.200202975846752)*~one,3.1439390419699795*~one)

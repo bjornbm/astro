@@ -74,8 +74,23 @@ linearPolateMEOEm (m0`At`t0) (m1`At`t1) t = ( vec2meoe
     l0 = long $ longitude m0
     l1 = long $ longitude m1
     l1' = adjustCyclicT (t0,l0) (t1,l1) period (_2 * pi)
+    --period = meoeOrbitalPeriod m1
     period = linearPolateT (meoeOrbitalPeriod m0`At`t0) (meoeOrbitalPeriod m1`At`t1) t
 
+-- {-
+linearPolateMEOEm2 :: RealFloat a
+                  => Datum t a -> Datum t a
+                  -> E t a -> MEOE Mean a
+linearPolateMEOEm2 (m0`At`t0) (m1`At`t1) t = vec2meoe
+  $ linearPolateVecT (meoe2vec m0' `At` t0) (meoe2vec m1' `At` t1) t
+  where
+    m0' = m0
+    m1' = m1 { longitude = Long $ l1' }
+    l0 = long $ longitude m0
+    l1 = long $ longitude m1
+    l1' = adjustCyclicT (t0,l0) (t1,l1) period (_2 * pi)
+    period = linearPolateT (meoeOrbitalPeriod m0`At`t0) (meoeOrbitalPeriod m1`At`t1) t
+-- -}
 
 -- | Assume that y(t) is cyclic in meaning (but not in value, as
 -- for e.g. angles). Then @adjustCyclic (t0,y0) (t1,y1) period cycle@
