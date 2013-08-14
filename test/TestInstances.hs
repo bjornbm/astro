@@ -53,8 +53,11 @@ instance (RealFrac a, Ord a, Arbitrary a) => Arbitrary (M.MEOE t a) where
     suchThat m (\m -> semiMajorAxis m > SMA _0)
     where arbitrary1 = (*~one) . snd . properFraction <$> arbitrary
 
-instance (RealFloat a, Ord a, Arbitrary a) => Arbitrary (C.COE t a) where
+instance (RealFloat a, Arbitrary a) => Arbitrary (C.COE t a) where
   arbitrary = meoe2coe <$> arbitrary
+
+instance (Fractional a, Arbitrary a, Arbitrary x) => Arbitrary (At t a x) where
+  arbitrary = At <$> arbitrary <*> arbitrary
 
 deriving instance AEq a => AEq (SemiMajorAxis a)
 deriving instance AEq a => AEq (SemiLatusRectum a)
