@@ -127,7 +127,7 @@ spec_linearPolateMEOEm = describe "linearPolateMEOEm (m0`At`t0) (m1`At`t1) t" $ 
                  , epoch = clock 1845 10 30 18 02 52.622930313809 UT1::E UT1 D}
     in linearPolateMEOEm m0 m1 (epoch m1) ~== value m1
 
-{-
+-- {-
   it "A failing test case due to degenerate numerics" $
     let m0 = At {value = (MEOE {mu = (88.26019212890891)*~(meter^pos3/second^pos2), p = (60.74053490573347)*~meter, f = (-0.10287594643823184)*~one, g = (0.33022867608059414)*~one, h = (0.566530781675775)*~one, k = (-0.9535070415326317)*~one, longitude = Long {long = (-136.19321025953184)*~one}}), epoch = clock 1859 02 25 14 31 58.664186554497 UT1}
         m1 = At {value = (MEOE {mu = (28.347782649561204)*~(meter^pos3/second^pos2), p = (81.31848224944541)*~meter, f = (0.14929490687671887)*~one, g = (-0.1494207496036637)*~one, h = (0.4877418113629943)*~one, k = (0.2923091817478394)*~one, longitude = Long {long = 226.1964600997837*~one}}), epoch = clock 1858 08 08 12 29 13.897002466374 UT1}

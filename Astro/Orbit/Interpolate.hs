@@ -49,13 +49,14 @@ linearPolateVec (x0,v0) (x1,v1) x = v0 `elemAdd` scaleVec1 ((x - x0) / (x1 - x0)
 linearPolateT :: (Mul DOne d d, Fractional a)
               => At t a (Quantity d a) -> At t a (Quantity d a)
               -> E t a -> Quantity d a
-linearPolateT (x1`At`t1) (x2`At`t2) t = x1 + diffEpoch t t1 / diffEpoch t2 t1 * (x2 - x1)
+linearPolateT (x0`At`t0) (x1`At`t1) t = linearPolate (d t0,x0) (d t1,x1) (d t)
+  where d t' = diffEpoch t' t -- t0 -- (mjd' 0)
 
 -- Interpolate vector as function of time.
 linearPolateVecT :: Fractional a
                  => At t a (Vec ds a) -> At t a (Vec ds a) -> E t a -> Vec ds a
-linearPolateVecT (v1`At`t1) (v2`At`t2) t = linearPolateVec (f t1,v1) (f t2,v2) (f t)
-  where f t = diffEpoch t (mjd' 0)
+linearPolateVecT (v0`At`t0) (v1`At`t1) t = linearPolateVec (d t0,v0) (d t1,v1) (d t)
+  where d t' = diffEpoch t' t -- t0 -- (mjd' 0)
 
 -- ==================================================================
 
@@ -65,6 +66,7 @@ linearPolateVecT (v1`At`t1) (v2`At`t2) t = linearPolateVec (f t1,v1) (f t2,v2) (
 -- NOTE: this does not work for hyperbolic orbits, and probably not
 -- when t1 and t0 are separated by more than one (or a half?) orbital
 -- period?
+-- {-
 linearPolateMEOEm :: RealFloat a
                   => Datum t a -> Datum t a
                   -> E t a -> MEOE Mean a
@@ -74,22 +76,22 @@ linearPolateMEOEm (m0`At`t0) (m1`At`t1) t = ( vec2meoe
   where
     l0 = long $ longitude m0
     l1 = long $ longitude m1
-    l1' = adjustCyclicT (t0,l0) (t1,l1) period (_2 * pi)
+    l1' = adjustCyclicT (l0`At`t0) (l1`At`t1) period (_2 * pi)
     period = (meoeOrbitalPeriod m0 + meoeOrbitalPeriod m1) / _2
-
+-- -}
 -- {-
 linearPolateMEOEm2 :: RealFloat a
                   => Datum t a -> Datum t a
                   -> E t a -> MEOE Mean a
-linearPolateMEOEm2 (m0`At`t0) (m1`At`t1) t = vec2meoe
-  $ linearPolateVecT (meoe2vec m0' `At` t0) (meoe2vec m1' `At` t1) t
+linearPolateMEOEm2 m0 m1 t = vec2meoe
+  $ linearPolateVecT (fmap meoe2vec m0') (fmap meoe2vec m1') t
   where
     m0' = m0
-    m1' = m1 { longitude = Long $ l1' }
-    l0 = long $ longitude m0
-    l1 = long $ longitude m1
-    l1' = adjustCyclicT (t0,l0) (t1,l1) period tau
-    period = (meoeOrbitalPeriod m0 + meoeOrbitalPeriod m1) / _2
+    m1' = fmap (\m -> m { longitude = Long l1' }) m1
+    l0 = fmap (long . longitude) m0
+    l1 = fmap (long . longitude) m1
+    l1' = adjustCyclicT l0 l1 period tau
+    period = (meoeOrbitalPeriod (value m0) + meoeOrbitalPeriod (value m1)) / _2
 -- -}
 
 -- | Assume that y(t) is cyclic in meaning (but not in value, as
@@ -98,9 +100,9 @@ linearPolateMEOEm2 (m0`At`t0) (m1`At`t1) t = vec2meoe
 -- corresponds roughly to the difference @t1 - t0@.
 -- (See also the more general adjustCyclic.)
 adjustCyclicT :: (RealFrac a, Div dy dy DOne, Mul DOne dy dy)
-              => (E t a, Quantity dy a) -> (E t a, Quantity dy a)
+              => At t a (Quantity dy a) -> At t a (Quantity dy a)
               -> Time a -> Quantity dy a -> Quantity dy a
-adjustCyclicT (t0,y0) (t1,y1) = adjustCyclic (f t0 ,y0) (f t1, y1)
+adjustCyclicT (y0`At`t0) (y1`At`t1) = adjustCyclic (f t0 ,y0) (f t1, y1)
   where f t = diffEpoch t (mjd' 0)
 
 -- | Assume that y(x) is cyclic in meaning (but not in value, as
