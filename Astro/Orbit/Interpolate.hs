@@ -21,6 +21,8 @@ import Astro.Time.At
 import Astro.Trajectory (Datum)
 import qualified Prelude as P
 
+import Data.HList
+
 
 -- dimensional
 -- -----------
@@ -55,7 +57,6 @@ linearPolateVecT :: Fractional a
 linearPolateVecT (v1`At`t1) (v2`At`t2) t = linearPolateVec (f t1,v1) (f t2,v2) (f t)
   where f t = diffEpoch t (mjd' 0)
 
-
 -- ==================================================================
 
 -- | Interpolate two MEOEs with mean anomaly. In interpolating mean
@@ -74,8 +75,7 @@ linearPolateMEOEm (m0`At`t0) (m1`At`t1) t = ( vec2meoe
     l0 = long $ longitude m0
     l1 = long $ longitude m1
     l1' = adjustCyclicT (t0,l0) (t1,l1) period (_2 * pi)
-    --period = meoeOrbitalPeriod m1
-    period = linearPolateT (meoeOrbitalPeriod m0`At`t0) (meoeOrbitalPeriod m1`At`t1) t
+    period = (meoeOrbitalPeriod m0 + meoeOrbitalPeriod m1) / _2
 
 -- {-
 linearPolateMEOEm2 :: RealFloat a
@@ -88,8 +88,8 @@ linearPolateMEOEm2 (m0`At`t0) (m1`At`t1) t = vec2meoe
     m1' = m1 { longitude = Long $ l1' }
     l0 = long $ longitude m0
     l1 = long $ longitude m1
-    l1' = adjustCyclicT (t0,l0) (t1,l1) period (_2 * pi)
-    period = linearPolateT (meoeOrbitalPeriod m0`At`t0) (meoeOrbitalPeriod m1`At`t1) t
+    l1' = adjustCyclicT (t0,l0) (t1,l1) period tau
+    period = (meoeOrbitalPeriod m0 + meoeOrbitalPeriod m1) / _2
 -- -}
 
 -- | Assume that y(t) is cyclic in meaning (but not in value, as
@@ -112,8 +112,10 @@ adjustCyclic :: (RealFrac a, Div d d DOne, Div dy dy DOne, Mul DOne dy dy)
             => (Quantity d a, Quantity dy a) -> (Quantity d a, Quantity dy a)
             -> Quantity d a -> Quantity dy a -> Quantity dy a
 adjustCyclic (x0,y0) (x1,y1) period cycle =
-  adjustCyclic1 (x0/period,y0/cycle) (x1/period,y1/cycle) * cycle
-
+  y1 + fmap round' ((x1 - x0) / period - (y1 - y0) / cycle) * cycle
+  -- Could be defined as:
+  --   adjustCyclic1 (x0/period,y0/cycle) (x1/period,y1/cycle) * cycle
+  -- but that has worse numerical properties!
 
 -- | Assume that y(x) is cyclic in meaning (but not in value, as
 -- for e.g. angles) where the meaning has a cycle (in y) of 1 with
@@ -130,5 +132,7 @@ adjustCyclic1 :: (RealFrac a, Ord a)
               => (Dimensionless a, Dimensionless a)
               -> (Dimensionless a, Dimensionless a)
               -> Dimensionless a
-adjustCyclic1 (x0,y0) (x1,y1)
-  = y1 + (fromIntegral $ round $ ((x1 - x0) - (y1 - y0)) /~ one) *~ one
+adjustCyclic1 (x0,y0) (x1,y1) = y1 + fmap round' ((x1 - x0) - (y1 - y0))
+
+round' :: RealFrac a => a -> a
+round' = fromIntegral . round

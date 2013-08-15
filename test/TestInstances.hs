@@ -11,6 +11,7 @@ import Test.QuickCheck hiding (property)-- (Arbitrary, arbitrary, (==>))
 import Data.AEq
 import TestUtil
 import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional (Dimensional (..))
 import qualified Prelude
 import Astro.Util (plusMinusPi, zeroTwoPi)
 import Astro.Orbit.Types
@@ -21,7 +22,42 @@ import Astro.Orbit.Conversion (meoe2coe)
 import Astro.Orbit.Maneuver
 import Astro.Time.At
 
--- Instances
+
+-- ----------------------------------------------------------
+-- Special generators and Arbitrary instances.
+
+-- These could be defined in terms of the newtypes, e,g, getNonZeroD <$> arbitrary
+nonZeroArbitrary :: (Arbitrary a, Eq a, Num a) => Gen (Quantity d a)
+nonZeroArbitrary = suchThat arbitrary (/= _0)
+positiveArbitrary :: (Arbitrary a, Ord a, Num a) => Gen (Quantity d a)
+positiveArbitrary = suchThat arbitrary (> _0)
+nonNegativeArbitrary :: (Arbitrary a, Ord a, Num a) => Gen (Quantity d a)
+nonNegativeArbitrary = suchThat arbitrary (>= _0)
+zeroOneArbitrary :: (Arbitrary a, RealFrac a) => Gen (Dimensionless a)
+zeroOneArbitrary = (*~one) . snd . properFraction <$> arbitrary
+
+-- | @NonZeroD x@ has an Arbitrary instance that guarantees that @x \/= 0@.
+newtype NonZeroD d a = NonZeroD { getNonZeroD :: Quantity d a } deriving (Show)
+instance (Arbitrary a, Eq a, Num a) => Arbitrary (NonZeroD d a) where
+  arbitrary = NonZeroD <$> suchThat arbitrary (/= _0)
+
+-- | @PositiveD x@ has an Arbitrary instance that guarantees that @x \> 0@.
+newtype PositiveD d a = PositiveD { getPositiveD :: Quantity d a } deriving (Show)
+instance (Arbitrary a, Ord a, Num a) => Arbitrary (PositiveD d a) where
+  arbitrary = PositiveD <$> suchThat arbitrary (> _0)
+
+-- | @NonNegativeD x@ has an Arbitrary instance that guarantees that @x \>= 0@.
+newtype NonNegativeD d a = NonNegativeD { getNonNegativeD :: Quantity d a } deriving (Show)
+instance (Arbitrary a, Ord a, Num a) => Arbitrary (NonNegativeD d a) where
+  arbitrary = NonNegativeD <$> suchThat arbitrary (>= _0)
+
+-- | @ZeroOneD x@ has an Arbitrary instance that guarantees that @0 <= x < 1@.
+newtype ZeroOneD a = ZeroOneD { getZeroOneD :: Dimensionless a } deriving (Show)
+instance (Arbitrary a, RealFrac a) => Arbitrary (ZeroOneD a) where
+  arbitrary = ZeroOneD . (*~one) . snd . properFraction <$> arbitrary
+
+-- ----------------------------------------------------------
+-- Arbitrary instances
 deriving instance Arbitrary a => Arbitrary (SemiMajorAxis a)
 deriving instance Arbitrary a => Arbitrary (SemiLatusRectum a)
 deriving instance Arbitrary a => Arbitrary (Anomaly t a)
@@ -29,35 +65,29 @@ deriving instance Arbitrary a => Arbitrary (Longitude t a)
 
 -- Arbitrary instance always returns values >= 0.
 instance (Num a, Ord a, Arbitrary a) => Arbitrary (Eccentricity a) where
-    arbitrary = do
-      NonNegative e <- arbitrary
-      return $ Ecc (e*~one)
+    arbitrary = Ecc <$> nonNegativeArbitrary
 
 instance Arbitrary a => Arbitrary (Maneuver a) where
   arbitrary = ImpulsiveRTN <$> arbitrary <*> arbitrary <*> arbitrary
 
-{-
-instance (RealFloat a, Ord a, Arbitrary a) => Arbitrary (MEOE True a) where
-  arbitrary = do
-    Positive mu <- arbitrary
-    sv2meoe (mu *~ (kilo meter ^ pos3 / second ^ pos2)) <$> arbitrary
--- -}
-
 -- This instance will not generate orbits with very large eccentricities.
 instance (RealFrac a, Ord a, Arbitrary a) => Arbitrary (M.MEOE t a) where
   arbitrary = do
-    Positive mu <- arbitrary
-    Positive p  <- arbitrary
-    let m = M.MEOE (mu *~ (kilo meter ^ pos3 / second ^ pos2)) (p *~ meter)
-            <$> arbitrary1 <*> arbitrary1 <*> arbitrary1 <*> arbitrary1 <*> arbitrary
+    let m = M.MEOE <$> positiveArbitrary
+                   <*> positiveArbitrary
+                   <*> zeroOneArbitrary <*> zeroOneArbitrary
+                   <*> zeroOneArbitrary <*> zeroOneArbitrary
+                   <*> arbitrary
     suchThat m (\m -> semiMajorAxis m > SMA _0)
-    where arbitrary1 = (*~one) . snd . properFraction <$> arbitrary
 
 instance (RealFloat a, Arbitrary a) => Arbitrary (C.COE t a) where
   arbitrary = meoe2coe <$> arbitrary
 
 instance (Fractional a, Arbitrary a, Arbitrary x) => Arbitrary (At t a x) where
   arbitrary = At <$> arbitrary <*> arbitrary
+
+-- ----------------------------------------------------------
+-- AEq instances.
 
 deriving instance AEq a => AEq (SemiMajorAxis a)
 deriving instance AEq a => AEq (SemiLatusRectum a)
