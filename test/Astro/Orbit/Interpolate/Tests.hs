@@ -136,7 +136,7 @@ spec_linearPolateMEOEm = describe "linearPolateMEOEm (m0`At`t0) (m1`At`t1) t" $ 
 
 -- ---------------------------------------------------------------------
 
-spec_adjustCyclic = describe "adjustCyclic1 (x0,y0) (x1,y1) period cycle" $ do
+spec_adjustCyclic = describe "adjustCyclic (x0,y0) (x1,y1) period cycle" $ do
 
   it "seems to work correctly" $
     adjustCyclic (_0, negate _3) (_1, _3) _1 (_2 * pi) `shouldBe` _3

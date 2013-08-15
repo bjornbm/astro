@@ -21,7 +21,7 @@ import Astro.Time.At
 import Astro.Trajectory (Datum)
 import qualified Prelude as P
 
-import Data.HList
+import Control.Applicative
 
 
 -- dimensional
@@ -30,8 +30,20 @@ import Data.HList
 linearPolate :: (Div d d DOne, Mul DOne dy dy, Fractional a)
              => (Quantity d a, Quantity dy a) -> (Quantity d a, Quantity dy a)
              -> Quantity d a -> Quantity dy a
-linearPolate (x0,y0) (x1,y1) x = y0 + ((x - x0) / (x1 - x0)) * (y1 - y0)
+linearPolate (x0,y0) (x1,y1) x = linearPolate0 y0 (x1-x0,y1) (x-x0)
 
+-- Polate assuming y0 corresponds to x0 = 0.
+linearPolate0 :: (Div d d DOne, Mul DOne dy dy, Fractional a)
+             => Quantity dy a -> (Quantity d a, Quantity dy a)
+             -> Quantity d a -> Quantity dy a
+--linearPolate0 y0 (x1,y1) x = y0 + x / x1 * (y1 - y0)
+linearPolate0 y0 (x1,y1) x = y0 + linearPolate00 (x1,y1-y0) x
+
+-- Polate assuming x0 = 0 and y0 = 0.
+linearPolate00 :: (Div d d DOne, Mul DOne dy dy, Fractional a)
+             => (Quantity d a, Quantity dy a)
+             -> Quantity d a -> Quantity dy a
+linearPolate00 (x1,y1) x = x / x1 * y1
 
 -- dimensional-vectors
 -- -------------------
@@ -39,7 +51,20 @@ linearPolate (x0,y0) (x1,y1) x = y0 + ((x - x0) / (x1 - x0)) * (y1 - y0)
 linearPolateVec :: (Div d d DOne, Fractional a)
                 => (Quantity d a, Vec ds a) -> (Quantity d a, Vec ds a)
                 -> Quantity d a -> Vec ds a
-linearPolateVec (x0,v0) (x1,v1) x = v0 `elemAdd` scaleVec1 ((x - x0) / (x1 - x0)) (v1 `elemSub` v0)
+linearPolateVec (x0,v0) (x1,v1) x = linearPolateVec0 v0 (x1-x0,v1) (x-x0)
+
+-- Polate assuming v0 corresponds to x0 = 0.
+linearPolateVec0 :: (Div d d DOne, Fractional a)
+                 => Vec ds a -> (Quantity d a, Vec ds a)
+                 -> Quantity d a -> Vec ds a
+--linearPolateVec0 v0 (x1,v1) x = v0 >+< scaleVec1 (x / x1) (v1 >-< v0)
+linearPolateVec0 v0 (x1,v1) x = v0 >+< linearPolateVec00 (x1, v1 >-< v0) x
+
+-- Polate assuming x0 = 0 and v0 = {0}.
+linearPolateVec00 :: (Div d d DOne, Fractional a)
+                 => (Quantity d a, Vec ds a)
+                 -> Quantity d a -> Vec ds a
+linearPolateVec00 (x1,v1) x = scaleVec1 (x / x1) v1
 
 
 -- Depend on astro
@@ -49,14 +74,14 @@ linearPolateVec (x0,v0) (x1,v1) x = v0 `elemAdd` scaleVec1 ((x - x0) / (x1 - x0)
 linearPolateT :: (Mul DOne d d, Fractional a)
               => At t a (Quantity d a) -> At t a (Quantity d a)
               -> E t a -> Quantity d a
-linearPolateT (x0`At`t0) (x1`At`t1) t = linearPolate (d t0,x0) (d t1,x1) (d t)
-  where d t' = diffEpoch t' t -- t0 -- (mjd' 0)
+linearPolateT (x0`At`t0) (x1`At`t1) t = linearPolate0 x0 (d t1,x1) (d t)
+  where d = (`diffEpoch` t0)
 
 -- Interpolate vector as function of time.
 linearPolateVecT :: Fractional a
                  => At t a (Vec ds a) -> At t a (Vec ds a) -> E t a -> Vec ds a
-linearPolateVecT (v0`At`t0) (v1`At`t1) t = linearPolateVec (d t0,v0) (d t1,v1) (d t)
-  where d t' = diffEpoch t' t -- t0 -- (mjd' 0)
+linearPolateVecT (v0`At`t0) (v1`At`t1) t = linearPolateVec0 v0 (d t1,v1) (d t)
+  where d = (`diffEpoch` t0)
 
 -- ==================================================================
 
@@ -84,12 +109,12 @@ linearPolateMEOEm2 :: RealFloat a
                   => Datum t a -> Datum t a
                   -> E t a -> MEOE Mean a
 linearPolateMEOEm2 m0 m1 t = vec2meoe
-  $ linearPolateVecT (fmap meoe2vec m0') (fmap meoe2vec m1') t
+  $ linearPolateVecT (meoe2vec <$> m0') (meoe2vec <$> m1') t
   where
     m0' = m0
-    m1' = fmap (\m -> m { longitude = Long l1' }) m1
-    l0 = fmap (long . longitude) m0
-    l1 = fmap (long . longitude) m1
+    m1' = (\m -> m { longitude = Long l1' }) <$> m1
+    l0 = long . longitude <$> m0
+    l1 = long . longitude <$> m1
     l1' = adjustCyclicT l0 l1 period tau
     period = (meoeOrbitalPeriod (value m0) + meoeOrbitalPeriod (value m1)) / _2
 -- -}
@@ -114,10 +139,31 @@ adjustCyclic :: (RealFrac a, Div d d DOne, Div dy dy DOne, Mul DOne dy dy)
             => (Quantity d a, Quantity dy a) -> (Quantity d a, Quantity dy a)
             -> Quantity d a -> Quantity dy a -> Quantity dy a
 adjustCyclic (x0,y0) (x1,y1) period cycle =
-  y1 + fmap round' ((x1 - x0) / period - (y1 - y0) / cycle) * cycle
+  y1 + cyclesOff (x1-x0, y1-y0) period cycle * cycle
   -- Could be defined as:
   --   adjustCyclic1 (x0/period,y0/cycle) (x1/period,y1/cycle) * cycle
   -- but that has worse numerical properties!
+
+-- | Adjust assuming x0 = 0 and y0 = 0
+adjustCyclic0 :: (RealFrac a, Div d d DOne, Div dy dy DOne, Mul DOne dy dy)
+              => (Quantity d a, Quantity dy a)
+              -> Quantity d a -> Quantity dy a -> Quantity dy a
+adjustCyclic0 (x1,y1) period cycle = y1 + cyclesOff (x1,y1) period cycle * cycle
+
+-- | Assume that y(x) is cyclic in meaning (but not in value, as
+-- for e.g. angles) with a periodicity @period@ and cycle length @cycle@.
+-- Then @cyclesOff (x,y) period cycle@ compute the approximate (closest)
+-- number of cycles that @y@ differs from what one would expect given @x@
+-- an assumption that y = cycle * x / period.
+cyclesOff :: (RealFrac a, Div d d DOne, Div dy dy DOne, Mul DOne dy dy)
+       => (Quantity d a, Quantity dy a)
+       -> Quantity d a -> Quantity dy a -> Dimensionless a
+cyclesOff (x,y) period cycle = cyclesOff1 (x/period, y/cycle)
+
+-- | Same as 'cyclesOff' but assumes that bot the period and the cycle
+-- of y(x) is one.
+cyclesOff1 :: RealFrac a => (Dimensionless a, Dimensionless a) -> Dimensionless a
+cyclesOff1 (x, y) = fmap round' (x - y)
 
 -- | Assume that y(x) is cyclic in meaning (but not in value, as
 -- for e.g. angles) where the meaning has a cycle (in y) of 1 with
@@ -134,7 +180,7 @@ adjustCyclic1 :: (RealFrac a, Ord a)
               => (Dimensionless a, Dimensionless a)
               -> (Dimensionless a, Dimensionless a)
               -> Dimensionless a
-adjustCyclic1 (x0,y0) (x1,y1) = y1 + fmap round' ((x1 - x0) - (y1 - y0))
+adjustCyclic1 (x0,y0) (x1,y1) = y1 + cyclesOff1 (x1-x0, y1-y0)
 
 round' :: RealFrac a => a -> a
 round' = fromIntegral . round
