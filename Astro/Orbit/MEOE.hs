@@ -1,5 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Astro.Orbit.MEOE where
 
@@ -28,14 +29,10 @@ data MEOE long a = MEOE
 -- elements (including mu).
 meoe2vec MEOE{..} = mu <: p <: f <: g <: h <: k <:. long longitude
 
-vec2meoe v = MEOE (vElemAt zero v)
-                  (vElemAt pos1 v)
-                  (vElemAt pos2 v)
-                  (vElemAt pos3 v)
-                  (vElemAt pos4 v)
-                  (vElemAt pos5 v)
-                  (Long $ vElemAt (incr pos5) v)
-
+vec2meoe :: Vec ( DGravitationalParameter :*: DLength
+              :*: DOne :*: DOne :*: DOne :*: DOne :*. DOne) a -> MEOE m a
+vec2meoe v = vIterate meoe v
+  where meoe a b c d e f = MEOE a b c d e f . Long
 
 
 -- TODO move orbitalPeriod somewhere more generic?
