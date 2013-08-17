@@ -2,4 +2,4 @@ module Astro.Orbit.SV where
 
 import Numeric.Units.Dimensional.LinearAlgebra.PosVel (CPos, CVel)
 
-type SV a = (CPos a, CVel a)
+data SV system a = SV (CPos a) (CVel a) deriving (Eq, Show)

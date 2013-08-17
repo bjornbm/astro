@@ -13,6 +13,7 @@ import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
 import qualified Prelude
 
+import Astro.Coords (ECI)
 import Astro.Orbit.COE
 import Astro.Orbit.MEOE (MEOE (..), eccentricity2)
 import Astro.Orbit.SV
@@ -29,7 +30,7 @@ specs = do
   spec_meoe2meoeM
 
 
-type SVD = SV Double
+type SVD = SV ECI Double
 type CT = COE True Double
 type MT = MEOE True Double
 
@@ -96,7 +97,7 @@ spec_sv2coe = describe "sv2coe" $ do
     (property $ \mu x y vx vy -> mu > _0 ==>
       let r =  x <:  y <:. 0 *~ meter
           v = vx <: vy <:. 0 *~ mps
-          i = inc (sv2coe mu (r,v)) :: Angle Double
+          i = inc (sv2coe mu (SV r v)) :: Angle Double
       in i == _0 || i == pi
     )
 
@@ -110,7 +111,7 @@ spec_sv2coe = describe "sv2coe" $ do
     (property $ \mu x y vx vy -> mu > _0 ==>
       let r =  x <:  y <:. 0 *~ meter
           v = vx <: vy <:. 0 *~ mps
-          ra = raan (sv2coe mu (r,v)) :: Angle Double
+          ra = raan (sv2coe mu (SV r v)) :: Angle Double
       in ra ~== pi || ra ~== negate pi || ra == _0
     )
 
@@ -187,7 +188,7 @@ spec_meoe2meoeM = describe "meoe2meoeM2meoe" $ do
 -- Convenience and utility functions.
 
 -- | Magnitude of orbit angular momentum per mass unit.
-orbmom (r, v) = vNorm (r `crossProduct` v)
+orbmom (SV r v) = vNorm (r `crossProduct` v)
 
 mps = meter / second
 
@@ -196,8 +197,8 @@ mu_Earth = 398600.4418 *~ (kilo meter ^ pos3 / second ^ pos2)
 
 -- | Fudge a state vector to avoid comparing to zero elements
 -- where the deviation may be greated than epsilon.
-fudgeSV :: SV Double -> SV Double
-fudgeSV (r,v) = (r >+< (a<:a<:.a), v >+< (b<:b<:.b))
+fudgeSV :: SVD -> SVD
+fudgeSV (SV r v) = SV (r >+< (a<:a<:.a)) (v >+< (b<:b<:.b))
   where
     a = vNorm r / (1e-9*~one)
     b = vNorm v / (1e-9*~one)
@@ -227,33 +228,26 @@ testCOE1 = COE
   , anomaly = Anom $ 10 *~ degree
   }
 
-testSV0 = (42156 *~ kilo meter <:    0 *~ meter <:. 0 *~ meter
-          ,    0 *~ mps        <: 3075 *~ mps   <:. 0 *~ mps
-          )
+testSV0 = SV (42156 *~ kilo meter <:    0 *~ meter <:. 0 *~ meter)
+             (    0 *~ mps        <: 3075 *~ mps   <:. 0 *~ mps)
 
-testSV0R = (42156 *~ kilo meter <:       0 *~ meter <:. 0 *~ meter
-           ,    0 *~ mps        <: (-3075) *~ mps   <:. 0 *~ mps
-           )
+testSV0R = SV (42156 *~ kilo meter <:       0 *~ meter <:. 0 *~ meter)
+              (    0 *~ mps        <: (-3075) *~ mps   <:. 0 *~ mps)
 
-testSV1 = (42156 *~ kilo meter <:    0 *~ meter <:. 0 *~ meter
-          ,    0 *~ mps        <: 3000 *~ mps   <:. 0 *~ mps
-          )
+testSV1 = SV (42156 *~ kilo meter <:    0 *~ meter <:. 0 *~ meter)
+             (    0 *~ mps        <: 3000 *~ mps   <:. 0 *~ mps)
 
-testSV1R = (42156 *~ kilo meter <:       0 *~ meter <:. 0 *~ meter
-           ,    0 *~ mps        <: (-3000) *~ mps   <:. 0 *~ mps
-           )
+testSV1R = SV (42156 *~ kilo meter <:       0 *~ meter <:. 0 *~ meter)
+              (    0 *~ mps        <: (-3000) *~ mps   <:. 0 *~ mps)
 
-testSV2 = ( 42156 *~ kilo meter <: 0 *~ meter <:. 0 *~ meter
-          , 0 *~ mps <: 3075 *~ mps <:. 1 *~ mps
-          )
-testSV2R = ( 42156 *~ kilo meter <: 0 *~ meter <:. 0 *~ meter
-           , 0 *~ mps <: (-3075) *~ mps <:. 1 *~ mps
-           )
+testSV2 = SV (42156 *~ kilo meter <: 0 *~ meter <:. 0 *~ meter)
+             (0 *~ mps <: 3075 *~ mps <:. 1 *~ mps)
 
-testSV3 = ( 42156 *~ kilo meter <: 0 *~ meter <:. 0 *~ meter
-          , 0 *~ mps <: 3075 *~ mps <:. (-1) *~ mps
-          )
+testSV2R = SV (42156 *~ kilo meter <: 0 *~ meter <:. 0 *~ meter)
+              (0 *~ mps <: (-3075) *~ mps <:. 1 *~ mps)
 
-testSV4 = ( 42156 *~ kilo meter <: 0 *~ meter <:. 0 *~ meter
-          , 0 *~ mps <: 3000 *~ mps <:. (-1) *~ mps
-          )
+testSV3 = SV (42156 *~ kilo meter <: 0 *~ meter <:. 0 *~ meter)
+             (0 *~ mps <: 3075 *~ mps <:. (-1) *~ mps)
+
+testSV4 = SV (42156 *~ kilo meter <: 0 *~ meter <:. 0 *~ meter)
+             (0 *~ mps <: 3000 *~ mps <:. (-1) *~ mps)

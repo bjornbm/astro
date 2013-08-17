@@ -17,7 +17,7 @@ import Astro.Util (plusMinusPi, zeroTwoPi)
 import Astro.Orbit.Types
 import Astro.Orbit.MEOE as M -- (MEOE (MEOE), meoe2vec)
 import qualified Astro.Orbit.COE as C -- (COE (COE), coe2vec)
-import Astro.Orbit.SV (SV)
+import Astro.Orbit.SV (SV (SV))
 import Astro.Orbit.Conversion (meoe2coe)
 import Astro.Orbit.Maneuver
 import Astro.Time.At
@@ -83,6 +83,9 @@ instance (RealFrac a, Ord a, Arbitrary a) => Arbitrary (M.MEOE t a) where
 instance (RealFloat a, Arbitrary a) => Arbitrary (C.COE t a) where
   arbitrary = meoe2coe <$> arbitrary
 
+instance (RealFloat a, Arbitrary a) => Arbitrary (SV system a) where
+  arbitrary = SV <$> arbitrary <*> arbitrary
+
 instance (Fractional a, Arbitrary a, Arbitrary x) => Arbitrary (At t a x) where
   arbitrary = At <$> arbitrary <*> arbitrary
 
@@ -127,6 +130,9 @@ instance (RealFloat a, AEq a) => AEq (C.COE t a) where
            && C.aop  c0 ~== C.aop  c1
            && C.raan c0 ~== C.raan c1
            && anom (C.anomaly c0) ~==~ anom (C.anomaly c1)
+
+instance (Floating a, AEq a) => AEq (SV system a) where
+  (SV r v) ~== (SV r' v') = r ~== r' && v ~== v'
 
 instance (RealFloat a, AEq a, AEq x) => AEq (At t a x) where
   (x0 `At` t0) ~== (x1 `At` t1) = x0 ~== x1 && t0 ~== t1

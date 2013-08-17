@@ -7,8 +7,8 @@ module Astro.Orbit.Conversion where
 
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
-import Numeric.Units.Dimensional.LinearAlgebra.PosVel (CPos, CVel)
 import qualified Prelude
+import Astro.Coords (ECI)
 import Astro.Orbit.SV
 import Astro.Orbit.COE
 import Astro.Orbit.MEOE hiding (anomaly, raan)
@@ -24,8 +24,8 @@ import Data.AEq
 --   i = 0   ->  RAAN = one of [-pi,-0,0,pi]
 --   i = pi  ->  RAAN = pi
 --   e = 0   ->  AoP  = 0
-sv2coe :: RealFloat a => GravitationalParameter a -> SV a -> COE True a
-sv2coe mu (r', v') = COE
+sv2coe :: RealFloat a => GravitationalParameter a -> SV ECI a -> COE True a
+sv2coe mu (SV r v) = COE
   { mu   = mu
   , slr  = p
   , ecc  = vNorm e'
@@ -36,7 +36,7 @@ sv2coe mu (r', v') = COE
   }
   where
     -- Angular momentum.
-    h' = r' `crossProduct` v'  -- Angular momentum vector.
+    h' = r `crossProduct` v  -- Angular momentum vector.
     h  = vNorm h'
     (h_x, h_y, h_z) = toTuple h'
 
@@ -50,11 +50,11 @@ sv2coe mu (r', v') = COE
     m' = h' `crossProduct` n'  -- Vector 90° ahead of n' (AN) in orbit plane.
 
     -- Eccentricity and perigee.
-    e' = v' `crossProduct` h' >/ mu >-< vNormalize r'  -- See e.g. Wikipedia.
+    e' = v `crossProduct` h' >/ mu >-< vNormalize r  -- See e.g. Wikipedia.
     aop = atan2 (e' >.< vNormalize m') (e' >.< n')     -- 0 for e' == 0'.
 
-    -- Argument of latitude (angle from AN to r').
-    u = atan2 (r' >.< vNormalize m') (r' >.< n')
+    -- Argument of latitude (angle from AN to r).
+    u = atan2 (r >.< vNormalize m') (r >.< n')
     -- True anomaly.
     trueAnomaly = u - aop
 
@@ -76,7 +76,7 @@ coe2meoe COE {..} = MEOE
 
 -- | Convert a SV into a COE.
 sv2meoe :: RealFloat a
-        => GravitationalParameter a -> SV a -> MEOE True a
+        => GravitationalParameter a -> SV ECI a -> MEOE True a
 sv2meoe mu = coe2meoe . sv2coe mu
 
 -- | Convert a MEOE into a COE. Use the algoritm from Eagle
@@ -97,10 +97,9 @@ meoe2coe m@MEOE{..} = COE
 
 
 -- | Convert a MEOE to a cartesian State Vector. Algorithm from Eagle.
-meoe2sv :: RealFloat a => MEOE True a -> SV a
-meoe2sv MEOE{..} = ( (r_x <: r_y <:. r_z) >* (r / s2)
-                   , (v_x <: v_y <:. v_z) >* negate (sqrt (mu / p) / s2)
-                   )
+meoe2sv :: RealFloat a => MEOE True a -> SV ECI a
+meoe2sv MEOE{..} = SV ((r_x <: r_y <:. r_z) >* (r / s2))
+                      ((v_x <: v_y <:. v_z) >* negate (sqrt (mu / p) / s2))
   where
     l = long longitude
 
@@ -123,7 +122,7 @@ meoe2sv MEOE{..} = ( (r_x <: r_y <:. r_z) >* (r / s2)
 
 
 -- | Convert Classical Orbital Elements into a State Vector.
-coe2sv :: RealFloat a => COE True a -> SV a
+coe2sv :: RealFloat a => COE True a -> SV ECI a
 coe2sv = meoe2sv . coe2meoe
 
 
