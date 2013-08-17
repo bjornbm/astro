@@ -1,5 +1,5 @@
 Name:                astro
-Version:             0.8
+Version:             0.8.2
 License:             BSD3
 License-File:        LICENSE
 Copyright:           Bjorn Buckwalter 2008-2013
@@ -46,6 +46,9 @@ Exposed-Modules:     Astro,
                      Astrodynamics,
                      Tmp.Lifts
                      Astro.Util
+                     --TLE
+                     --TLE.Parse
+                     --TLE.Util
 Extra-source-files:  README,
                      Test.lhs,
                      Astro/TestTime.hs,

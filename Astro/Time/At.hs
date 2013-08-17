@@ -1,5 +1,9 @@
 module Astro.Time.At where
 
+import Control.Applicative
+import Data.Foldable
+import Data.Traversable
+
 import Astro.Time (E)
 
 -- | Data type tagging some value x with a specific time. Typically
@@ -10,6 +14,12 @@ data At t a x = At { value :: x
                    } deriving (Show, Eq)
 
 instance Functor (At t a) where fmap f (x `At` t) = f x `At` t
+
+instance Foldable (At t a) where
+  foldMap f (x `At` t) = f x
+
+instance Traversable (At t a) where
+  traverse f (x `At` t) = (`At` t) <$> f x
 
 -- | A flipped 'At', in other words @t `tA` x == x `At` t@.
 tA :: E t a -> x -> At t a x
