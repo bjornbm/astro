@@ -58,7 +58,7 @@ coerceUtcToUT1 = coerce . fromAbsoluteTime . utcToTAITime (const 0)
 -- <http://www.java2s.com/Tutorial/Java/0120__Development/Normalizeanangleina2piwideintervalaroundacentervalue.htm>.
 normalizeAngle :: RealFloat a => Angle a -> Angle a -> Angle a
 normalizeAngle center a = a - _2 * pi * floor' ((a + pi - center) / (_2 * pi))
-  where floor' = (*~ one) . fromIntegral . floor . (/~ one)
+  where floor' = fmap (fromIntegral . floor)
 
 -- | Constrains an angle to the range [-pi,pi).
 plusMinusPi :: RealFloat a => Angle a -> Angle a
@@ -70,4 +70,4 @@ zeroTwoPi   = normalizeAngle pi
 -- | Removes the integral part of a value so that it ends up in the
 -- interval [0,1).
 fractionalPart :: RealFrac a => Dimensionless a -> Dimensionless a
-fractionalPart x = x - fromIntegral (floor (x /~ one)) *~ one
+fractionalPart = fmap (\x -> x Prelude.- fromIntegral (floor x))
