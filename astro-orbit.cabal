@@ -2,7 +2,7 @@ Name:                astro-orbit
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-Version:             0.8
+Version:             0.9
 License:             BSD3
 License-File:        LICENSE
 Copyright:           Bjorn Buckwalter 2011
