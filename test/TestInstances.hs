@@ -1,7 +1,9 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 
 module TestInstances where
@@ -12,14 +14,21 @@ import Data.AEq
 import TestUtil
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional (Dimensional (..))
+import Numeric.Units.Dimensional.LinearAlgebra
+import Numeric.Units.Dimensional.LinearAlgebra.Vector (Vec (ListVec))
+import Numeric.Units.Dimensional.AEq
 import qualified Prelude
 import Astro.Util (plusMinusPi, zeroTwoPi)
+import Astro.Coords
+import Astro.Coords.PosVel
+import Astro.Place
+import Astro.Place.ReferenceEllipsoid
 import Astro.Orbit.Types
 import Astro.Orbit.MEOE as M -- (MEOE (MEOE), meoe2vec)
 import qualified Astro.Orbit.COE as C -- (COE (COE), coe2vec)
-import Astro.Orbit.SV (SV (SV))
 import Astro.Orbit.Conversion (meoe2coe)
 import Astro.Orbit.Maneuver
+import Astro.Time
 import Astro.Time.At
 
 
@@ -58,6 +67,32 @@ instance (Arbitrary a, RealFrac a) => Arbitrary (ZeroOneD a) where
 
 -- ----------------------------------------------------------
 -- Arbitrary instances
+-- -------------------
+
+instance (Arbitrary a) => Arbitrary (Quantity d a) where
+  arbitrary = Dimensional <$> arbitrary
+
+instance (VTuple (Vec ds a) t, Arbitrary t) => Arbitrary (Vec ds a) where
+  arbitrary = fromTuple <$> arbitrary
+
+instance Arbitrary a => Arbitrary (Coord s a) where
+  arbitrary = C <$> arbitrary
+
+instance (Fractional a, Ord a, Arbitrary a) => Arbitrary (GeodeticPlace a) where
+  arbitrary = GeodeticPlace <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary
+
+instance (Num a, Ord a, Arbitrary a) => Arbitrary (ReferenceEllipsoid a) where
+  arbitrary = do
+    x <- positiveArbitrary
+    y <- positiveArbitrary
+    return $ ReferenceEllipsoid (max x y) (min x y)
+
+instance (Arbitrary a, Fractional a) => Arbitrary (E t a) where
+  arbitrary = mjd' <$> arbitrary
+
+instance (Arbitrary a, Fractional a) => Arbitrary (PosVel s a) where
+  arbitrary = C' <$> arbitrary <*> arbitrary
+
 deriving instance Arbitrary a => Arbitrary (SemiMajorAxis a)
 deriving instance Arbitrary a => Arbitrary (SemiLatusRectum a)
 deriving instance Arbitrary a => Arbitrary (Anomaly t a)
@@ -65,7 +100,7 @@ deriving instance Arbitrary a => Arbitrary (Longitude t a)
 
 -- Arbitrary instance always returns values >= 0.
 instance (Num a, Ord a, Arbitrary a) => Arbitrary (Eccentricity a) where
-    arbitrary = Ecc <$> nonNegativeArbitrary
+  arbitrary = Ecc <$> nonNegativeArbitrary
 
 instance Arbitrary a => Arbitrary (Maneuver a) where
   arbitrary = ImpulsiveRTN <$> arbitrary <*> arbitrary <*> arbitrary
@@ -83,30 +118,39 @@ instance (RealFrac a, Ord a, Arbitrary a) => Arbitrary (M.MEOE t a) where
 instance (RealFloat a, Arbitrary a) => Arbitrary (C.COE t a) where
   arbitrary = meoe2coe <$> arbitrary
 
-instance (RealFloat a, Arbitrary a) => Arbitrary (SV system a) where
-  arbitrary = SV <$> arbitrary <*> arbitrary
-
 instance (Fractional a, Arbitrary a, Arbitrary x) => Arbitrary (At t a x) where
   arbitrary = At <$> arbitrary <*> arbitrary
 
 -- ----------------------------------------------------------
 -- AEq instances.
 
+-- Approximate equality
+-- --------------------
+
+instance (Floating a, AEq a) => AEq (Coord s a) where
+  r1 ~== r2 = c r1 ~== c r2
+
+instance (RealFloat a, AEq a) => AEq (E t a) where
+  E t1 ~== E t2 = t1 ~== t2
+
+instance (RealFloat a, AEq a) => AEq (PosVel s a) where
+  pv1 ~== pv2 = cpos pv1 ~== cpos pv2 && cvel pv1 ~== cvel pv2
+
 deriving instance AEq a => AEq (SemiMajorAxis a)
 deriving instance AEq a => AEq (SemiLatusRectum a)
 deriving instance AEq a => AEq (Eccentricity a)
 
 instance (RealFloat a, Eq a) => Eq (Anomaly t a) where
-  (Anom x) == (Anom y) = x ==~ y
+  Anom x == Anom y = x ==~ y
 
 instance (RealFloat a, AEq a) => AEq (Anomaly t a) where
-  (Anom x) ~== (Anom y) = x ~==~ y
+  Anom x ~== Anom y = x ~==~ y
 
 instance (RealFloat a, Eq a) => Eq (Longitude l a) where
-  (Long x) == (Long y) = x ==~ y
+  Long x == Long y = x ==~ y
 
 instance (RealFloat a, AEq a) => AEq (Longitude l a) where
-  (Long x) ~== (Long y) = x ~==~ y
+  Long x ~== Long y = x ~==~ y
 
 deriving instance (RealFloat a,  Eq a) =>  Eq (M.MEOE l a)
 deriving instance (RealFloat a,  Eq a) =>  Eq (C.COE t a)
@@ -130,9 +174,6 @@ instance (RealFloat a, AEq a) => AEq (C.COE t a) where
            && C.aop  c0 ~== C.aop  c1
            && C.raan c0 ~== C.raan c1
            && anom (C.anomaly c0) ~==~ anom (C.anomaly c1)
-
-instance (Floating a, AEq a) => AEq (SV system a) where
-  (SV r v) ~== (SV r' v') = r ~== r' && v ~== v'
 
 instance (RealFloat a, AEq a, AEq x) => AEq (At t a x) where
   (x0 `At` t0) ~== (x1 `At` t1) = x0 ~== x1 && t0 ~== t1

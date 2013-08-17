@@ -24,8 +24,8 @@ import Data.AEq
 --   i = 0   ->  RAAN = one of [-pi,-0,0,pi]
 --   i = pi  ->  RAAN = pi
 --   e = 0   ->  AoP  = 0
-sv2coe :: RealFloat a => GravitationalParameter a -> SV ECI a -> COE True a
-sv2coe mu (SV r v) = COE
+sv2coe :: RealFloat a => GravitationalParameter a -> SV a -> COE True a
+sv2coe mu pv = COE
   { mu   = mu
   , slr  = p
   , ecc  = vNorm e'
@@ -35,7 +35,10 @@ sv2coe mu (SV r v) = COE
   , anomaly = Anom trueAnomaly
   }
   where
-    -- Angular momentum.
+    r  = pos pv
+    v  = vel pv
+
+    -- Angular momentum
     h' = r `crossProduct` v  -- Angular momentum vector.
     h  = vNorm h'
     (h_x, h_y, h_z) = toTuple h'
@@ -76,7 +79,7 @@ coe2meoe COE {..} = MEOE
 
 -- | Convert a SV into a COE.
 sv2meoe :: RealFloat a
-        => GravitationalParameter a -> SV ECI a -> MEOE True a
+        => GravitationalParameter a -> SV a -> MEOE True a
 sv2meoe mu = coe2meoe . sv2coe mu
 
 -- | Convert a MEOE into a COE. Use the algoritm from Eagle
@@ -97,8 +100,8 @@ meoe2coe m@MEOE{..} = COE
 
 
 -- | Convert a MEOE to a cartesian State Vector. Algorithm from Eagle.
-meoe2sv :: RealFloat a => MEOE True a -> SV ECI a
-meoe2sv MEOE{..} = SV ((r_x <: r_y <:. r_z) >* (r / s2))
+meoe2sv :: RealFloat a => MEOE True a -> SV a
+meoe2sv MEOE{..} = sv ((r_x <: r_y <:. r_z) >* (r / s2))
                       ((v_x <: v_y <:. v_z) >* negate (sqrt (mu / p) / s2))
   where
     l = long longitude
@@ -122,7 +125,7 @@ meoe2sv MEOE{..} = SV ((r_x <: r_y <:. r_z) >* (r / s2))
 
 
 -- | Convert Classical Orbital Elements into a State Vector.
-coe2sv :: RealFloat a => COE True a -> SV ECI a
+coe2sv :: RealFloat a => COE True a -> SV a
 coe2sv = meoe2sv . coe2meoe
 
 

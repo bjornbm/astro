@@ -1,4 +1,4 @@
-import qualified Astro.Orbit.Types.Tests
+import qualified Astro.Util.Tests
 import qualified Astro.Orbit.Anomaly.Tests
 import qualified Astro.Orbit.MEOE.Tests
 import qualified Astro.Orbit.Conversion.Tests
@@ -7,7 +7,7 @@ import qualified Astro.Trajectory.Cropped.Tests
 import Test.Hspec
 
 main = hspec $ do
-  Astro.Orbit.Types.Tests.specs
+  Astro.Util.Tests.specs
   Astro.Orbit.Anomaly.Tests.specs
   Astro.Orbit.MEOE.Tests.specs
   Astro.Orbit.Conversion.Tests.specs

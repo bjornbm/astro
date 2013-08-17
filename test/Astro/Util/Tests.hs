@@ -3,20 +3,20 @@
 
 
 
-module Astro.Orbit.Types.Tests where
+module Astro.Util.Tests where
 
 import Test.Hspec
 import Test.QuickCheck (property, (==>))
 import Data.AEq
 
 import TestUtil
+import TestInstances
 
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 
 import Astro.Util (plusMinusPi, zeroTwoPi)
 
-import Astro.Orbit.Types
 
 
 

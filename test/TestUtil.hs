@@ -5,79 +5,15 @@
 
 module TestUtil where
 
-import Numeric.Units.Dimensional (Dimensional (Dimensional))
 import Numeric.Units.Dimensional.Prelude
-import Numeric.Units.Dimensional.LinearAlgebra
-import Numeric.Units.Dimensional.LinearAlgebra.Vector (Vec (ListVec))
 import Numeric.Units.Dimensional.AEq
 import qualified Prelude
-import Astro.Coords
-import Astro.Coords.PosVel
-import Astro.Place
-import Astro.Place.Topocentric
-import Astro.Place.ReferenceEllipsoid
-import Astro.Time
 import Astro.Util
 import Test.QuickCheck
 import Control.Applicative
 import Data.AEq
 import qualified Debug.Trace
 
-
-
--- Instances (TODO: move elsewhere)
--- ================================
-
--- Approximate equality
--- --------------------
-instance (Floating a, AEq a) => AEq (Coord s a)
-  where
-    r1 === r2 = c r1 === c r2
-    r1 ~== r2 = c r1 ~== c r2
-
-instance (RealFloat a, AEq a) => AEq (E t a)
-  where
-    E t1 === E t2 = t1 === t2
-    E t1 ~== E t2 = t1 ~== t2
-
-instance (RealFloat a, AEq a) => AEq (PosVel s a)
-  where
-    pv1 === pv2 = cpos pv1 === cpos pv2 && cvel pv1 === cvel pv2
-    pv1 ~== pv2 = cpos pv1 ~== cpos pv2 && cvel pv1 ~== cvel pv2
-
--- Arbitrary instances
--- -------------------
-instance (Arbitrary a) => Arbitrary (Quantity d a) where
-  arbitrary   = Dimensional <$> arbitrary
-
---instance Arbitrary a => Arbitrary (CPos a) where
-instance (VTuple (Vec ds a) t, Arbitrary t) => Arbitrary (Vec ds a)
-  where
-    arbitrary = fromTuple <$> arbitrary
-
-instance Arbitrary a => Arbitrary (Coord s a)
-  where
-    --arbitrary = return . C . fromTuple =<< arbitrary
-    arbitrary = C <$> arbitrary
-
-instance (Fractional a, Arbitrary a) => Arbitrary (GeodeticPlace a)
-  where
-    arbitrary = GeodeticPlace <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary
-
-instance (Num a, Arbitrary a) => Arbitrary (ReferenceEllipsoid a)
-  where
-    arbitrary = do
-      x <- arbitrary
-      let pol = abs x + 1*~meter  -- Prevent zero radius.
-      d <- arbitrary
-      let eq  = pol + abs d       -- Always larger than polar radius.
-      return (ReferenceEllipsoid eq pol)
-
-instance (Arbitrary a, Fractional a) => Arbitrary (E t a) where
-  arbitrary = mjd' <$> arbitrary
-
-instance (Arbitrary a, Fractional a) => Arbitrary (PosVel s a) where
-  arbitrary = C' <$> arbitrary <*> arbitrary
 
 
 -- Helpers
@@ -105,9 +41,12 @@ trace s x = Debug.Trace.trace (s ++ ": " ++ show x) x
 -- =========
 
 -- | Removes the integral part of a value so that it ends up in the
--- interval [0,1).
+-- interval [0,1). This differs from (snd . properFraction) for
+-- negative values:
+--   @(snd . properFraction) (-1.2)@ = -0.2
+--   @fractionalPart         (-1.2)@ =  0.8
 fractionalPart :: Dimensionless Double -> Dimensionless Double
-fractionalPart x = x - fromIntegral (floor (x /~ one)) *~ one
+fractionalPart = fmap (\x -> x Prelude.- fromIntegral (floor x))
 
 
 -- Angle comparisons
