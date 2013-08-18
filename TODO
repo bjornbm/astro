@@ -1,0 +1,19 @@
++  2013-08-18: Consolidate with astro (astro is messier and need some clean up,
+   in particular the test suite).
+
++  2013-08-18: Create a Astro.Util.Cyclic module for plusMinusPi, adjustCyclic, et al.
+   Or just more them to Astro.Util??
+
++  2013-08-18: Make specs discoverable. Rename e.g. test/Astro/Util/Tests.hs to 
+   test/Astro/UtilSpec.hs and create test/Spec.hs
+
+-  Fix applyManeuvers (currently NOOP).
+
+-  Why both ephems and trajectories? Can we kill either abstraction?
+
+-  MEOM polation test cases at 1/4, 1/2, 3/4 for a well understood MEOM.
+
+-  Linear interpolation of MEOM longitude isn't consistent with linear
+   interpolation of SLR and ecc components as orbital rate varied non-
+   linearly with these. Fixing this will be hairy though so I'm
+   inclined to leave it as is.
