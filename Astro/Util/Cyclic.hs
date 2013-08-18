@@ -14,6 +14,37 @@ import Astro.Time
 import Astro.Time.At
 
 
+
+-- Adjusting angles
+-- ----------------
+
+-- | @normalizeAngle center a@ normalizes the angle @a@ to
+-- be within ±π of @center@. Algorithm from
+-- <http://www.java2s.com/Tutorial/Java/0120__Development/Normalizeanangleina2piwideintervalaroundacentervalue.htm>.
+normalizeAngle :: RealFloat a => Angle a -> Angle a -> Angle a
+normalizeAngle center a = a - _2 * pi * floor' ((a + pi - center) / (_2 * pi))
+  where floor' = fmap (fromIntegral . floor)
+
+-- | Constrains an angle to the range [-pi,pi).
+plusMinusPi :: RealFloat a => Angle a -> Angle a
+plusMinusPi = normalizeAngle _0
+
+-- | Constrains an angle to the range [0,2*pi).
+zeroTwoPi   :: RealFloat a => Angle a -> Angle a
+zeroTwoPi   = normalizeAngle pi
+
+-- | Removes the integral part of a value so that it ends up in the
+-- interval [0,1). This differs from (snd . properFraction) for
+-- negative values:
+--   @(snd . properFraction) (-1.2)@ = -0.2
+--   @fractionalPart         (-1.2)@ =  0.8
+fractionalPart :: RealFrac a => Dimensionless a -> Dimensionless a
+fractionalPart = fmap (\x -> x Prelude.- fromIntegral (floor x))
+
+
+-- Adjusting for relative total rotation
+-- -------------------------------------
+
 -- | Assume that y(t) is cyclic in meaning (but not in value, as
 -- for e.g. angles). Then @adjustCyclic (t0,y0) (t1,y1) period cycle@
 -- returns a new @y1@ adjusted so that the difference @y1 - y0@

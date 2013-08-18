@@ -3,7 +3,6 @@
 module Astro.Util ( r_GEO  -- From Astrodynamics
                   , perfectGEO, perfectGEO'
                   , coerceUt1ToUTC, coerceUtcToUT1
-                  , normalizeAngle, plusMinusPi, zeroTwoPi, fractionalPart
                   ) where
 
 import Astro.Coords
@@ -48,26 +47,3 @@ coerceUt1ToUTC (E t) = taiToUTCTime (const 0) $ toAbsoluteTime (E t)
 coerceUtcToUT1 :: RealFloat a => UTCTime -> E UT1 a
 coerceUtcToUT1 = coerce . fromAbsoluteTime . utcToTAITime (const 0)
   where coerce (E t) = E t
-
-
--- Dealing with cyclic angles
--- -------------------------
-
--- | @normalizeAngle center a@ normalizes the angle @a@ to
--- be within ±π of @center@. Algorithm from
--- <http://www.java2s.com/Tutorial/Java/0120__Development/Normalizeanangleina2piwideintervalaroundacentervalue.htm>.
-normalizeAngle :: RealFloat a => Angle a -> Angle a -> Angle a
-normalizeAngle center a = a - _2 * pi * floor' ((a + pi - center) / (_2 * pi))
-  where floor' = fmap (fromIntegral . floor)
-
--- | Constrains an angle to the range [-pi,pi).
-plusMinusPi :: RealFloat a => Angle a -> Angle a
-plusMinusPi = normalizeAngle _0
--- | Constrains an angle to the range [0,2*pi).
-zeroTwoPi   :: RealFloat a => Angle a -> Angle a
-zeroTwoPi   = normalizeAngle pi
-
--- | Removes the integral part of a value so that it ends up in the
--- interval [0,1).
-fractionalPart :: RealFrac a => Dimensionless a -> Dimensionless a
-fractionalPart = fmap (\x -> x Prelude.- fromIntegral (floor x))

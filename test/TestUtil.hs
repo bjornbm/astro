@@ -5,14 +5,16 @@
 
 module TestUtil where
 
-import Numeric.Units.Dimensional.Prelude
-import Numeric.Units.Dimensional.AEq
-import qualified Prelude
-import Astro.Util
-import Test.QuickCheck
 import Control.Applicative
 import Data.AEq
 import qualified Debug.Trace
+import Test.QuickCheck
+
+import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional.AEq
+import qualified Prelude
+
+import Astro.Util.Cyclic
 
 
 
@@ -35,18 +37,6 @@ cmpE accuracy x y' = abs (x - y') < accuracy
 -- | Trace the argument with a descriptive prefix.
 trace :: Show a => String -> a -> a
 trace s x = Debug.Trace.trace (s ++ ": " ++ show x) x
-
-
--- Massagers
--- =========
-
--- | Removes the integral part of a value so that it ends up in the
--- interval [0,1). This differs from (snd . properFraction) for
--- negative values:
---   @(snd . properFraction) (-1.2)@ = -0.2
---   @fractionalPart         (-1.2)@ =  0.8
-fractionalPart :: Dimensionless Double -> Dimensionless Double
-fractionalPart = fmap (\x -> x Prelude.- fromIntegral (floor x))
 
 
 -- Angle comparisons
