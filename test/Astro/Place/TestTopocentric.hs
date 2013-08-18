@@ -12,6 +12,7 @@ import Astro.Place.ReferenceEllipsoid
 import Astro.Util (perfectGEO)
 import Test.QuickCheck
 import TestUtil
+import TestInstances
 import Data.AEq
 
 
