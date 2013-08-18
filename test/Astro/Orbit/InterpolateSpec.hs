@@ -8,6 +8,7 @@ import Data.AEq
 
 import Astro.Time
 import Astro.Time.At
+import Astro.Util.Cyclic
 import TestUtil
 import TestInstances
 import Astro.Orbit.Types
