@@ -14,32 +14,61 @@ import Astro.Time
 import Astro.Time.At
 
 
+-- | Removes the integral part of a value so that it ends up in the
+-- interval [0,1). This differs from (snd . properFraction) for
+-- negative values:
+--   @(snd . properFraction)   1.2@  =  0.2
+--   @adjustZeroOne            1.2@  =  0.2
+--   @(snd . properFraction) (-1.2)@ = -0.2
+--   @adjustZeroOne          (-1.2)@ =  0.8
+adjustZeroOne :: RealFrac a => Dimensionless a -> Dimensionless a
+adjustZeroOne = fmap (\x -> x Prelude.- fromIntegral (floor x))
+
+-- | A somewhat misleadingly named alias for 'adjustZeroOne'
+-- (@/= snd . properFraction@).
+fractionalPart :: RealFrac a => Dimensionless a -> Dimensionless a
+fractionalPart = adjustZeroOne
+
 
 -- Adjusting angles
 -- ----------------
 
--- | @normalizeAngle center a@ normalizes the angle @a@ to
--- be within ±π of @center@. Algorithm from
--- <http://www.java2s.com/Tutorial/Java/0120__Development/Normalizeanangleina2piwideintervalaroundacentervalue.htm>.
-normalizeAngle :: RealFloat a => Angle a -> Angle a -> Angle a
-normalizeAngle center a = a - _2 * pi * floor' ((a + pi - center) / (_2 * pi))
-  where floor' = fmap (fromIntegral . floor)
+-- | @adjustAbove1 min x@ adjusts x by an integer so that it lies in the
+-- interval [min,min+1).
+adjust1Above :: RealFloat a
+             => Dimensionless a -> Dimensionless a -> Dimensionless a
+adjust1Above min x = adjustZeroOne (x - min) + min
 
--- | Constrains an angle to the range [-pi,pi).
+-- | @adjustAbove cycle min x@ adjusts x by an integer number or cycles
+-- so that it lies in the interval [min,min+cycle).
+adjustAbove :: (RealFloat a, Div d d DOne, Mul DOne d d)
+            => Quantity d a -> Quantity d a -> Quantity d a -> Quantity d a
+adjustAbove cycle min x = adjust1Above (min/cycle) (x/cycle) * cycle
+
+-- | @adjustAbout1 center x@ adjusts x by an integer so that it lies in the
+-- interval [center-1/2,center+1/2).
+adjust1About :: RealFloat a
+             => Dimensionless a -> Dimensionless a -> Dimensionless a
+adjust1About center = adjust1Above (center - _1/_2)
+
+-- | @adjustAbout center cycle x@ adjusts x by an integer number or cycles
+-- so that it lies in the interval [min-cycle/2,min+cycle/2).
+adjustAbout :: (RealFloat a, Div d d DOne, Mul DOne d d, Div d DOne d)
+            => Quantity d a -> Quantity d a -> Quantity d a -> Quantity d a
+adjustAbout center cycle x = adjust1About (center/cycle) (x/cycle) * cycle
+
+-- | @adjustAngle center a@ adjusts the angle @a@ to
+-- be within ±π of @center@.
+adjustAngle :: RealFloat a => Angle a -> Angle a -> Angle a
+adjustAngle center = adjustAbout center tau
+
+-- | Adjusts an angle to the range [-pi,pi).
 plusMinusPi :: RealFloat a => Angle a -> Angle a
-plusMinusPi = normalizeAngle _0
+plusMinusPi = adjustAngle _0
 
--- | Constrains an angle to the range [0,2*pi).
-zeroTwoPi   :: RealFloat a => Angle a -> Angle a
-zeroTwoPi   = normalizeAngle pi
-
--- | Removes the integral part of a value so that it ends up in the
--- interval [0,1). This differs from (snd . properFraction) for
--- negative values:
---   @(snd . properFraction) (-1.2)@ = -0.2
---   @fractionalPart         (-1.2)@ =  0.8
-fractionalPart :: RealFrac a => Dimensionless a -> Dimensionless a
-fractionalPart = fmap (\x -> x Prelude.- fromIntegral (floor x))
+-- | Adjusts an angle to the range [0,2pi).
+zeroTwoPi :: RealFloat a => Angle a -> Angle a
+zeroTwoPi = adjustAngle pi
 
 
 -- Adjusting for relative total rotation
