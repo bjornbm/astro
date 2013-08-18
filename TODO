@@ -7,6 +7,8 @@
 +  2013-08-18: Make specs discoverable. Rename e.g. test/Astro/Util/Tests.hs to 
    test/Astro/UtilSpec.hs and create test/Spec.hs
 
+-  Convert astro tests (see test/Test.lhs) into specs.
+
 -  Fix applyManeuvers (currently NOOP).
 
 -  Why both ephems and trajectories? Can we kill either abstraction?
