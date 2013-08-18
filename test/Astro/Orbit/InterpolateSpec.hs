@@ -30,7 +30,6 @@ spec = do
   spec_linearPolateVec
   spec_linearPolateVecT
   spec_linearPolateMEOEm
-  spec_adjustCyclic
 
 
 spec_linearPolate = describe "linearPolate (x0,y0) (x1,y1) x" $ do
@@ -134,67 +133,3 @@ spec_linearPolateMEOEm = describe "linearPolateMEOEm (m0`At`t0) (m1`At`t1) t" $ 
         m1 = At {value = (MEOE {mu = (28.347782649561204)*~(meter^pos3/second^pos2), p = (81.31848224944541)*~meter, f = (0.14929490687671887)*~one, g = (-0.1494207496036637)*~one, h = (0.4877418113629943)*~one, k = (0.2923091817478394)*~one, longitude = Long {long = 226.1964600997837*~one}}), epoch = clock 1858 08 08 12 29 13.897002466374 UT1}
     in linearPolateMEOEm m0 m1 (epoch m1) ~== (value m1 :: MEOE Mean D)
 -- -}
-
--- ---------------------------------------------------------------------
-
-spec_adjustCyclic = describe "adjustCyclic (x0,y0) (x1,y1) period cycle" $ do
-
-  it "seems to work correctly" $
-    adjustCyclic (_0, negate _3) (_1, _3) _1 (_2 * pi) `shouldBe` _3
-
-  it "seems to work correctly" $
-    adjustCyclic (_0, negate _3) (_1,_3) _1 _8 `shouldBe` _3
-
-  it "seems to work correctly" $
-    adjustCyclic (_0, negate _3) (_1,_5) _5 _8 `shouldBe` negate _3
-
-  it "seems to work correctly" $
-    adjustCyclic (_0,_3) (_1, negate _3) _5 _8 `shouldBe` _5
-
-  it "seems to work correctly" $
-    adjustCyclic (_0,_3) (_1, negate _3) _5 _8 `shouldBe` _5
-
-  it "seems to work correctly" $
-    adjustCyclic (_0,_3) (_1, negate _3) _1 _8 `shouldBe` 13*~one
-
-  it "seems to work correctly on a previously failing case" $
-    let (x0,y0) = ((-9.200202975846752)*~one,3.1439390419699795*~one)
-        (x1,y1) = ((-36.091591960763786)*~one,(-3.341608661319045)*~one)
-        y1' = adjustCyclic1 (x0,y0) (x1,y1)
-     in abs ((y1'-y0) - (x1-x0)) < 0.5 *~one
-
-  it "seems to work correctly on a previously failing case" $
-    ( let (x0,y0) = (0.36547819268776943*~one, 7.590913372057166*~one)
-          (x1,y1) = ((-2.000468137259748)*~one, (-0.18165146326599815)*~one)
-          period = 1.9197163741923564 *~one
-          cycle  = 64.0 *~one
-          y1' = adjustCyclic (x0,y0) (x1,y1) period cycle
-      in abs ((y1'-y0)/cycle - (x1-x0)/period) < 0.5*~one)
-
-  it "seems to work with random inputs" $ property $
-    \(x0,y0) (x1,y1) -> let y1' = adjustCyclic1 (x0,y0) (x1,y1)
-        in abs ((y1' - y0) - (x1 - x0)) < (0.5 *~one::Dimensionless D)
-
-  it "seems to work with random inputs" $ property $
-    \(x0::Time D,y0::Length D) (x1,y1) (NonZeroD period) (NonZeroD cycle)
-      -> let y1' = adjustCyclic (x0,y0) (x1,y1) period cycle
-          in abs ((y1'-y0)/cycle - (x1-x0)/period) < 0.5 *~one
-
-  it "always adjusts by an integer number of cycles" $ property $
-    \(x0::Time D,y0::Length D) (x1,y1) (NonZeroD period) (NonZeroD cycle)
-      -> let y1' = adjustCyclic (x0,y0) (x1,y1) period cycle
-             dy1 = (y1' - y1) / cycle /~ one
-          in dy1 ~== fromInteger (round dy1)
-          -- || y1' ~== y1  -- Catches cases where y1 is not adjusted but
-                            -- due to arithmetic changes slightly more than
-                            -- epsilon.
-
-  it "now passes a test that failed earlier due to bad numerics" $
-         let (x0,y0) = (110.11241870409592 *~second,(-44.69574262947886)*~meter)
-             (x1,y1) = (45.78313070344765 *~second,(-60.42668049624092)*~meter)
-             period = (-184.186385868482)*~second
-             cycle = (-28.31292968999108)*~meter :: Length D
-             y1' = adjustCyclic (x0,y0) (x1,y1) period cycle
-             dy1 = (y1' - y1) / cycle /~ one
-          in dy1 ~== fromInteger (round dy1)
-
