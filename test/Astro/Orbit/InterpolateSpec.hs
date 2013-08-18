@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Astro.Orbit.Interpolate.Tests (main, specs) where
+module Astro.Orbit.InterpolateSpec (main, spec) where
 
 import Test.Hspec
 import Test.QuickCheck (property, (==>), NonZero(..))
@@ -22,8 +22,8 @@ import qualified Prelude
 
 type D = Double
 
-main = hspec specs
-specs = do
+main = hspec spec
+spec = do
   spec_linearPolate
   spec_linearPolateT
   spec_linearPolateVec

@@ -1,4 +1,4 @@
-module Astro.Trajectory.Cropped.Tests where
+module Astro.Trajectory.CroppedSpec where
 
 import Test.Hspec
 --import Test.QuickCheck (property, (==>))
@@ -20,8 +20,8 @@ import Data.List
 import Astro.Orbit.MEOE
 import Astro.Orbit.Types
 
-main = hspec specs
-specs = do
+main = hspec spec
+spec = do
   spec_uncropped
   spec_croppedStartTime
   spec_croppedEndTime

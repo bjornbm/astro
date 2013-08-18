@@ -3,7 +3,7 @@
 
 
 
-module Astro.Util.Tests where
+module Astro.UtilSpec where
 
 import Test.Hspec
 import Test.QuickCheck (property, (==>))
@@ -20,8 +20,8 @@ import Astro.Util (plusMinusPi, zeroTwoPi)
 
 
 
-main = hspec specs
-specs = do
+main = hspec spec
+spec = do
   spec_fundamentals
   spec_plusMinusPi
   spec_zeroTwoPi

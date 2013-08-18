@@ -1,7 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Astro.Orbit.Anomaly.Tests where
+module Astro.Orbit.AnomalySpec where
 
 import Test.Hspec
 import Test.QuickCheck (property, (==>))
@@ -18,8 +18,8 @@ import Astro.Orbit.Types
 import Astro.Orbit.Anomaly
 
 
-main = hspec specs
-specs = do
+main = hspec spec
+spec = do
   spec_anomalyComparison
   spec_anomalyConversion
 

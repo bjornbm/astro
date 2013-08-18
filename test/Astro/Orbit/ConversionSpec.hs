@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE RecordWildCards #-}
-module Astro.Orbit.Conversion.Tests where
+module Astro.Orbit.ConversionSpec where
 
 import Test.Hspec
 import Test.QuickCheck (property, (==>))
@@ -21,8 +21,8 @@ import Astro.Orbit.Conversion
 import Astro.Orbit.Types hiding (ecc)
 
 
-main = hspec specs
-specs = do
+main = hspec spec
+spec = do
   spec_sv2coe
   spec_coe2meoe2coe
   spec_sv2coe2meoe2sv

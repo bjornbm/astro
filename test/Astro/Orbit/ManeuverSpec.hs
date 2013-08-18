@@ -1,7 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Astro.Orbit.Maneuver.Tests where
+module Astro.Orbit.ManeuverSpec where
 
 import Test.Hspec
 import Test.QuickCheck (property, (==>))
@@ -25,8 +25,8 @@ import Astro.Trajectory
 import Astro.Trajectory.EphemTrajectory
 
 
-main = hspec specs
-specs = do
+main = hspec spec
+spec = do
   spec_zeroManeuver
   spec_randomManeuver
 
