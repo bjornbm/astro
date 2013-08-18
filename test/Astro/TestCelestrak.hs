@@ -56,7 +56,7 @@ prop_convertUT1 t = cmpE (1e-4*~second) ut1 $ fromUniversalTime (toUniversalTime
 -- Driver
 -- ======
 main = do
-  arr <- readFile "eop_test.txt" >>= return . mkEOPArray . parseEOPData
+  arr <- readFile "test/testdata/eop_test.txt" >>= return . mkEOPArray . parseEOPData
 
   onceCheck prop_interpolate_mid
   onceCheck prop_interpolate_0
