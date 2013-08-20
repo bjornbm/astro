@@ -203,10 +203,11 @@ clock' :: (Fractional a, Real b)
 clock' y m d h min s = clock y m d h min s undefined
 
 -- | Show an epoch as a clock time. This function is used by the @Show@
--- instance. TODO: should change this to use ISO8601 format.
-showClock :: forall t a. (Show t, Show a, Real a, Fractional a) 
+-- instance.
+showClock :: forall t a. (Show t, Show a, Real a, Fractional a)
           => E t a -> String
 showClock = formatEpoch' "%c"
+
 
 -- ** Julian Date (JD)
 --    ----------------
