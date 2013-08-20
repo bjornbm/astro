@@ -19,7 +19,8 @@ import System.Locale
 --
 --   *  The time zone offset (%z) will always be 00:00.
 --
-formatEpoch :: forall t a. (Show t, RealFrac a) => TimeLocale -> String -> E t a -> String
+formatEpoch :: forall t a. (Show t, RealFrac a)
+            => TimeLocale -> String -> E t a -> String
 formatEpoch locale format e = formatTime locale format
                             $ ZonedTime (unsafeToLocalTime e) tz
   where tz = TimeZone 0 False $ show (undefined :: t)

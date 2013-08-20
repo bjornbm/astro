@@ -96,9 +96,7 @@ module Astro.Time (
 import Numeric.Units.Dimensional.Prelude  -- hiding (century)
 import qualified Prelude
 import Data.Time hiding (utc)
-import qualified Data.Time (utc)
-import Data.Time.Clock.TAI
-import Data.Fixed (Pico)
+import System.Locale (TimeLocale (..), defaultTimeLocale)
 
 
 -- A Julian century.
@@ -112,8 +110,8 @@ century = prefix 36525 day
 -- the 21st century. For exact numerical representation use e.g.
 -- Rational.
 newtype E t a = E (Time a) deriving (Eq, Ord, Enum)
-instance (Show t, Show a, Real a, Fractional a)
-  => Show (E t a) where show = showClock
+instance (Show t, Show a, Real a, Fractional a) => Show (E t a) where
+  show = showClock
 
 
 -- | Obtain the difference in seconds between two epochs. Beware that if
@@ -208,7 +206,7 @@ clock' y m d h min s = clock y m d h min s undefined
 -- instance. TODO: should change this to use ISO8601 format.
 showClock :: forall t a. (Show t, Show a, Real a, Fractional a) 
           => E t a -> String
-showClock t = show (unsafeToLocalTime t) ++ ' ':show (undefined::t)
+showClock = formatEpoch' "%c"
 
 -- ** Julian Date (JD)
 --    ----------------
@@ -513,6 +511,35 @@ ut1ToTAI f ut1@(E t) = E $ t + f ut1
 -- | Convert a TAI epoch into a UT1 epoch.
 taiToUT1 :: Num a => UT1MinusTAI a -> E TAI a -> E UT1 a
 taiToUT1 f tai@(E t) = E $ t + f tai
+
+
+-- Formatting
+-- ==========
+
+-- | Format an epoch using the formatting codes of
+-- 'Data.Time.Format.formatTime'. Some specifics to keep in mind:
+--
+--   *  Week days will in general not make sense other than for UT1.
+--
+--   *  The time zone name (%Z) will be the time scale name.
+--
+--   *  The time zone offset (%z) will always be 00:00.
+--
+formatEpoch :: forall t a. (Show t, Real a, Fractional a)
+            => TimeLocale -> String -> E t a -> String
+formatEpoch locale format e = formatTime locale format
+                            $ ZonedTime (unsafeToLocalTime e) tz
+  where tz = TimeZone 0 False $ show (undefined :: t)
+
+-- | Same as 'formatEpoch' but uses a sensible (English, ISO8601)
+-- 'System.Locale.TimeLocale'.
+formatEpoch' :: (Show t, Real a, Fractional a) => String -> E t a -> String
+formatEpoch' = formatEpoch locale
+  where
+    locale = defaultTimeLocale { dateTimeFmt = "%FT%T%Q %Z"
+                               , dateFmt = "%F"
+                               , timeFmt = "%T%Q"
+                               }
 
 
 -- References
