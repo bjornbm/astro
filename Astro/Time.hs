@@ -69,6 +69,9 @@ module Astro.Time (
   , clock'
   , showClock
   -- ** Julian Dates (JD)
+  -- ** Formatting
+  , formatEpoch
+  , formatEpoch'
   -- $jd
   , jd
   , jd'

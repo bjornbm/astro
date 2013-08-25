@@ -19,3 +19,7 @@
    interpolation of SLR and ecc components as orbital rate varied non-
    linearly with these. Fixing this will be hairy though so I'm
    inclined to leave it as is.
+
+-  Use Lens to access data in the Astro monad.
+
+-  Use Data.Default for the Astro monad.
