@@ -44,3 +44,20 @@ appAt f at = at { value = f at }
 -- | Maps 'appAt f'.
 mapAt :: (At t a x -> y) -> [At t a x] -> [At t a y]
 mapAt f = map (appAt f)
+
+-- | \"Zips\" two time series with matching times. The time series should be
+-- ordered. Values that do not match up (in time) with a value in the other
+-- series are dropped.
+zipAt :: Ord a => [At t a x] -> [At t a y] -> [At t a (x,y)]
+zipAt = zipAtWith (,)
+
+-- | Applies a binary function to the values in both series, returning a
+-- single series with the results. The time series should be ordered. Values
+-- that do not match up (in time) with a value in the other series are
+-- dropped.
+zipAtWith :: Ord a => (x -> y -> z) -> [At t a x] -> [At t a y] -> [At t a z]
+zipAtWith f (x`At`t:txs) (y`At`t':tys) = case t `compare` t' of
+                                    LT -> zipAtWith f txs (y`At`t':tys)
+                                    EQ -> (f x y `At` t : zipAtWith f txs tys)
+                                    GT -> zipAtWith f (x`At`t:txs) tys
+zipAtWith _ _ _ = []
