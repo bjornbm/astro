@@ -2,7 +2,7 @@ Name:                astro
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-Version:             0.11
+Version:             0.12
 License:             BSD3
 License-File:        LICENSE
 Copyright:           Bjorn Buckwalter 2008-2013
@@ -22,6 +22,7 @@ Build-Depends:       base < 5,
                      mtl,
                      array,
                      HList > 0.1,
+                     data-default > 0.5 && < 0.6,
                      leapseconds-announced,
                      numtype < 1.1,
                      dimensional < 1.1,
