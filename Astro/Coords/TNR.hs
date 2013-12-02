@@ -3,8 +3,6 @@ module Astro.Coords.TNR where
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
-import Numeric.Units.Dimensional.LinearAlgebra.Operators
-import Numeric.Units.Dimensional.LinearAlgebra.PosVel
 import Astro.Coords
 import Astro.Coords.PosVel
 import qualified Astrodynamics
@@ -43,4 +41,3 @@ orbitalFrameECR pv = consRow t $ consRow n $ rowMatrix r where
 -- | Converts ECR position to orbital frame defined by PosVel.
 ecrToOrbitalFrame :: RealFloat a => PosVel ECR a -> Coord ECR a -> Coord Orbital a
 ecrToOrbitalFrame pv p = C $ orbitalFrameECR pv `matVec` (c p `elemSub` cpos pv)
-
