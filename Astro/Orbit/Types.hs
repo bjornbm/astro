@@ -3,8 +3,6 @@
 module Astro.Orbit.Types where
 
 import Numeric.Units.Dimensional.Prelude
-import Numeric.Units.Dimensional.NonSI (revolution)
-import Astro.Time (E)
 import qualified Prelude
 
 
@@ -16,11 +14,14 @@ newtype Eccentricity a = Ecc { ecc :: Dimensionless a } deriving (Show, Eq, Ord)
 
 -- Angles
 -- ======
--- For angles the following should hold: x == x + n 2 pi
 
 data True
 data Mean
-data Ecc
+data Eccentric
 
 newtype Anomaly t a = Anom { anom :: Angle a } deriving (Show)
 newtype Longitude t a = Long { long :: Angle a } deriving (Show)
+-- Rename the above the "argument of longitude".
+--newtype ArgumentOfLatitude  t a = AoLat { argLat :: Angle a } deriving (Show)
+--newtype ArgumentOfLongitude t a = AoLon { argLon :: Angle a } deriving (Show)
+--newtype ArgumentOfPerigee   t a = AoP   { app    :: Angle a } deriving (Show)
