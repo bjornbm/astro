@@ -8,7 +8,6 @@ module Astro.Orbit.Conversion where
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
 import qualified Prelude
-import Astro.Coords (ECI)
 import Astro.Orbit.SV
 import Astro.Orbit.COE
 import Astro.Orbit.MEOE hiding (anomaly, raan)
@@ -154,3 +153,9 @@ meoeM2meoe :: (AEq a, RealFloat a) => MEOE Mean a -> MEOE True a
 --meoeM2meoe = coe2meoe . coeM2coe . meoe2coe
 -- Implementation where conversion limited to (that necessary for) longitude.
 meoeM2meoe m = m { longitude = (longitude . coe2meoe . coeM2coe . meoe2coe) m }
+
+meoeM2coe :: (AEq a, RealFloat a) => MEOE Mean a -> COE True a
+meoeM2coe = coeM2coe . meoe2coe
+
+meoeM2sv :: (AEq a, RealFloat a) => MEOE Mean a -> SV a
+meoeM2sv = coe2sv . meoeM2coe
