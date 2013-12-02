@@ -23,3 +23,12 @@
 -  Use Lens to access data in the Astro monad.
 
 -  Use Data.Default for the Astro monad.
+
+
+-  Criterion bench mark.
+
+-  Make At strict in its fields.
+
+-  Use dlists instead of lists.
+
+-  Use vectors instead of lists.
