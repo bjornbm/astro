@@ -34,25 +34,25 @@ fractionalPart = adjustZeroOne
 
 -- | @adjustAbove1 min x@ adjusts x by an integer so that it lies in the
 -- interval [min,min+1).
-adjust1Above :: RealFloat a
+adjust1Above :: RealFrac a
              => Dimensionless a -> Dimensionless a -> Dimensionless a
 adjust1Above min x = adjustZeroOne (x - min) + min
 
 -- | @adjustAbove cycle min x@ adjusts x by an integer number or cycles
 -- so that it lies in the interval [min,min+cycle).
-adjustAbove :: (RealFloat a, Div d d DOne, Mul DOne d d)
+adjustAbove :: (RealFrac a, Div d d DOne, Mul DOne d d)
             => Quantity d a -> Quantity d a -> Quantity d a -> Quantity d a
 adjustAbove cycle min x = adjust1Above (min/cycle) (x/cycle) * cycle
 
 -- | @adjustAbout1 center x@ adjusts x by an integer so that it lies in the
 -- interval [center-1/2,center+1/2).
-adjust1About :: RealFloat a
+adjust1About :: RealFrac a
              => Dimensionless a -> Dimensionless a -> Dimensionless a
 adjust1About center = adjust1Above (center - _1/_2)
 
 -- | @adjustAbout center cycle x@ adjusts x by an integer number or cycles
 -- so that it lies in the interval [min-cycle/2,min+cycle/2).
-adjustAbout :: (RealFloat a, Div d d DOne, Mul DOne d d, Div d DOne d)
+adjustAbout :: (RealFrac a, Div d d DOne, Mul DOne d d, Div d DOne d)
             => Quantity d a -> Quantity d a -> Quantity d a -> Quantity d a
 adjustAbout center cycle x = adjust1About (center/cycle) (x/cycle) * cycle
 
