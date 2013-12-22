@@ -11,7 +11,7 @@ import Astro.Time (E)
 -- use is @x `At` t@.
 -- Isomorphic to @(E t a, x)@ (also true for the 'Functor' instance).
 data At t a x = At { value :: x
-                   , epoch :: E t a
+                   , epoch :: !(E t a)
                    } deriving (Show, Eq)
 
 instance (Ord a, Ord x) => Ord (At t a x) where
