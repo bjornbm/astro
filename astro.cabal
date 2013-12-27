@@ -2,7 +2,7 @@ Name:                astro
 -- PVP summary:      +-+------- breaking API changes
 --                   | |  +----- non-breaking API additions
 --                   | |  | +--- code changes with no API change
-Version:             0.13.0.1
+Version:             0.14.0.0
 License:             BSD3
 License-File:        LICENSE
 Copyright:           Bjorn Buckwalter 2008-2013
@@ -67,6 +67,7 @@ Exposed-Modules:     Astro
                      Astro.Orbit.SV
                      Astro.Orbit.Types
                      Astro.Orbit.Maneuver
+                     Astro.SolarCoordinates
                      Astro.Trajectory
                      Astro.Trajectory.Cropped
                      Astro.Trajectory.EphemTrajectory
