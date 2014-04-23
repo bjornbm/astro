@@ -12,20 +12,19 @@ import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.LinearAlgebra.HListExtras (HZipWith)
 import Numeric.Units.Dimensional.AD
 import Numeric.Units.Dimensional.LinearAlgebra.VectorAD
-import Numeric.AD.Types (Mode, AD)
 
 
 -- | If @f@ is a function of epoch that returns a 'Vector', then
 -- @diff f@ is a function of that returns the first derivative of
 -- the result.
 diffVt :: (Num a, HMap (DivD,DTime) ds ds')
-        => (forall tag. Mode tag => E t (AD tag a) -> Vec ds (AD tag a))
+        => (forall tag. E t (FAD tag a) -> Vec ds (FAD tag a))
         -> E t a -> Vec ds' a
 diffVt f (E x) = diffV (f . E) x
 
 -- | Like 'diffVt' but returns a pair of the result and its first derivative.
 diffVt' :: (Num a, HMap (DivD,DTime) ds ds')
-        => (forall tag. Mode tag => E t (AD tag a) -> Vec ds (AD tag a))
+        => (forall tag. E t (FAD tag a) -> Vec ds (FAD tag a))
         -> E t a -> (Vec ds a, Vec ds' a)
 diffVt' f (E x) = diffV' (f . E) x
 
@@ -37,7 +36,7 @@ applyLinearAtT :: forall a t ds ds' ds2 ds2' ts l'. (
                  --HZipWith DivD ds ds' ts, Homo ts DTime, -- Necessary to infer t (the dimension w r t which we are differentiating).
                  Homo ts DTime,
                  HZip ds ds' l', HMap DivD l' ts         -- Needed to use applyLinearAt, not sure why, grr!
-            ) => (forall tag. Mode tag => E t (AD tag a) -> Vec ds (AD tag a) -> Vec ds2 (AD tag a))
+            ) => (forall tag. E t (FAD tag a) -> Vec ds (FAD tag a) -> Vec ds2 (FAD tag a))
               -> E t a -> (Vec ds a, Vec ds' a) -> (Vec ds2 a, Vec ds2' a)
 applyLinearAtT f (E t) = applyLinearAt (f . E) t
 --applyLinearAtT f (p,v) t = diffVt' (\t' -> f (liftV p `elemAdd` scaleVec (diffEpoch t' (liftT t)) (liftV v)) t') t
