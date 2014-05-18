@@ -14,9 +14,10 @@ http://aa.usno.navy.mil/faq/docs/SunApprox.php. The narrative from
 that page is included inline in the source for reference.
 
 It is unclear what time system is expected for the JD, although UT1
-is implied.  However, it seems strange that irregularities in Earth's
-rotation rate should impact the solar coordinates, so TT is assumed
-instead.
+is implied. It seems a bit strange to use UT1 as the Earth's orbit
+is not coupled to its (axial) rotation, but with the provided
+precision the difference between time scales is pretty insignificant,
+and so pragmatism may be the reason for using UT1.
 
 Furthermore the coordinate system of the computation result is not
 specified. An Earth centered inertial (ECI) frame is assumed.
@@ -24,8 +25,8 @@ specified. An Earth centered inertial (ECI) frame is assumed.
 > -- | Computes the Sun's angular coordinates to an accuracy of about 1
 > -- arcminute within two centuries of 2000. For more details see
 > -- http://aa.usno.navy.mil/faq/docs/SunApprox.php.
-> solarCoordinates :: RealFloat a => E TT a -> Coord ECI a
-> solarCoordinates tt = S (r <: toZenith decl <:. ra)
+> solarCoordinates :: RealFloat a => E ut1 a -> Coord ECI a
+> solarCoordinates ut1 = S (r <: toZenith decl <:. ra)
 >   where
 
 Given below is a simple algorithm for computing the Sun's angular
@@ -44,7 +45,8 @@ date 2451545.0:
 
       D = JD – 2451545.0
 
->     d = sinceJ2000 tt
+>     d = sinceJ2000' ut1
+>       where sinceJ2000' = flip diffEpoch (clock' 2000 1  1 12 0 0)
 
 where JD is the Julian date of interest. Then compute
 
