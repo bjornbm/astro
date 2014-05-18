@@ -20,12 +20,14 @@ precision the difference between time scales is pretty insignificant,
 and so pragmatism may be the reason for using UT1.
 
 Furthermore the coordinate system of the computation result is not
-specified. An Earth centered inertial (ECI) frame is assumed.
+specified. However, page C3 of the Astronomical Almanac (2009) implies
+that the formulas on page C5 compute “ICRS geocentric equatorial”
+coordinates, which I assume must strictly mean GCRS coordinates.
 
 > -- | Computes the Sun's angular coordinates to an accuracy of about 1
 > -- arcminute within two centuries of 2000. For more details see
 > -- http://aa.usno.navy.mil/faq/docs/SunApprox.php.
-> solarCoordinates :: RealFloat a => E ut1 a -> Coord ECI a
+> solarCoordinates :: RealFloat a => E ut1 a -> Coord GCRS a
 > solarCoordinates ut1 = S (r <: toZenith decl <:. ra)
 >   where
 
