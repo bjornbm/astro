@@ -34,13 +34,35 @@ diffCoords :: Floating a => Coord s a -> Coord s a -> CPos a
 diffCoords c1 c2 = elemSub (c c1) (c c2)
 
 -- Some coordinate systems
-data ECI = ECI deriving (Show, Read) -- ICRS
-data ECR = ECR deriving (Show, Read) -- ITRS
-data Topocentric = Topocentric deriving (Show, Read)
-data Orbital = Orbital deriving (Show, Read)
+
+-- | The International Celestial Reference System (ICRS) has its
+-- origin located at the barycenter of the solar system and its
+-- axes fixed very near (within 0.1 arc second of) the mean equator
+-- and equinox of J2000.
+data ICRS = ICRS deriving (Show, Read)
+
+-- | The Geocentric Celestial Reference System (GCRS) has its
+-- origin at the center of Earth and axes parallel with the ICRS 
+data GCRS = GCRS deriving (Show, Read)
+
+-- | The International Terrestrial Reference System (ICRS) is a an
+-- Earth fixed rotating coordinate systems, connected to the ICRS
+-- by use of the IERS Earth Orientation Parameters (EOP).
+data ITRS = ITRS deriving (Show, Read) -- ITRS
+
+type ECEF = ITRS  -- Losely defined.
+type ECR = ITRS   -- Losely defined.
+
+data Topocentric = Topocentric deriving (Show, Read)  -- Defined by geographic location.
+data Orbital = Orbital deriving (Show, Read)  -- Defined by orbital state.
+
+-- | Earth Centered Inertial. A losely defined “of Date” coordinate system.
+-- Could be either Mean or True.
+-- (TODO deprecate in favor of more rigorous systems.)
+data ECI = ECI deriving (Show, Read)
 type MEGSD = ECI  -- Close to ECI as per Soop, not very rigorous.
 
--- Perhaps class ECI with instance ICRS, MEGSD, TEME...
+-- TODO Perhaps class ECI with instance GCRS, ToD, MEGSD, TEME... ?
 
 -- Type synonyms for use elsewhere.
 type Axis a = Vec3 DOne DOne DOne a
