@@ -328,7 +328,7 @@ j2000 = clock 2000 01 01 12 00 00.000 TT
 -- | The difference in seconds between the given epoch and J2000.0. Will
 -- be negative if the given epoch preceeds J2000.0.
 sinceJ2000 :: Fractional a => E TT a -> Time a
-sinceJ2000 tt = diffEpoch tt j2000
+sinceJ2000 = flip diffEpoch j2000
 
 -- | The difference between TAI and TT.
 ttMinusTAI :: Fractional a => Time a
