@@ -39,15 +39,23 @@ diffCoords c1 c2 = elemSub (c c1) (c c2)
 -- origin located at the barycenter of the solar system and its
 -- axes fixed very near (within 0.1 arc second of) the mean equator
 -- and equinox of J2000.
+--
+-- Per Wikipedia[1] "ICRS coordinates are approximately the same as equatorial
+-- coordinates: the mean pole at J2000.0 in the ICRS lies at 17.3±0.2 mas in
+-- the direction 12 h and 5.1±0.2 mas in the direction 18 h. The mean equinox
+-- of J2000.0 is shifted from the ICRS right ascension origin by 78±10 mas
+-- (direct rotation around the polar axis)."
+--
+-- [1]: http://en.wikipedia.org/wiki/International_Celestial_Reference_System
 data ICRS = ICRS deriving (Show, Read)
 
 -- | The Geocentric Celestial Reference System (GCRS) has its
 -- origin at the center of Earth and axes parallel with the ICRS 
 data GCRS = GCRS deriving (Show, Read)
 
--- | The International Terrestrial Reference System (ICRS) is a an
--- Earth fixed rotating coordinate systems, connected to the ICRS
--- by use of the IERS Earth Orientation Parameters (EOP).
+-- | The International Terrestrial Reference System (ITRS) is a an Earth fixed
+-- rotating coordinate systems, connected to the ICRS by use of the IERS Earth
+-- Orientation Parameters (EOP).
 data ITRS = ITRS deriving (Show, Read) -- ITRS
 
 type ECEF = ITRS  -- Losely defined.
