@@ -74,7 +74,7 @@ degeneratePlace place = height place <= negate (b^pos2 / a)
 -- latitudes. See [AsA2009] page B84.
 --
 -- (Should this take geodetic vs geocentric latitude into account? Would
--- that fix polar latitudes? Or should polar motionrotation matrix be
+-- that fix polar latitudes? Or should polar motion rotation matrix be
 -- used for accurate results? It is also unclear whether the latitude
 -- in the CIP/TIO frame is geocentric or geodetic... does the concept
 -- of geodetic exist in that frame?)
