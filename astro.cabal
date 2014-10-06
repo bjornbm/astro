@@ -2,7 +2,7 @@ Name:                astro
 -- PVP summary:      +-+------- breaking API changes
 --                   | |  +----- non-breaking API additions
 --                   | |  | +--- code changes with no API change
-Version:             0.16.0.0
+Version:             0.17.0.0
 License:             BSD3
 License-File:        LICENSE
 Copyright:           Bjorn Buckwalter 2008-2014
@@ -22,14 +22,14 @@ Build-Depends:       base < 5,
                      mtl,
                      array,
                      HList-classic > 0.1,
-                     data-default > 0.5 && < 0.6,
+                     data-default > 0.5,
                      leapseconds-announced,
                      numtype < 1.2,
                      dimensional < 1.1,
-                     dimensional-vectors >= 0.10.1 && < 1.1,
-                     dimensional-experimental >= 0.9 && < 1.1,
-                     ieee754 < 1.1,
-                     ad >= 4.2 && < 4.3,
+                     dimensional-vectors >= 0.10.1,
+                     dimensional-experimental >= 0.9,
+                     ieee754,
+                     ad >= 4.2,
                      astro-tables
 Exposed-Modules:     Astro
                      Astro.DefaultData
