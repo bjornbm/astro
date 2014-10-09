@@ -2,7 +2,7 @@ Name:                astro
 -- PVP summary:      +-+------- breaking API changes
 --                   | |  +----- non-breaking API additions
 --                   | |  | +--- code changes with no API change
-Version:             0.17.0.0
+Version:             0.17.0.1
 License:             BSD3
 License-File:        LICENSE
 Copyright:           Bjorn Buckwalter 2008-2014
@@ -28,7 +28,7 @@ Build-Depends:       base < 5,
                      dimensional < 1.1,
                      dimensional-vectors >= 0.10.1,
                      dimensional-experimental >= 0.9,
-                     ieee754,
+                     aeq,
                      ad >= 4.2,
                      astro-tables
 Exposed-Modules:     Astro
