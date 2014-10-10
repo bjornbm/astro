@@ -28,7 +28,7 @@ Build-Depends:       base < 5,
                      dimensional < 1.1,
                      dimensional-vectors >= 0.10.1,
                      dimensional-experimental >= 0.9,
-                     aeq,
+                     ieee754 >= 0.7.4,
                      ad >= 4.2,
                      astro-tables
 Exposed-Modules:     Astro
