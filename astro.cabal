@@ -2,7 +2,7 @@ Name:                astro
 -- PVP summary:      +-+------- breaking API changes
 --                   | |  +----- non-breaking API additions
 --                   | |  | +--- code changes with no API change
-Version:             0.17.0.1
+Version:             0.18
 License:             BSD3
 License-File:        LICENSE
 Copyright:           Bjorn Buckwalter 2008-2014
@@ -34,6 +34,7 @@ Build-Depends:       base < 5,
 Exposed-Modules:     Astro
                      Astro.DefaultData
                      Astro.Coords
+                     Astro.Coords.ECR
                      Astro.Coords.PosVel
                      Astro.Coords.TNR
                      Astro.Place
