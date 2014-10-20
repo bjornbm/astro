@@ -11,7 +11,7 @@ import Astro.Time
 import Astro.Time.Interop
 import Astrodynamics (r_GEO)
 import Numeric.Units.Dimensional.Prelude
-import Numeric.Units.Dimensional.LinearAlgebra (fromTuple)
+import Numeric.Units.Dimensional.LinearAlgebra -- (fromTuple)
 
 import Data.Time.Clock
 import Data.Time.Clock.TAI
@@ -24,14 +24,13 @@ type Longitude = Angle
 -- Perfect GEO vectors
 -- -------------------
 
--- | ECEF(??) position of a perfectly geostationary SC.
+-- | ECEF position of a perfectly geostationary SC.
 perfectGEO :: Floating a => Longitude a -> Coord ECR a
-perfectGEO l = S $ fromTuple (r_GEO, 90*~degree, l)
+perfectGEO l = C (r_GEO * cos l <: r_GEO * sin l <:. _0)
 
--- | ECEF posvel of a perfectly geostationary SC.
+-- | ECEF @PosVel@ of a perfectly geostationary SC.
 perfectGEO' :: RealFloat a => Longitude a -> PosVel ECR a
-perfectGEO' l = S' (s $ perfectGEO l)
-                   (fromTuple (_0, _0, _0))
+perfectGEO' l = C' (c $ perfectGEO l) (_0 <: _0 <:. _0)
 
 
 -- Approximating UTC == UT1
