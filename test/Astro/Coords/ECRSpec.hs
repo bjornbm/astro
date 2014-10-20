@@ -25,6 +25,8 @@ main = hspec spec
 spec = do
   spec_ecrToECI
   spec_eciToECR
+  spec_ecrToECISV
+  spec_eciToECRSV
 
 
 -- ----------------------------------------------------------
@@ -54,3 +56,34 @@ spec_eciToECR = describe "eciToECR" $ do
     (property $ \(p::Coord ECI D) t ->
       (ecrToECI t . eciToECR t) p ~== p)
 
+
+-- ----------------------------------------------------------
+spec_ecrToECISV = describe "ecrToECISV" $ do
+
+  it "is identical to ecrToECI for the position"
+    (property $ \(pv::PosVel ECR D) t ->
+      --Comparison of cartesian coords fails due to numerics.
+      (s . pos . ecrToECISV t) pv ~== (s . ecrToECI t . pos) pv)
+
+  it "is the inverse of eciToECRSV"
+    (property $ \(pv::PosVel ECR D) t ->
+      (eciToECRSV t . ecrToECISV t) pv ~== pv)
+
+
+-- ----------------------------------------------------------
+spec_eciToECRSV = describe "eciToECRSV" $ do
+
+  it "is identical to eciToECR for the position"
+    (property $ \(pv::PosVel ECI D) t ->
+      --Comparison of cartesian coords fails due to numerics.
+      (s . pos . eciToECRSV t) pv ~== (s . eciToECR t . pos) pv)
+
+  it "is the inverse of ecrToECISV"
+    (property $ \(pv::PosVel ECI D) t ->
+      (ecrToECISV t . eciToECRSV t) pv ~== pv)
+
+-- {-
+p = (-0.5653349232735853::D) *~ meter <: (-5.133004275272132) *~meter <:. (-7.22445929855348) *~ meter
+t = clock' 1858 11 24 20 10 15.151878680541
+pv = C' p (_0 <: _0 <:. _0)
+-- -}

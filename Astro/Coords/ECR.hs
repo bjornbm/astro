@@ -1,3 +1,4 @@
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
 {- | Module for converting between ECR and other frames. This module is
 -- currently somewhat unprincipled in that is uses constants for
@@ -17,6 +18,7 @@ import Astro.Coords
 import Astro.Coords.PosVel
 import Astro.Time
 import Astro.Time.At
+import Numeric.Units.Dimensional.AD
 import qualified Astrodynamics
 
 
@@ -54,14 +56,29 @@ ecrToECI t xyz = C (rotZ (Astrodynamics.greenwichRA t) |*< c xyz)
 ecrToECI' :: Floating a => At UT1 a (Coord ECR a) -> At UT1 a (Coord ECI a)
 ecrToECI' At {..} = ecrToECI epoch value `At` epoch
 
+
 -- | Convert PosVel from ECR frame to ECI frame.
 ecrToECISV :: RealFloat a => E UT1 a -> PosVel ECR a -> PosVel ECI a
-ecrToECISV t pv = C' p' v'
-  where
-    p = cpos pv
-    v = cvel pv
-    t0 = clock' 2014 1 1 0 0 0
-    (p', v') = applyLinearAt
-        (\dt p' -> c $ eciToECR (addTime (clock' 2014 1 1 0 0 0) dt) (C p'))
-        (diffEpoch t t0)
-        (p,v)
+ecrToECISV = liftPVAt ecrToECI
+
+-- | Convert PosVel from ECR frame to ECI frame.
+eciToECRSV :: RealFloat a => E UT1 a -> PosVel ECI a -> PosVel ECR a
+eciToECRSV = liftPVAt eciToECR
+
+
+liftPV :: RealFloat a
+       => (forall tag. Coord s (FAD tag a) -> Coord s' (FAD tag a))
+       -> PosVel s a -> PosVel s' a
+liftPV f pv = uncurry C' $ applyLinear (c . f . C) (cpos pv, cvel pv)
+
+liftPVAt :: (RealFloat a)
+         => (forall tag. E t (FAD tag a) -> Coord s (FAD tag a) -> Coord s' (FAD tag a))
+         -> E t a -> PosVel s a -> PosVel s' a
+liftPVAt f t pv = uncurry C' $ applyLinearAt
+                --(\dt -> c . f (addTime (jd' 0) dt) . C)
+                --(diffEpoch t (jd' 0))
+                (\dt -> c . f (addTime (lift t) dt) . C)
+                _0
+                (cpos pv, cvel pv)
+
+instance Lift (E t) where lift (E t) = E (lift t)
