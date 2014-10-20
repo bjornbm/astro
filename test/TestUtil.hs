@@ -17,6 +17,9 @@ import qualified Prelude
 import Astro.Util.Cyclic
 
 
+-- | Convenience type for QuickCheck.
+type D = Double
+
 
 -- Helpers
 -- =======
