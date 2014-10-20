@@ -37,5 +37,5 @@ spec_driftRateToSMA = describe "smaToDriftRate" $ do
 spec_meanAngularMotion = describe "meanAngularMotion" $ do
 
   it "is the inverse of semiMajorAxis"
-      a ~== semiMajorAxis (meanAngularMotion a))
     (property $ \(NonNegativeD (a::Length Double)) ->
+      a ~== semiMajorAxis (meanAngularMotion a))

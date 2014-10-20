@@ -47,9 +47,13 @@ spec_anomalyComparison = describe "Anomaly comparisons" $ do
 -- ----------------------------------------------------------
 spec_anomalyConversion = describe "Anomaly conversions" $ do
 
-  it "Two ways of computing eccentric anomaly from true anomaly"
+  it "Two ways of computing eccentric anomaly from true anomaly are identical."
     (property $ \e' t -> let e = fractionalPart e'
       in eccAnomaly1 e t ~== eccAnomaly2 e t)
+
+  it "Converting TA to EA is consistent with other method."
+    (property $ \e' t -> let e = Ecc $ fractionalPart e' :: Eccentricity Double
+      in ta2ea e t ~== Anom (eccAnomaly1 (ecc e) (anom t)))
 
   it "Converting TA to EA and back should not change it."
     (property $ \e' t -> let e = Ecc $ fractionalPart e' :: Eccentricity Double
@@ -84,7 +88,7 @@ spec_anomalyConversion = describe "Anomaly conversions" $ do
   where
     e0 = Ecc _0 :: Eccentricity Double
     ta0 = Anom _0 :: Anomaly True Double
-    ea0 = Anom _0 :: Anomaly Ecc  Double
+    ea0 = Anom _0 :: Anomaly Eccentric  Double
     ma0 = Anom _0 :: Anomaly Mean Double
 
 
