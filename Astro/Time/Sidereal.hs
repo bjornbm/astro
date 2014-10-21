@@ -29,6 +29,14 @@ era ut1 = tau * ( 0.7790572732640 *~ one
   where
     du = sinceJ2000' ut1
 
+-- | Earth's adopted mean angular velocity (the time derivative of the
+  -- Earth rotation angle, see [AsA2009] B8).
+  --
+  -- prop> phi t == diff era t
+phi :: Floating a => AngularVelocity a
+phi = 1.00273781191135448 *~ (revolution / day)
+
+
 -- | The polynomial part of GMST is almost entirely due to the effect of
 -- precession and is given separately as it also forms part of the equation
 -- of the origins [AsA2009].
