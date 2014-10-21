@@ -58,12 +58,12 @@ ecrToECI' At {..} = ecrToECI epoch value `At` epoch
 
 
 -- | Convert PosVel from ECR frame to ECI frame.
-ecrToECISV :: RealFloat a => E UT1 a -> PosVel ECR a -> PosVel ECI a
-ecrToECISV = liftPVAt ecrToECI
+ecrToECIPV :: RealFloat a => E UT1 a -> PosVel ECR a -> PosVel ECI a
+ecrToECIPV = liftPVAt ecrToECI
 
 -- | Convert PosVel from ECR frame to ECI frame.
-eciToECRSV :: RealFloat a => E UT1 a -> PosVel ECI a -> PosVel ECR a
-eciToECRSV = liftPVAt eciToECR
+eciToECRPV :: RealFloat a => E UT1 a -> PosVel ECI a -> PosVel ECR a
+eciToECRPV = liftPVAt eciToECR
 
 
 -- TODO Move these.

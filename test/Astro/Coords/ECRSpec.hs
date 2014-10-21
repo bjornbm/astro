@@ -25,8 +25,8 @@ main = hspec spec
 spec = do
   spec_ecrToECI
   spec_eciToECR
-  spec_ecrToECISV
-  spec_eciToECRSV
+  spec_ecrToECIPV
+  spec_eciToECRPV
 
 
 -- ----------------------------------------------------------
@@ -58,29 +58,29 @@ spec_eciToECR = describe "eciToECR" $ do
 
 
 -- ----------------------------------------------------------
-spec_ecrToECISV = describe "ecrToECISV" $ do
+spec_ecrToECIPV = describe "ecrToECIPV" $ do
 
   it "is identical to ecrToECI for the position"
     (property $ \(pv::PosVel ECR D) t ->
       --Comparison of cartesian coords fails due to numerics.
-      (s . pos . ecrToECISV t) pv ~== (s . ecrToECI t . pos) pv)
+      (s . pos . ecrToECIPV t) pv ~== (s . ecrToECI t . pos) pv)
 
-  it "is the inverse of eciToECRSV"
+  it "is the inverse of eciToECRPV"
     (property $ \(pv::PosVel ECR D) t ->
-      (eciToECRSV t . ecrToECISV t) pv ~== pv)
+      (eciToECRPV t . ecrToECIPV t) pv ~== pv)
 
 
 -- ----------------------------------------------------------
-spec_eciToECRSV = describe "eciToECRSV" $ do
+spec_eciToECRPV = describe "eciToECRPV" $ do
 
   it "is identical to eciToECR for the position"
     (property $ \(pv::PosVel ECI D) t ->
       --Comparison of cartesian coords fails due to numerics.
-      (s . pos . eciToECRSV t) pv ~== (s . eciToECR t . pos) pv)
+      (s . pos . eciToECRPV t) pv ~== (s . eciToECR t . pos) pv)
 
-  it "is the inverse of ecrToECISV"
+  it "is the inverse of ecrToECIPV"
     (property $ \(pv::PosVel ECI D) t ->
-      (ecrToECISV t . eciToECRSV t) pv ~== pv)
+      (ecrToECIPV t . eciToECRPV t) pv ~== pv)
 
 -- {-
 p = (-0.5653349232735853::D) *~ meter <: (-5.133004275272132) *~meter <:. (-7.22445929855348) *~ meter
