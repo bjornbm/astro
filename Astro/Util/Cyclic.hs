@@ -17,20 +17,22 @@ import Astro.Time.At
 -- Adjusting values with respect to a reference
 -- --------------------------------------------
 
--- | Removes the integral part of a value so that it ends up in the
--- interval [0,1). This differs from (snd . properFraction) for
--- negative values:
+-- | Returns the integral part of a value, leaving only a fractional
+-- part in the interval (-1,1).
+-- (@/= snd . properFraction@).
+fractionalPart :: RealFrac a => Dimensionless a -> Dimensionless a
+fractionalPart = fmap (snd . properFraction)
+
+-- | Removes the integral part of a value so that a fractional part
+-- in the interval [0,1) is returned. This differs in behavior from
+-- @(snd . properFraction)@ for negative values:
 --   @(snd . properFraction)   1.2@  =  0.2
 --   @adjustZeroOne            1.2@  =  0.2
 --   @(snd . properFraction) (-1.2)@ = -0.2
 --   @adjustZeroOne          (-1.2)@ =  0.8
 adjustZeroOne :: RealFrac a => Dimensionless a -> Dimensionless a
-adjustZeroOne = fmap (\x -> x Prelude.- fromIntegral (floor x))
-
--- | A somewhat misleadingly named alias for 'adjustZeroOne'
--- (@/= snd . properFraction@).
-fractionalPart :: RealFrac a => Dimensionless a -> Dimensionless a
-fractionalPart = adjustZeroOne
+--adjustZeroOne = fmap (\x -> x Prelude.- fromIntegral (floor x))
+adjustZeroOne x = x - fmap (fromIntegral . floor) x
 
 -- | @adjustAbove1 min x@ adjusts x by an integer so that it lies in the
 -- interval [min,min+1).
