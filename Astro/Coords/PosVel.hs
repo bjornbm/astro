@@ -7,7 +7,7 @@ import Astro.Time (E (E), addTime)  -- For the Lift instance.
 import Numeric.Units.Dimensional.Prelude (_0)  -- for liftPVAt.
 import Numeric.Units.Dimensional.LinearAlgebra.PosVel
 import Numeric.Units.Dimensional.LinearAlgebra.VectorAD (applyLinear, applyLinearAt)
-import Numeric.Units.Dimensional.AD
+import Astro.AD
 
 
 data PosVel system a = C' (CPos a) (CVel a)
@@ -36,7 +36,6 @@ svel :: RealFloat a => PosVel s a -> SVel a
 svel (S' _ v) = v
 svel (C' p v) = snd $ applyLinear c2s (p,v)
 
---applyLinearC f (C' p v) = let (p',v') = applyLinear f (p,v) in C' p' v'
 
 -- | Lift a function on @Coord@s to a function on 'PosVel's.
 liftPV :: RealFloat a
@@ -52,6 +51,3 @@ liftPVAt f t pv = uncurry C' $ applyLinearAt
                                 (\dt -> c . f (addTime (lift t) dt) . C)
                                 _0
                                 (cpos pv, cvel pv)
-
--- List instance for epochs. TODO Move!
-instance Lift (E t) where lift (E t) = E (lift t)

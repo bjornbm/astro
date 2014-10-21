@@ -32,6 +32,7 @@ Build-Depends:       base < 5,
                      ad >= 4.2,
                      astro-tables
 Exposed-Modules:     Astro
+                     Astro.AD
                      Astro.DefaultData
                      Astro.Coords
                      Astro.Coords.ECR
