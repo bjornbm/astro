@@ -56,6 +56,9 @@ gmst_full ut1 tt = era ut1 + gmst_p tt
   -- This version disregards the difference between UT1 and TAI
   -- (about 35 s in 2014). The impact is less than one mas
   -- (milliarcsecond) from 1972 (start of TT scale) through 2050-ish.
+  --
+  -- GMST is consistent with Soop Table 1.
+  --
 gmst' :: RealFloat a => E UT1 a -> Angle a
 gmst' ut1 = gmst_full ut1 (taiToTT $ ut1ToTAI (const _0) ut1)
 
