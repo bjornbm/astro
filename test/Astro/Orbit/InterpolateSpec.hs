@@ -21,8 +21,6 @@ import Numeric.Units.Dimensional.LinearAlgebra.PosVel (SPos)
 import qualified Prelude
 
 
-type D = Double
-
 main = hspec spec
 spec = do
   spec_linearPolate

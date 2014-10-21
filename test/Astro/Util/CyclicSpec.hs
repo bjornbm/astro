@@ -15,8 +15,6 @@ import qualified Prelude
 import Astro.Util.Cyclic
 
 
-type D = Double
-
 main = hspec spec
 spec = do
   spec_fundamentals
