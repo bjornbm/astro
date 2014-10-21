@@ -10,6 +10,7 @@ other modules.
 > import Data.Time.Clock.TAI
 > import Astro.Time
 > import Astro.Time.Interop
+> import Astro.Time.Sidereal (gmst')
 > import Prelude 
 >   ( fromIntegral, toRational, properFraction
 >   , Fractional, RealFloat, Num, realToFrac
@@ -46,6 +47,7 @@ The speed of light in vacuum (Beta p. 509).
 > c = 2.997925e8 *~ (meter / second)
 
 The angular velocity of Earth's rotation (Soop p. 7).
+TODO use derivative or ERA?
 
 > phi :: Floating a => AngularVelocity a
 > phi = 360.985647 *~ (degree / day)
@@ -56,8 +58,9 @@ The gravitational parameter of Earth. Value from Wikipedia[3].
 > mu = 398600.4418 *~ (kilo meter ^ pos3 / second ^ pos2)
 
 The Greenwich Right Ascension reference epoch and angle (Soop p. 128).
-These should ideally be updated on a yearly basis. TODO: Investigate
-options.
+These should ideally be updated on a yearly basis.
+TODO update to 2011
+TODO Investigate options -> Use era instead 
 
 > greenwichRefEpoch :: Fractional a => E UT1 a
 > greenwichRefEpoch = clock 2008 1 1 0 0 0 UT1
@@ -83,6 +86,7 @@ Functions
 Longitudes
 ----------
 Calculates the right ascension of the Greenwich meridian at the epoch.
+TODO use gmst' instead.
 
 > greenwichRA t = greenwichRefAngle + phi * dt
 >   where
