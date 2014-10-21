@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Astro.Time.SideralSpec where
+module Astro.Time.SiderealSpec where
 
 import Test.Hspec
 import Test.QuickCheck (property, (==>), NonZero(..))

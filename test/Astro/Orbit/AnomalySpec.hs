@@ -16,7 +16,7 @@ import qualified Prelude
 
 import Astro.Orbit.Types
 import Astro.Orbit.Anomaly
-import Astro.Util.Cyclic (fractionalPart)
+import Astro.Util.Cyclic (fractionalPart, adjustZeroOne)
 
 
 main = hspec spec
@@ -71,7 +71,7 @@ spec_anomalyConversion = describe "Anomaly conversions" $ do
       in ta2ea e ta0 == ea0 && ea2ta e ea0 == ta0)
 
   it "At apogee TA and EA should be equally pi."
-    (property $ \e' -> let e = Ecc $ fractionalPart e' :: Eccentricity Double
+    (property $ \e' -> let e = Ecc $ adjustZeroOne e' :: Eccentricity Double
       in ta2ea e (Anom pi) ~== Anom pi && ea2ta e (Anom pi) == Anom pi)
 
   it "For circular orbit TA and EA should be equal."

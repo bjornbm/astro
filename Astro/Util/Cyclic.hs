@@ -75,6 +75,10 @@ plusMinusPi = adjustAngle _0
 zeroTwoPi :: RealFloat a => Angle a -> Angle a
 zeroTwoPi = adjustAngle pi
 
+-- | Adjusts an angle to the range [0,tau).
+zeroTau :: RealFloat a => Angle a -> Angle a
+zeroTau = zeroTwoPi
+
 
 -- Consistency metric for cyclic values
 -- ------------------------------------

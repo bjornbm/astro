@@ -33,7 +33,7 @@ spec_fundamentals = describe "Fundamentals" $ do
 
   it "fractionalPart works as advertized"
     (property $ \(x::Dimensionless Double) ->
-      fractionalPart x >= _0 && fractionalPart x < _1)
+      fractionalPart x >= negate _1 && fractionalPart x < _1)
 
 
 -- ----------------------------------------------------------
@@ -56,7 +56,7 @@ spec_plusMinusPi = describe "plusMinusPi" $ do
 
   it "plusMinusPi x = x for x in [-pi,pi)"
     (property $ \(x'::Angle Double) ->
-      let x = fractionalPart x' * _2 * pi - pi in plusMinusPi x ~== x)
+      let x = fractionalPart x' * pi in plusMinusPi x ~== x)
 
   it "plusMinusPi returns values in [-pi,pi)"
     (property $ \x -> plusMinusPi x > negate pi && plusMinusPi x <= (pi::Angle Double))
@@ -85,13 +85,16 @@ spec_zeroTwoPi = describe "zeroTwoPi" $ do
 
   it "zeroTwoPi x = x for x in [0,2*pi)"
     (property $ \(x'::Angle Double) ->
-       let x = fractionalPart x' * _2 * pi in zeroTwoPi x ~== x)
+       let x = adjustZeroOne x' * _2 * pi in zeroTwoPi x ~== x)
 
   it "zeroTwoPi returns values in [0,2*pi)"
     (property $ \x -> zeroTwoPi x >= _0 && zeroTwoPi x < (_2 * pi::Angle Double))
 
   it "zeroTwoPi x + 2 pi = zeroTwoPi x"
     (property $ \x -> zeroTwoPi (x + _2 * pi) ~== (zeroTwoPi x::Angle Double))
+
+  it "zeroTau x = zeroTwoPi x"
+    (property $ \(x::Angle Double) -> zeroTwoPi x == zeroTau x)
 
 
 -- ----------------------------------------------------------
