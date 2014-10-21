@@ -47,6 +47,13 @@ spec_anomalyComparison = describe "Anomaly comparisons" $ do
 -- ----------------------------------------------------------
 spec_anomalyConversion = describe "Anomaly conversions" $ do
 
+  -- Arguably should use adjustZeroOne instead of fractionalPart in the
+  -- below tests, but these seem to work well with negative eccentricity
+  -- too!
+  --
+  -- Could use the Arbitrary instance for Eccentricity, but would have
+  -- to discard eccentricity >= 1.
+
   it "Two ways of computing eccentric anomaly from true anomaly are identical."
     (property $ \e' t -> let e = fractionalPart e'
       in eccAnomaly1 e t ~== eccAnomaly2 e t)
