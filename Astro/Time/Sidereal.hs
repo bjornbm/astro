@@ -27,8 +27,7 @@ era ut1 = tau * ( 0.7790572732640 *~ one
                 + fractionalPart (du / (1 *~ day))
                 )
   where
-    du = diffEpoch ut1 j2000ut1
-    j2000ut1 = jd 2451545.0 UT1
+    du = sinceJ2000' ut1
 
 -- | The polynomial part of GMST is almost entirely due to the effect of
 -- precession and is given separately as it also forms part of the equation
@@ -44,7 +43,7 @@ gmst_p tt = 0.014506   *~ arcsecond
           - 0.00000044 *~(arcsecond/century^pos3) * t^pos3
           - 0.000029956*~(arcsecond/century^pos4) * t^pos4
           - 3.68e-8    *~(arcsecond/century^pos5) * t^pos5
-        where t = diffEpoch tt j2000
+        where t = sinceJ2000 tt
 
 -- | Greenwich mean sidereal time (GMST) expressed as an angle.
   -- The TT time should be consistent with the UT1 time. It is

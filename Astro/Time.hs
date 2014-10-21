@@ -49,8 +49,12 @@ module Astro.Time (
   -- ** Terrestial Time (TT)
   -- $tt
   , TT  (TT)
+  -- *** J2000
+  -- $j2000
   , j2000
   , sinceJ2000
+  , j2000'
+  , sinceJ2000'
   -- ** Geocentric Coordinate Time (TCG)
   -- $tcg
   , TCG (TCG)
@@ -320,16 +324,6 @@ scale.
 -}
 data TT  = TT ; instance Show TT  where show _ = "TT"
 
--- | The "standard epoch" J2000.0 (2000-01-01 12:00 TT or JD 2451545.0 TT).
--- Page 9 of [1], page 34 of [2].
-j2000 :: Fractional a => E TT a
-j2000 = clock 2000 01 01 12 00 00.000 TT
-
--- | The difference in seconds between the given epoch and J2000.0. Will
--- be negative if the given epoch preceeds J2000.0.
-sinceJ2000 :: Fractional a => E TT a -> Time a
-sinceJ2000 = flip diffEpoch j2000
-
 -- | The difference between TAI and TT.
 ttMinusTAI :: Fractional a => Time a
 ttMinusTAI = 32.184 *~ second  -- (2.4)
@@ -341,6 +335,36 @@ taiToTT e = coerce $ addTime e ttMinusTAI
 -- | Convert a TT epoch into a TAI epoch.
 ttToTAI :: Fractional a => E TT a -> E TAI a
 ttToTAI e = coerce $ subTime e ttMinusTAI
+
+
+-- *** J2000
+-- ---------
+{- $j2000
+The standard epoch J2000.0 (2000-01-01 12:00 TT or JD 2451545.0 TT),
+and less standard variations in other time scales.
+-}
+
+-- | The "standard epoch" J2000.0 (2000-01-01 12:00 TT or JD 2451545.0 TT).
+-- Page 9 of [1], page 34 of [2].
+j2000 :: Fractional a => E TT a
+j2000 = clock 2000 01 01 12 00 00.000 TT
+
+-- | The difference in seconds between the given epoch and J2000.0. Will
+-- be negative if the given epoch preceeds J2000.0.
+sinceJ2000 :: Fractional a => E TT a -> Time a
+sinceJ2000 = flip diffEpoch j2000
+
+-- | Occasionally literature refers to J2000.0 in other time scales, e.g.
+  -- AsA2009.
+j2000' :: Fractional a => E t a
+j2000' = clock' 2000 01 01 12 00 00.000
+
+-- | The difference in seconds between the given epoch and 2000-01-01T12:00
+-- in the timescale of the epoch. Will be negative if the given epoch
+-- preceeds 2000-01-01T12:00.
+sinceJ2000' :: Fractional a => E t a -> Time a
+sinceJ2000' = flip diffEpoch j2000'
+
 
 
 -- ** Geocentric Coordinate Time (TCG)
