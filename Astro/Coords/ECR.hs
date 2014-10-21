@@ -13,13 +13,11 @@ import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.LinearAlgebra.Rotation
-import Numeric.Units.Dimensional.LinearAlgebra.VectorAD
 import Astro.Coords
 import Astro.Coords.PosVel
 import Astro.Time
 import Astro.Time.At
 import Astro.Time.Sidereal (gmst')
-import Numeric.Units.Dimensional.AD
 import qualified Astrodynamics
 
 
@@ -64,22 +62,3 @@ ecrToECIPV = liftPVAt ecrToECI
 -- | Convert PosVel from ECR frame to ECI frame.
 eciToECRPV :: RealFloat a => E UT1 a -> PosVel ECI a -> PosVel ECR a
 eciToECRPV = liftPVAt eciToECR
-
-
--- TODO Move these.
-liftPV :: RealFloat a
-       => (forall tag. Coord s (FAD tag a) -> Coord s' (FAD tag a))
-       -> PosVel s a -> PosVel s' a
-liftPV f pv = uncurry C' $ applyLinear (c . f . C) (cpos pv, cvel pv)
-
-liftPVAt :: (RealFloat a)
-         => (forall tag. E t (FAD tag a) -> Coord s (FAD tag a) -> Coord s' (FAD tag a))
-         -> E t a -> PosVel s a -> PosVel s' a
-liftPVAt f t pv = uncurry C' $ applyLinearAt
-                --(\dt -> c . f (addTime (jd' 0) dt) . C)
-                --(diffEpoch t (jd' 0))
-                (\dt -> c . f (addTime (lift t) dt) . C)
-                _0
-                (cpos pv, cvel pv)
-
-instance Lift (E t) where lift (E t) = E (lift t)

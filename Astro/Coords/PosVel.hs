@@ -1,8 +1,13 @@
+{-# LANGUAGE RankNTypes #-}
+
 module Astro.Coords.PosVel where
 
 import Astro.Coords
+import Astro.Time (E (E), addTime)  -- For the Lift instance.
+import Numeric.Units.Dimensional.Prelude (_0)  -- for liftPVAt.
 import Numeric.Units.Dimensional.LinearAlgebra.PosVel
-import Numeric.Units.Dimensional.LinearAlgebra.VectorAD (applyLinear)
+import Numeric.Units.Dimensional.LinearAlgebra.VectorAD (applyLinear, applyLinearAt)
+import Numeric.Units.Dimensional.AD
 
 
 data PosVel system a = C' (CPos a) (CVel a)
@@ -33,3 +38,20 @@ svel (C' p v) = snd $ applyLinear c2s (p,v)
 
 --applyLinearC f (C' p v) = let (p',v') = applyLinear f (p,v) in C' p' v'
 
+-- | Lift a function on @Coord@s to a function on 'PosVel's.
+liftPV :: RealFloat a
+       => (forall tag. Coord s (FAD tag a) -> Coord s' (FAD tag a))
+       -> PosVel s a -> PosVel s' a
+liftPV f pv = uncurry C' $ applyLinear (c . f . C) (cpos pv, cvel pv)
+
+-- | Lift a function of time on @Coord@s to a function of time on 'PosVel's.
+liftPVAt :: (RealFloat a)
+         => (forall tag. E t (FAD tag a) -> Coord s (FAD tag a) -> Coord s' (FAD tag a))
+         -> E t a -> PosVel s a -> PosVel s' a
+liftPVAt f t pv = uncurry C' $ applyLinearAt
+                                (\dt -> c . f (addTime (lift t) dt) . C)
+                                _0
+                                (cpos pv, cvel pv)
+
+-- List instance for epochs. TODO Move!
+instance Lift (E t) where lift (E t) = E (lift t)
