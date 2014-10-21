@@ -39,8 +39,8 @@ spec_fundamentals = describe "Fundamentals" $ do
 -- ----------------------------------------------------------
 spec_plusMinusPi = describe "plusMinusPi" $ do
 
-  it "plusMinusPi -2*pi = 0"
-    (plusMinusPi (negate _2 * pi) == _0)
+  it "plusMinusPi -tau = 0"
+    (plusMinusPi (negate tau) == _0)
 
   it "plusMinusPi -pi = -pi"
     (plusMinusPi (negate pi) == negate pi)
@@ -51,8 +51,8 @@ spec_plusMinusPi = describe "plusMinusPi" $ do
   it "plusMinusPi pi = -pi"
     (plusMinusPi pi == negate pi)
 
-  it "plusMinusPi 2pi = 0"
-    (plusMinusPi (_2*pi) == _0)
+  it "plusMinusPi tau = 0"
+    (plusMinusPi tau == _0)
 
   it "plusMinusPi x = x for x in [-pi,pi)"
     (property $ \(x'::Angle Double) ->
@@ -61,15 +61,15 @@ spec_plusMinusPi = describe "plusMinusPi" $ do
   it "plusMinusPi returns values in [-pi,pi)"
     (property $ \x -> plusMinusPi x > negate pi && plusMinusPi x <= (pi::Angle Double))
 
-  it "plusMinusPi x + 2 pi = plusMinusPi x"
-    (property $ \x -> plusMinusPi (x + _2 * pi) ~== (plusMinusPi x::Angle Double))
+  it "plusMinusPi x + tau = plusMinusPi x"
+    (property $ \x -> plusMinusPi (x + tau) ~== (plusMinusPi x::Angle Double))
 
 
 -- ----------------------------------------------------------
 spec_zeroTwoPi = describe "zeroTwoPi" $ do
 
-  it "zeroTwoPi -2*pi = 0"
-    (zeroTwoPi (negate _2 * pi) == _0)
+  it "zeroTwoPi -tau = 0"
+    (zeroTwoPi (negate tau) == _0)
 
   it "zeroTwoPi -pi = pi"
     (zeroTwoPi (negate pi) == pi)
@@ -80,18 +80,18 @@ spec_zeroTwoPi = describe "zeroTwoPi" $ do
   it "zeroTwoPi pi = pi"
     (zeroTwoPi pi == pi)
 
-  it "zeroTwoPi 2*pi = 0"
-    (zeroTwoPi (_2 * pi) == _0)
+  it "zeroTwoPi tau = 0"
+    (zeroTwoPi tau == _0)
 
-  it "zeroTwoPi x = x for x in [0,2*pi)"
+  it "zeroTwoPi x = x for x in [0,tau)"
     (property $ \(x'::Angle Double) ->
-       let x = adjustZeroOne x' * _2 * pi in zeroTwoPi x ~== x)
+       let x = adjustZeroOne x' * tau in zeroTwoPi x ~== x)
 
-  it "zeroTwoPi returns values in [0,2*pi)"
-    (property $ \x -> zeroTwoPi x >= _0 && zeroTwoPi x < (_2 * pi::Angle Double))
+  it "zeroTwoPi returns values in [0,tau)"
+    (property $ \x -> zeroTwoPi x >= _0 && zeroTwoPi x < (tau::Angle Double))
 
-  it "zeroTwoPi x + 2 pi = zeroTwoPi x"
-    (property $ \x -> zeroTwoPi (x + _2 * pi) ~== (zeroTwoPi x::Angle Double))
+  it "zeroTwoPi x + tau = zeroTwoPi x"
+    (property $ \x -> zeroTwoPi (x + tau) ~== (zeroTwoPi x::Angle Double))
 
   it "zeroTau x = zeroTwoPi x"
     (property $ \(x::Angle Double) -> zeroTwoPi x == zeroTau x)
@@ -101,7 +101,7 @@ spec_zeroTwoPi = describe "zeroTwoPi" $ do
 spec_adjustCyclic = describe "adjustCyclic (x0,y0) (x1,y1) period cycle" $ do
 
   it "seems to work correctly" $
-    adjustCyclic (_0, negate _3) (_1, _3) _1 (_2 * pi) `shouldBe` _3
+    adjustCyclic (_0, negate _3) (_1, _3) _1 tau `shouldBe` _3
 
   it "seems to work correctly" $
     adjustCyclic (_0, negate _3) (_1,_3) _1 _8 `shouldBe` _3

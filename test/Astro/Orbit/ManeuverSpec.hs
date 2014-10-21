@@ -39,22 +39,9 @@ spec_zeroManeuver = describe "Zero maneuver " $ do
     == ephemeris testTrajectory [mjd' 0,mjd' 1..]
     )
 
-{-
-  it "-pi and pi should be approximately equal"
-    (Anom (negate pi::Angle Double) ~== Anom pi)
-
-  it "0 and 2*pi should be equal"
-    (Anom _0 == Anom (_2*pi))
-
-  it "0 and 2*pi should be approximately equal"
-    (Anom _0 ~== Anom (_2*pi::Angle Double))
-
-  it "x and x+2*pi should be equal."
-    (property $ \t -> Anom t ~== Anom (t + _2*pi::Angle Double))
--}
-
   where
     zeroMan = ImpulsiveRTN (0*~mps) (0*~mps) (0*~mps)
+
 
 spec_randomManeuver = describe "Random maneuver at time t" $ do
 

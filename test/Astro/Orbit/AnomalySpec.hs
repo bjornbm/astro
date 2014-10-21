@@ -34,14 +34,14 @@ spec_anomalyComparison = describe "Anomaly comparisons" $ do
   it "-pi and pi should be approximately equal"
     (Anom (negate pi::Angle Double) ~== Anom pi)
 
-  it "0 and 2*pi should be equal"
-    (Anom _0 == Anom (_2*pi))
+  it "0 and tau should be equal"
+    (Anom _0 == Anom (tau))
 
-  it "0 and 2*pi should be approximately equal"
-    (Anom _0 ~== Anom (_2*pi::Angle Double))
+  it "0 and tau should be approximately equal"
+    (Anom _0 ~== Anom (tau::Angle Double))
 
-  it "x and x+2*pi should be equal."
-    (property $ \t -> Anom t ~== Anom (t + _2*pi::Angle Double))
+  it "x and x+tau should be equal."
+    (property $ \t -> Anom t ~== Anom (t + tau::Angle Double))
 
 
 -- ----------------------------------------------------------
