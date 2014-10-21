@@ -18,6 +18,7 @@ import Astro.Coords
 import Astro.Coords.PosVel
 import Astro.Time
 import Astro.Time.At
+import Astro.Time.Sidereal (gmst')
 import Numeric.Units.Dimensional.AD
 import qualified Astrodynamics
 
@@ -39,21 +40,20 @@ ecrToOrbitalFrame :: RealFloat a => PosVel ECR a -> Coord ECR a -> Coord Orbital
 ecrToOrbitalFrame pv p = C $ orbitalFrameECR pv `matVec` (c p `elemSub` cpos pv)
 
 
-
 -- | Convert coordinates from ECI frame to ECR frame.
-eciToECR :: Floating a => E UT1 a -> Coord ECI a -> Coord ECR a
-eciToECR t xyz = C (rotZ (negate $ Astrodynamics.greenwichRA t) |*< c xyz)
+eciToECR :: RealFloat a => E UT1 a -> Coord ECI a -> Coord ECR a
+eciToECR t xyz = C (rotZ (negate $ gmst' t) |*< c xyz)
                                 -- TODO ^^^ Use ERA instead??
 -- | Convert coordinates from ECI frame to ECR frame.
-eciToECR' :: Floating a => At UT1 a (Coord ECI a) -> At UT1 a (Coord ECR a)
+eciToECR' :: RealFloat a => At UT1 a (Coord ECI a) -> At UT1 a (Coord ECR a)
 eciToECR' At {..} = eciToECR epoch value `At` epoch
 
 -- | Convert coordinates from ECR frame to ECI frame.
-ecrToECI :: Floating a => E UT1 a -> Coord ECR a -> Coord ECI a
-ecrToECI t xyz = C (rotZ (Astrodynamics.greenwichRA t) |*< c xyz)
-                       -- TODO ^^^ Use ERA instead??
+ecrToECI :: RealFloat a => E UT1 a -> Coord ECR a -> Coord ECI a
+ecrToECI t xyz = C (rotZ (gmst' t) |*< c xyz)
+                   -- TODO ^^^ Use gmst instead??
 -- | Convert coordinates from ECR frame to ECI frame.
-ecrToECI' :: Floating a => At UT1 a (Coord ECR a) -> At UT1 a (Coord ECI a)
+ecrToECI' :: RealFloat a => At UT1 a (Coord ECR a) -> At UT1 a (Coord ECI a)
 ecrToECI' At {..} = ecrToECI epoch value `At` epoch
 
 
@@ -66,6 +66,7 @@ eciToECRSV :: RealFloat a => E UT1 a -> PosVel ECI a -> PosVel ECR a
 eciToECRSV = liftPVAt eciToECR
 
 
+-- TODO Move these.
 liftPV :: RealFloat a
        => (forall tag. Coord s (FAD tag a) -> Coord s' (FAD tag a))
        -> PosVel s a -> PosVel s' a
