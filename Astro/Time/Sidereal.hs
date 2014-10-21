@@ -1,6 +1,6 @@
 module Astro.Time.Sidereal where
 
-import Astro
+import Astro hiding (ut1ToTAI)
 import Astro.Place
 import Astro.Time
 import Astro.Time.Convert
@@ -38,8 +38,17 @@ gmst_p tt = 0.014506   *~ arcsecond
         where t = diffEpoch tt j2000
 
 -- | Greenwich mean sidereal time (GMST) expressed as an angle.
-gmst' :: RealFloat a => E UT1 a -> E TT a -> Angle a
-gmst' ut1 tt = era ut1 + gmst_p tt
+  -- The TT time should be consistent with the UT1 time. It is
+  -- recommended to use `gmst` instead.
+gmst_full :: RealFloat a => E UT1 a -> E TT a -> Angle a
+gmst_full ut1 tt = era ut1 + gmst_p tt
+
+-- | Greenwich mean sidereal time (GMST) expressed as an angle.
+  -- This version disregards the difference between UT1 and TAI
+  -- (about 35 s in 2014). The impact is less than one mas
+  -- (milliarcsecond) from 1972 (start of TT scale) through 2050-ish.
+gmst' :: RealFloat a => E UT1 a -> Angle a
+gmst' ut1 = gmst_full ut1 (taiToTT $ ut1ToTAI (const _0) ut1)
 
 
 -- Astro monad
@@ -49,7 +58,7 @@ gmst' ut1 tt = era ut1 + gmst_p tt
 gmst :: RealFloat a => E TT a -> Astro a (Angle a)
 gmst tt = do
   ut1 <- convert tt
-  return $ gmst' ut1 tt
+  return $ gmst_full ut1 tt
 
 -- | Greenwich apparent sidereal time (GAST) expressed as an angle.
 --gast :: RealFloat a => E UT1 a -> E TT a -> Angle a
