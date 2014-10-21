@@ -4,6 +4,7 @@ import Astro hiding (ut1ToTAI)
 import Astro.Place
 import Astro.Time
 import Astro.Time.Convert
+import Astro.Util.Cyclic -- (adjustZeroOne)
 import Control.Monad.Reader
 import Control.Applicative
 import IAU2000.Nutation
@@ -12,14 +13,22 @@ import Numeric.Units.Dimensional.NonSI (revolution)
 import qualified Prelude as P
 
 
--- | Earth rotation angle.
+-- | Earth rotation angle, from AsA2009 B8.
+  --
+  -- This implementation has been optimized for better numerics
+  -- than the naive implementation:
+  --
+  --  era' ut1 = 0.7790572732640     *~ revolution
+  --           + 1.00273781191135448 *~ (revolution / day) * du
+  --
 era :: RealFloat a => E UT1 a -> Angle a
-era ut1 = 0.7790572732640    *~ revolution
-        + 0.00273781191135448*~(revolution/day) * du + fracRev du
-      where
-        du = diffEpoch ut1 j2000ut1
-        j2000ut1 = jd 2451545.0 UT1
-        fracRev = (*~revolution) . snd . properFraction . (/~day)
+era ut1 = tau * ( 0.7790572732640 *~ one
+                + fractionalPart (0.00273781191135448 *~ day ^ neg1 * du)
+                + fractionalPart (du / (1 *~ day))
+                )
+  where
+    du = diffEpoch ut1 j2000ut1
+    j2000ut1 = jd 2451545.0 UT1
 
 -- | The polynomial part of GMST is almost entirely due to the effect of
 -- precession and is given separately as it also forms part of the equation
