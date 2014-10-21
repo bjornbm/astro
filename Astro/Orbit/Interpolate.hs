@@ -106,6 +106,6 @@ linearPolateMEOEm_OLD (m0`At`t0) (m1`At`t1) t = ( vec2meoe
   where
     l0 = long $ longitude m0
     l1 = long $ longitude m1
-    l1' = adjustCyclicT (l0`At`t0) (l1`At`t1) period (_2 * pi)
+    l1' = adjustCyclicT (l0`At`t0) (l1`At`t1) period tau
     period = (meoeOrbitalPeriod m0 + meoeOrbitalPeriod m1) / _2
 -- -}

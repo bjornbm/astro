@@ -37,7 +37,7 @@ vec2meoe v = vIterate meoe v
 
 -- TODO move orbitalPeriod somewhere more generic?
 orbitalPeriod :: Floating a => GravitationalParameter a -> SemiMajorAxis a -> Time a
-orbitalPeriod mu (SMA a) = _2 * pi * sqrt (a ^ pos3 / mu)
+orbitalPeriod mu (SMA a) = tau * sqrt (a ^ pos3 / mu)
 
 -- | Compute the orbital eccentricity.
 eccentricity :: Floating a => MEOE t a -> Dimensionless a
