@@ -14,6 +14,7 @@ import Numeric.Units.Dimensional.AD (diff)
 import Numeric.Units.Dimensional.NonSI (revolution)
 import qualified Prelude
 
+import Astro.Util
 import Astro.Util.Cyclic
 import Astro.Time
 import Astro.Time.Sidereal
@@ -31,11 +32,11 @@ spec_era = describe "Earth Rotation Angle (era)" $ do
 
   it "is consistent with AsA2009 on 2009-01-01" $
     (zeroTwoPi $ era $ clock' 2009 1 1 0 0 0 :: Angle D)
-    ~== 100 *~ degree + 39 *~ arcminute + 39.6557 *~ arcsecond
+    ~== sexagesimalAngle 100 39 39.6557
 
   it "is consistent with AsA2009 on 2010-01-01" $
     (zeroTwoPi $ era $ clock' 2010 1 1 0 0 0 :: Angle D)
-    ~== 100 *~ degree + 24 *~ arcminute + 34.2022 *~ arcsecond
+    ~== sexagesimalAngle 100 24 34.2022
 
 
 spec_phi = describe "Earth's adopted mean angular velocity (phi)" $ do
@@ -48,13 +49,8 @@ spec_gmst = describe "GMST" $ do
 
   it "is consistent with AsA2009 on 2009-01-01" $
     (zeroTwoPi $ gmst' $ clock' 2009 1 1 0 0 0 :: Angle D)
-    ~== 6 *~ h + 43 *~ m + 6.3205 *~ s
+    ~== timeAngle 6 43 6.3205
 
   it "is consistent with AsA2009 on 2010-01-01" $
     (zeroTwoPi $ gmst' $ clock' 2010 1 1 0 0 0 :: Angle D)
-    ~== 6 *~ h + 42 *~ m + 9.0298 *~ s
-
-  where
-    h = prefix (1 Prelude./ 24) revolution
-    m = prefix (1 Prelude./ 60) h
-    s = prefix (1 Prelude./ 60) m
+    ~== timeAngle 6 42 9.0298

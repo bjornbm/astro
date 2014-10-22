@@ -9,7 +9,7 @@ import Astro.Coords
 import Astro.Place
 import Astro.Place.Topocentric
 import Astro.Place.ReferenceEllipsoid
-import Astro.Util (perfectGEO)
+import Astro.Util (perfectGEO, sexagesimalAngle)
 import Test.QuickCheck
 import TestUtil
 import TestInstances
@@ -24,8 +24,8 @@ prop_va long f x = cmpE e (f cibinong $ perfectGEO $ long*~degree) (x*~degree)
   where
     e = 0.1 *~ degree
     cibinong = GeodeticPlace wgs84
-      (negate $ 6*~degree + 26*~arcminute + 52*~arcsecond)
-      (106*~degree + 56*~arcminute + 10*~arcsecond)
+      (negate $ sexagesimalAngle 6 26 52)
+      (sexagesimalAngle 106 56 10)
       (0*~meter)
 
 -- | Converting geocentric to topocentric and back should be identity function.

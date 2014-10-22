@@ -3,6 +3,7 @@
 module Astro.Util ( r_GEO  -- From Astrodynamics
                   , perfectGEO, perfectGEO'
                   , coerceUt1ToUTC, coerceUtcToUT1
+                  , timeAngle, sexagesimalAngle, dmsAngle
                   ) where
 
 import Astro.Coords
@@ -11,7 +12,8 @@ import Astro.Time
 import Astro.Time.Interop
 import Astrodynamics (r_GEO)
 import Numeric.Units.Dimensional.Prelude
-import Numeric.Units.Dimensional.LinearAlgebra -- (fromTuple)
+import Numeric.Units.Dimensional.NonSI (revolution)
+import Numeric.Units.Dimensional.LinearAlgebra
 
 import Data.Time.Clock
 import Data.Time.Clock.TAI
@@ -46,3 +48,25 @@ coerceUt1ToUTC (E t) = taiToUTCTime (const 0) $ toAbsoluteTime (E t)
 coerceUtcToUT1 :: RealFloat a => UTCTime -> E UT1 a
 coerceUtcToUT1 = coerce . fromAbsoluteTime . utcToTAITime (const 0)
   where coerce (E t) = E t
+
+
+-- Angle representations
+-- ---------------------
+
+-- | @timeAngle hours minutes seconds@ interprets the given time as an
+  -- angle, where 24 h corresponds to 360°.
+timeAngle :: Floating a => a -> a -> a -> Angle a
+timeAngle h m s = h *~ hour + m *~ minute + s *~ second
+  where
+    hour   = prefix (1 Prelude./ 24) revolution
+    minute = prefix (1 Prelude./ 60) hour
+    second = prefix (1 Prelude./ 60) minute
+
+-- | @sexagesimalAngle degrees arcminutes arcseconds@ returns the
+  -- corresponding angle.
+sexagesimalAngle :: Floating a => a -> a -> a -> Angle a
+sexagesimalAngle d m s = d *~ degree + m *~ arcminute + s *~ arcsecond
+
+-- | @dmsAngle@ is a synonym for `sexagesimalAngle`.
+dmsAngle :: Floating a => a -> a -> a -> Angle a
+dmsAngle = sexagesimalAngle

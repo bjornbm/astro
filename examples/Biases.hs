@@ -24,7 +24,7 @@ import Astro.Coords
 import Astro.Place
 import Astro.Place.ReferenceEllipsoid
 import Astro.Place.Topocentric
-import Astro.Util (perfectGEO, r_GEO)
+import Astro.Util (perfectGEO, r_GEO, sexagesimalAngle)
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.AD
@@ -83,7 +83,7 @@ stations =
   , station "Ashgabat" 38.14 58.37 0.134
   ]
 
-cibinong = GeodeticPlace wgs84 (negate $ 6*~degree + 26*~arcminute + 52*~arcsecond) (106*~degree + 56*~arcminute + 10*~arcsecond) _0
+cibinong = GeodeticPlace wgs84 (negate $ sexagesimalAngle 6 26 52) (sexagesimalAngle 106 56 10) _0
 
 -- | Computes sensitivities for a list of ground stations.
 -- If the SC is below the GS's horizon Nothing is returned.
