@@ -60,5 +60,13 @@ ecrToECIPV :: RealFloat a => E UT1 a -> PosVel ECR a -> PosVel ECI a
 ecrToECIPV = liftPVAt ecrToECI
 
 -- | Convert PosVel from ECR frame to ECI frame.
+ecrToECIPV' :: RealFloat a => At UT1 a (PosVel ECR a) -> At UT1 a (PosVel ECI a)
+ecrToECIPV' = liftPVAt' ecrToECI
+
+-- | Convert PosVel from ECR frame to ECI frame.
 eciToECRPV :: RealFloat a => E UT1 a -> PosVel ECI a -> PosVel ECR a
 eciToECRPV = liftPVAt eciToECR
+
+-- | Convert PosVel from ECR frame to ECI frame.
+eciToECRPV' :: RealFloat a => At UT1 a (PosVel ECI a) -> At UT1 a (PosVel ECR a)
+eciToECRPV' = liftPVAt' eciToECR

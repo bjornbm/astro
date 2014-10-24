@@ -4,6 +4,7 @@ module Astro.Coords.PosVel where
 
 import Astro.Coords
 import Astro.Time (E (E), addTime)  -- For the Lift instance.
+import Astro.Time.At (At (At))
 import Numeric.Units.Dimensional.Prelude (_0)  -- for liftPVAt.
 import Numeric.Units.Dimensional.LinearAlgebra.PosVel
 import Numeric.Units.Dimensional.LinearAlgebra.VectorAD (applyLinear, applyLinearAt)
@@ -51,3 +52,9 @@ liftPVAt f t pv = uncurry C' $ applyLinearAt
                                 (\dt -> c . f (addTime (lift t) dt) . C)
                                 _0
                                 (cpos pv, cvel pv)
+
+-- | Lift a function of time on @Coord@s to a function of time on 'PosVel's.
+liftPVAt' :: (RealFloat a)
+         => (forall tag. E t (FAD tag a) -> Coord s (FAD tag a) -> Coord s' (FAD tag a))
+         -> At t a (PosVel s a) -> At t a (PosVel s' a)
+liftPVAt' f (pv `At` t) = liftPVAt f t pv `At` t
