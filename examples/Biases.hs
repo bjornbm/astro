@@ -79,8 +79,11 @@ stations =
   , station "CLK" 39.029938499358  282.729127  0.12095988  -- Clarksburg
   , station "MAS" 27.263  (360 Prelude.- 15.634)  0.167
   , ("Cibinong", cibinong)
+  , station "Banjarmasin" (-3.37) 114.6 0
   , station "Dasoguz"  41.50 59.55 0.086
   , station "Ashgabat" 38.14 58.37 0.134
+  , station "Follingbo" 57.59269 18.37298  86.53  -- Eniro.se + STA altitude
+  , station "Esrange" 67.885 21.0788 327.50 -- STA
   ]
 
 cibinong = GeodeticPlace wgs84 (negate $ sexagesimalAngle 6 26 52) (sexagesimalAngle 106 56 10) _0
