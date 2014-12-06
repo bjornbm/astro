@@ -42,10 +42,7 @@ spec_trivialSV = describe "A trivial state vector" $ do
     attitudeCoordSys pv ~== _Y |: vNegate _Z |:. vNegate _X
 
   where
-    _X = _1 <: _0 <:. _0 :: Num a => Car DOne Double
-    _Y = _0 <: _1 <:. _0 :: Num a => Car DOne Double
-    _Z = _0 <: _0 <:. _1 :: Num a => Car DOne Double
-    r = scaleVec (1 *~ meter) _X
+    r = scaleVec ((1::Double) *~ meter) _X :: Car DLength Double
     v = scaleVec (1 *~ (meter / second)) _Y
     pv = C' r v
 
@@ -58,10 +55,7 @@ spec_trivialRetroSV = describe "A trivial retrograde state vector" $ do
     attitudeCoordSys pv ~== vNegate _Y |: _Z |:. vNegate _X
 
   where
-    _X = _1 <: _0 <:. _0 :: Num a => Car DOne Double
-    _Y = _0 <: _1 <:. _0 :: Num a => Car DOne Double
-    _Z = _0 <: _0 <:. _1 :: Num a => Car DOne Double
-    r = scaleVec (1 *~ meter) _X
+    r = scaleVec ((1::Double) *~ meter) _X
     v = scaleVec (1 *~ (meter / second)) _Y
     pv = C' r (vNegate v)
 
