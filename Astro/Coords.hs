@@ -2,7 +2,7 @@ module Astro.Coords where
 
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
-import Numeric.Units.Dimensional.LinearAlgebra (elemSub)
+import Numeric.Units.Dimensional.LinearAlgebra (elemSub, (<:), (<:.))
 import Numeric.Units.Dimensional.LinearAlgebra.PosVel
 import Numeric.Units.Dimensional.LinearAlgebra.Rotation (Homo33)
 
@@ -76,3 +76,9 @@ type MEGSD = ECI  -- Close to ECI as per Soop, not very rigorous.
 type Axis a = Vec3 DOne DOne DOne a
 type CoordSys a = Homo33 DOne a
 
+-- Cartesian axes
+-- --------------
+_X, _Y, _Z :: Num a => Axis a
+_X = _1 <: _0 <:. _0
+_Y = _0 <: _1 <:. _0
+_Z = _0 <: _0 <:. _1
