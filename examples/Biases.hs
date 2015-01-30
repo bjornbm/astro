@@ -84,6 +84,7 @@ stations =
   , station "Ashgabat" 38.14 58.37 0.134
   , station "Follingbo" 57.59269 18.37298  86.53  -- Eniro.se + STA altitude
   , station "Esrange" 67.885 21.0788 327.50 -- STA
+  , station "Al Ghuwayriyah" 25.33 51.28 0  -- TODO
   ]
 
 cibinong = GeodeticPlace wgs84 (negate $ sexagesimalAngle 6 26 52) (sexagesimalAngle 106 56 10) _0
