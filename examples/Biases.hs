@@ -84,6 +84,7 @@ stations =
   , station "Ashgabat" 38.14 58.37 0.134
   , station "Follingbo" 57.59269 18.37298  86.53  -- Eniro.se + STA altitude
   , station "Esrange" 67.885 21.0788 327.50 -- STA
+  , station "Chilworth" 50.961 (-1.428) 327.50 -- Approximation from Google Maps
   , station "Al Ghuwayriyah" 25.33 51.28 0  -- TODO
   ]
 
@@ -102,8 +103,8 @@ showSC long longBias = printSC (long/~degree) (longBias/~degree) (longBias*r_GEO
 
 -- | Construct line describing station sensitivity and estimated bias.
 showStation :: Angle Double -> (String, Maybe (WaveNumber Double)) -> String
-showStation longBias (name, Just s) = printf "%-7s  %9.3f  (%8.1f)  %9.3f" name (s/~(degree/kilo meter)) (s*r_GEO/~one) (negate longBias/s/~kilo meter)
-showStation longBias (name, Nothing) = printf "%-7s           no visibility" name
+showStation longBias (name, Just s)  = printf "%-14s  %9.3f  (%8.1f)  %9.3f" name (s/~(degree/kilo meter)) (s*r_GEO/~one) (negate longBias/s/~kilo meter)
+showStation longBias (name, Nothing) = printf "%-14s           no visibility" name
 
 
 main = do
@@ -117,17 +118,17 @@ main = do
 
   putStrLn $ showSC long longBias
   putStrLn $ ""
-  putStrLn $ "             Sensitivity        Est. Bias"
-  putStrLn $ "Station  [degE/km]  ([kmE/km])    [km]"
-  putStrLn $ "-------  ---------  ----------  ---------"
+  putStrLn $ "                    Sensitivity        Est. Bias"
+  putStrLn $ "Station         [degE/km]  ([kmE/km])    [km]"
+  putStrLn $ "--------------  ---------  ----------  ---------"
   putStrLn $ unlines $ map (showStation longBias) ss
   putStrLn $ ""
-  putStrLn $ "Station  Range         Azimuth       Elevation"
-  putStrLn $ "-------  ------------  ------------  -----------"
+  putStrLn $ "Station         Range         Azimuth       Elevation"
+  putStrLn $ "--------------  ------------  ------------  -----------"
   putStrLn $ unlines $ map (showAzElRg long) stations
 
 showAzElRg :: Longitude Double -> (String, GeodeticPlace Double) -> String
-showAzElRg long (name, gs) = printf "%-7s  %9.3f km  %8.3f deg  %7.3f deg" name (range' gs s/~kilo meter) (azimuth' gs s/~degree) (elevation' gs s/~degree)
+showAzElRg long (name, gs) = printf "%-14s  %9.3f km  %8.3f deg  %7.3f deg" name (range' gs s/~kilo meter) (azimuth' gs s/~degree) (elevation' gs s/~degree)
   where s = perfectGEO long
 
 {-
