@@ -51,10 +51,19 @@ The angular velocity of Earth's rotation.
 > phi :: Floating a => AngularVelocity a
 > phi = Astro.Time.Sidereal.phi
 
-The gravitational parameter of Earth. Value from Wikipedia[3].
+The standard gravitational parameter of Earth. Value from Wikipedia[3].
 
 > mu :: Fractional a => GravitationalParameter a
 > mu = 398600.4418 *~ (kilo meter ^ pos3 / second ^ pos2)
+
+The next two older standard gravitational parameters from
+https://books.google.se/books?id=f89GBQAAQBAJ&pg=PA464
+
+> mu1967 :: Fractional a => GravitationalParameter a
+> mu1967 = 398603 *~ (kilo meter ^ pos3 / second ^ pos2)
+
+> mu1980 :: Fractional a => GravitationalParameter a
+> mu1980 = 398600.5 *~ (kilo meter ^ pos3 / second ^ pos2)
 
 The ideal geostationary radius and velocity.
 
@@ -108,9 +117,16 @@ Same for the Greenwich meridian.
 Orbits
 ------
 Calculate the semi-major axis of an orbit based on the mean angular motion.
+This function assumes the current standard gravitational parameter ('mu').
 
 > semiMajorAxis :: Floating a => AngularVelocity a -> Length a
 > semiMajorAxis n = cbrt (mu / n ^ pos2)
+
+Calculate the semi-major axis of an orbit based on the mean angular motion
+for a given standard gravitational parameter.
+
+> semiMajorAxis' :: Floating a => GravitationalParameter a -> AngularVelocity a -> Length a
+> semiMajorAxis' mu n = cbrt (mu / n ^ pos2)
 
 Calculate the mean angular motion of an orbit based on the semi-major axis.
 
