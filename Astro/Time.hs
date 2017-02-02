@@ -103,7 +103,7 @@ module Astro.Time (
 import Numeric.Units.Dimensional.Prelude  -- hiding (century)
 import qualified Prelude
 import Data.Time hiding (utc)
-import System.Locale (TimeLocale (..), defaultTimeLocale)
+--import System.Locale (TimeLocale (..), defaultTimeLocale)
 
 
 -- A Julian century.
@@ -581,7 +581,7 @@ formatEpoch' = formatEpoch locale
  * [dav]  <http://www.centerforspace.com/downloads/files/pubs/AAS-06-134.pdf>
 
  * [AAG]  <http://asa.usno.navy.mil/SecM/Glossary.html>
- 
+
  * [WPJD] <http://en.wikipedia.org/wiki/Julian_date>
 
 -}
