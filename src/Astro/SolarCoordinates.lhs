@@ -4,7 +4,7 @@
 > import Astro.Coords
 > import Numeric.Units.Dimensional.Prelude
 > import Numeric.Units.Dimensional.LinearAlgebra
-> import Numeric.Units.Dimensional.LinearAlgebra.PosVel (toZenith)
+> import Numeric.Units.Dimensional.LinearAlgebra.PosVel (Sph (Sph), toZenith)
 > import qualified Prelude
 
 
@@ -28,7 +28,7 @@ coordinates, which I assume must strictly mean GCRS coordinates.
 > -- arcminute within two centuries of 2000. For more details see
 > -- http://aa.usno.navy.mil/faq/docs/SunApprox.php.
 > solarCoordinates :: RealFloat a => E ut1 a -> Coord GCRS a
-> solarCoordinates ut1 = S (r <: toZenith decl <:. ra)
+> solarCoordinates ut1 = S $ Sph r (toZenith decl) ra
 >   where
 
 Given below is a simple algorithm for computing the Sun's angular

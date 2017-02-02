@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-
 -- | This module contains various function for working with functions
 -- that are is cyclic in meaning (but not in value). An obvious example
 -- are angles, where in many cases there is no value in distinguishing
@@ -42,7 +40,7 @@ adjust1Above min x = adjustZeroOne (x - min) + min
 
 -- | @adjustAbove cycle min x@ adjusts x by an integer number or cycles
 -- so that it lies in the interval [min,min+cycle).
-adjustAbove :: (RealFrac a, Div d d DOne, Mul DOne d d)
+adjustAbove :: RealFrac a
             => Quantity d a -> Quantity d a -> Quantity d a -> Quantity d a
 adjustAbove cycle min x = adjust1Above (min/cycle) (x/cycle) * cycle
 
@@ -54,7 +52,7 @@ adjust1About center = adjust1Above (center - _1/_2)
 
 -- | @adjustAbout center cycle x@ adjusts x by an integer number or cycles
 -- so that it lies in the interval [min-cycle/2,min+cycle/2).
-adjustAbout :: (RealFrac a, Div d d DOne, Mul DOne d d, Div d DOne d)
+adjustAbout :: RealFrac a
             => Quantity d a -> Quantity d a -> Quantity d a -> Quantity d a
 adjustAbout center cycle x = adjust1About (center/cycle) (x/cycle) * cycle
 
@@ -88,9 +86,9 @@ zeroTau = zeroTwoPi
 -- Then @cyclesOff (x,y) period cycle@ compute the approximate (closest)
 -- integral number of cycles that @y@ differs from what one would expect
 -- given @x@ and an assumption that y = cycle * x / period.
-cyclesOff :: (RealFrac a, Div d d DOne, Div dy dy DOne, Mul DOne dy dy)
-       => (Quantity d a, Quantity dy a)
-       -> Quantity d a -> Quantity dy a -> Dimensionless a
+cyclesOff :: RealFrac a
+          => (Quantity d a, Quantity dy a)
+          -> Quantity d a -> Quantity dy a -> Dimensionless a
 cyclesOff (x,y) period cycle = cyclesOff1 (x/period, y/cycle)
 
 -- | Same as 'cyclesOff' but assumes that both the period and the cycle
@@ -107,9 +105,9 @@ cyclesOff1 (x, y) = fmap (fromIntegral . round) (x - y)
 -- returns a new @y1@ adjusted so that the difference @y1 - y0@
 -- corresponds roughly to the difference @x1 - x0@.
 -- (See also adjustCyclic1.)
-adjustCyclic :: (RealFrac a, Div d d DOne, Div dy dy DOne, Mul DOne dy dy)
-            => (Quantity d a, Quantity dy a) -> (Quantity d a, Quantity dy a)
-            -> Quantity d a -> Quantity dy a -> Quantity dy a
+adjustCyclic :: RealFrac a
+             => (Quantity d a, Quantity dy a) -> (Quantity d a, Quantity dy a)
+             -> Quantity d a -> Quantity dy a -> Quantity dy a
 adjustCyclic (x0,y0) (x1,y1) period cycle =
   y1 + cyclesOff (x1-x0, y1-y0) period cycle * cycle
   -- Could be defined as:
@@ -127,14 +125,14 @@ adjustCyclic (x0,y0) (x1,y1) period cycle =
 --
 -- (This is a "normalized" version of 'adjustCyclic' for cycle and
 -- period of 1.)
-adjustCyclic1 :: (RealFrac a, Ord a)
+adjustCyclic1 :: RealFrac a
               => (Dimensionless a, Dimensionless a)
               -> (Dimensionless a, Dimensionless a)
               -> Dimensionless a
 adjustCyclic1 (x0,y0) (x1,y1) = y1 + cyclesOff1 (x1-x0, y1-y0)
 
 -- | Adjust assuming x0 = 0 and y0 = 0
-adjustCyclic0 :: (RealFrac a, Div d d DOne, Div dy dy DOne, Mul DOne dy dy)
+adjustCyclic0 :: RealFrac a
               => (Quantity d a, Quantity dy a)
               -> Quantity d a -> Quantity dy a -> Quantity dy a
 adjustCyclic0 (x1,y1) period cycle = y1 + cyclesOff (x1,y1) period cycle * cycle
@@ -144,7 +142,7 @@ adjustCyclic0 (x1,y1) period cycle = y1 + cyclesOff (x1,y1) period cycle * cycle
 -- returns a new @y1@ adjusted so that the difference @y1 - y0@
 -- corresponds roughly to the difference @t1 - t0@.
 -- (See also the more general adjustCyclic.)
-adjustCyclicT :: (RealFrac a, Div dy dy DOne, Mul DOne dy dy)
+adjustCyclicT :: RealFrac a
               => At t a (Quantity dy a) -> At t a (Quantity dy a)
               -> Time a -> Quantity dy a -> Quantity dy a
 adjustCyclicT (y0`At`t0) (y1`At`t1) = adjustCyclic (f t0 ,y0) (f t1, y1)
