@@ -18,7 +18,7 @@ data COE anom a = COE
   , anomaly :: Anomaly anom a
   } deriving (Show)
 
--- | Convert a COE into a vector (not a State Vector) of its
--- elements (including mu).
-coe2vec :: COE anom a -> Vec (DGravitationalParameter:*:DLength:*:DOne:*:DPlaneAngle:*:DPlaneAngle:*:DPlaneAngle:*.DPlaneAngle) a
-coe2vec COE{..} = mu <: slr <: ecc <: inc <: aop <: raan <:. anom anomaly
+-- -- | Convert a COE into a vector (not a State Vector) of its
+-- -- elements (including mu).
+-- coe2vec :: COE anom a -> Vec (DGravitationalParameter:*:DLength:*:DOne:*:DPlaneAngle:*:DPlaneAngle:*:DPlaneAngle:*.DPlaneAngle) a
+-- coe2vec COE{..} = mu <: slr <: ecc <: inc <: aop <: raan <:. anom anomaly

@@ -4,7 +4,6 @@
 
 module Astro.Orbit.MEOE where
 
-import Numeric.NumType (incr)
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.NonSI (revolution)
 import Numeric.Units.Dimensional.LinearAlgebra
@@ -25,14 +24,14 @@ data MEOE long a = MEOE
   -- for an orbit with inclinaton = 0°.
   } deriving (Show)
 
--- | Convert a MEOE into a vector (not a State Vector) of its
--- elements (including mu).
-meoe2vec MEOE{..} = mu <: p <: f <: g <: h <: k <:. long longitude
-
-vec2meoe :: Vec ( DGravitationalParameter :*: DLength
-              :*: DOne :*: DOne :*: DOne :*: DOne :*. DOne) a -> MEOE m a
-vec2meoe v = vIterate meoe v
-  where meoe a b c d e f = MEOE a b c d e f . Long
+-- -- | Convert a MEOE into a vector (not a State Vector) of its
+-- -- elements (including mu).
+-- meoe2vec MEOE{..} = mu <: p <: f <: g <: h <: k <:. long longitude
+--
+-- vec2meoe :: Vec ( DGravitationalParameter :*: DLength
+--               :*: DOne :*: DOne :*: DOne :*: DOne :*. DOne) a -> MEOE m a
+-- vec2meoe v = vIterate meoe v
+--   where meoe a b c d e f = MEOE a b c d e f . Long
 
 
 -- TODO move orbitalPeriod somewhere more generic?
@@ -49,7 +48,7 @@ eccentricity = sqrt . eccentricity2
 eccentricity2 :: Fractional a => MEOE t a -> Dimensionless a
 eccentricity2 MEOE{..} = f ^ pos2 + g ^ pos2
 
--- | The semi latus rectum is the @p@ element of a MEOE 
+-- | The semi latus rectum is the @p@ element of a MEOE
 semiLatusRectum :: Fractional a => MEOE t a -> Length a
 semiLatusRectum = p
 

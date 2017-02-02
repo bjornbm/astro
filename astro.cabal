@@ -2,7 +2,7 @@ Name:                astro
 -- PVP summary:      +-+------- breaking API changes
 --                   | |  +----- non-breaking API additions
 --                   | |  | +--- code changes with no API change
-Version:             0.19
+Version:             0.20
 License:             BSD3
 License-File:        LICENSE
 Copyright:           Bjorn Buckwalter 2008-2016
@@ -16,21 +16,21 @@ Description:
     Orbit representations and ephemeris. TLE parsing.
 Category:            Physics, Astrodynamics
 Build-Type:          Simple
-Build-Depends:       base < 5,
+Build-Depends:       base,
                      old-locale,
                      time,
                      mtl,
                      array,
-                     HList-classic > 0.1,
                      data-default > 0.5,
                      leapseconds-announced,
-                     numtype < 1.2,
-                     dimensional < 1.1,
-                     dimensional-vectors >= 0.10.1,
-                     dimensional-experimental >= 0.9,
-                     ieee754 >= 0.7.4,
-                     ad >= 4.2,
+                     numtype-dk,
+                     dimensional,
+                     dimensional-homo,
+                     dimensional-experimental,
+                     ieee,
+                     ad,
                      astro-tables
+hs-source-dirs:      src
 Exposed-Modules:     Astro
                      Astro.AD
                      Astro.DefaultData

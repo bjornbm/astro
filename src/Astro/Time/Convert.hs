@@ -7,7 +7,6 @@ explicit 'Convert' instances for all combinations of time scales.
 
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE OverlappingInstances #-}
 
 module Astro.Time.Convert where
 
@@ -21,24 +20,24 @@ import qualified Prelude
 
 
 -- ConvertTT
-class ConvertTT t where 
+class ConvertTT t where
   toTT   :: Fractional a => E t  a -> Astro a (E TT a)
   fromTT :: Fractional a => E TT a -> Astro a (E t  a)
 
 -- All time scales should be able to convert to/from TT.
-instance ConvertTT TCG where 
+instance ConvertTT TCG where
   toTT   = return . tcgToTT
   fromTT = return .  ttToTCG
-instance ConvertTT TDB where 
+instance ConvertTT TDB where
   toTT   = eval (tdbToTT .time)
   fromTT = eval ( ttToTDB.time)
-instance ConvertTT TCB where 
+instance ConvertTT TCB where
   toTT   = toTT . tcbToTDB
   fromTT t = fromTT t >>= return . tdbToTCB
-instance ConvertTT TAI where 
+instance ConvertTT TAI where
   toTT   = return . taiToTT
   fromTT = return .  ttToTAI
-instance ConvertTT UT1 where 
+instance ConvertTT UT1 where
   toTT   t = eval (ut1ToTAI.time) t >>= toTT
   fromTT t = fromTT t >>= eval (taiToUT1.time)
 
@@ -61,4 +60,3 @@ instance (ConvertTT t, ConvertTT t') => Convert t t'
 -- TT would be prohibitively expensive or lossy (in accuracy).
 instance Convert TDB TCB where convert = return . tdbToTCB
 instance Convert TCB TDB where convert = return . tcbToTDB
-

@@ -2,6 +2,7 @@
            , MultiParamTypeClasses
            , FlexibleInstances
            , GeneralizedNewtypeDeriving
+           , DataKinds
   #-}
 
 {- |
@@ -101,22 +102,23 @@ module Astro.Time (
 
 
 import Numeric.Units.Dimensional.Prelude  -- hiding (century)
+import Numeric.Units.Dimensional.UnitNames (atom)  -- hiding (century)
 import qualified Prelude
 import Data.Time hiding (utc)
 --import System.Locale (TimeLocale (..), defaultTimeLocale)
 
 
 -- A Julian century.
-century :: Num a => Unit DTime a
-century = prefix 36525 day
-
+-- TODO move somewhere (also in two places in astro-tables)!
+century :: Floating a => Unit 'NonMetric DTime a
+century = mkUnitR (atom "cen" "cen" "century") 36525 day
 
 -- | Representation of an epoch parameterized by time scale and
 -- numerical representation. When Double is used for the numerical
 -- representation the accuracy will be below one microsecond in
 -- the 21st century. For exact numerical representation use e.g.
 -- Rational.
-newtype E t a = E (Time a) deriving (Eq, Ord, Enum)
+newtype E t a = E (Time a) deriving (Eq, Ord)
 instance (Show t, Show a, Real a, Fractional a) => Show (E t a) where
   show = showClock
 
@@ -383,7 +385,7 @@ l_G = 6.969290134e-10 *~ (second / second)
 -- | The difference between the TT and TCG time scales as a function of
 -- TCG epoch. The formula used is exact, barring numerical errors.
 ttMinusTCG :: Fractional a => E TCG a -> Time a
-ttMinusTCG tcg = negate l_G * (diffEpoch tcg convergenceEpochTCG)
+ttMinusTCG tcg = negate l_G * diffEpoch tcg convergenceEpochTCG
 
 {-
 The exact mathematical expression for TCG with TT as the free variable is
@@ -513,11 +515,11 @@ tcbMinusTDB tdb = (tdb .- convergenceEpochTDB) * (l_B + l_B^pos2 + l_B^pos3) - t
 
 -- | Convert a TCB epoch into a TDB epoch.
 tcbToTDB :: Fractional a =>  E TCB a -> E TDB a
-tcbToTDB tcb@(E t) = E $ t + (tdbMinusTCB tcb)
+tcbToTDB tcb@(E t) = E $ t + tdbMinusTCB tcb
 
 -- | Convert a TDB epoch into a TCB epoch.
 tdbToTCB :: Fractional a => E TDB a -> E TCB a
-tdbToTCB tdb@(E t) = E $ t + (tcbMinusTDB tdb)
+tdbToTCB tdb@(E t) = E $ t + tcbMinusTDB tdb
 
 
 -- Universal Time
@@ -585,4 +587,3 @@ formatEpoch' = formatEpoch locale
  * [WPJD] <http://en.wikipedia.org/wiki/Julian_date>
 
 -}
-

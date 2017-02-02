@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC -fcontext-stack=22 #-}
+-- {-# OPTIONS_GHC -fcontext-stack=22 #-}
 
 {-
 This modules provides functions for working with topocentric

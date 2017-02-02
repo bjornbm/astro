@@ -50,7 +50,7 @@ diffCoords c1 c2 = elemSub (c c1) (c c2)
 data ICRS = ICRS deriving (Show, Read)
 
 -- | The Geocentric Celestial Reference System (GCRS) has its
--- origin at the center of Earth and axes parallel with the ICRS 
+-- origin at the center of Earth and axes parallel with the ICRS
 data GCRS = GCRS deriving (Show, Read)
 
 -- | The International Terrestrial Reference System (ITRS) is a an Earth fixed
@@ -73,7 +73,7 @@ type MEGSD = ECI  -- Close to ECI as per Soop, not very rigorous.
 -- TODO Perhaps class ECI with instance GCRS, ToD, MEGSD, TEME... ?
 
 -- Type synonyms for use elsewhere.
-type Axis a = Vec3 DOne DOne DOne a
+type Axis a = Vec3 DOne a
 type CoordSys a = Homo33 DOne a
 
 -- Cartesian axes

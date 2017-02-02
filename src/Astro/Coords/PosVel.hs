@@ -30,12 +30,12 @@ spos (C' p _) = c2s p
 -- | Extract the cartesian velocity vector.
 cvel :: RealFloat a => PosVel s a -> CVel a
 cvel (C' _ v) = v
-cvel (S' p v) = snd $ applyLinear s2c (p,v)
+cvel (S' p v) = snd $ s2cEphem (p,v)
 
 -- | Extract the spherical velocity.
 svel :: RealFloat a => PosVel s a -> SVel a
 svel (S' _ v) = v
-svel (C' p v) = snd $ applyLinear c2s (p,v)
+svel (C' p v) = snd $ c2sEphem (p,v)
 
 
 -- | Lift a function on @Coord@s to a function on 'PosVel's.
