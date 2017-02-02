@@ -28,8 +28,8 @@ diffVt' f (E x) = diffV' (f . E) x
 
 
 applyLinearAtT :: (d1 ~ (*) DTime d1', d2' ~ (/) d2 DTime, Num a)
-               => (forall tag b . b ~ FAD tag a => E t b -> Vec d1 n b -> Vec d2 n b)
-               -> E t a -> (Vec d1 n a, Vec d1' n a) -> (Vec d2 n a, Vec d2' n a)
+               => (forall tag b . b ~ FAD tag a => E t b -> Vec d1 n b -> Vec d2 m b)
+               -> E t a -> (Vec d1 n a, Vec d1' n a) -> (Vec d2 m a, Vec d2' m a)
 applyLinearAtT f (E t) = applyLinearAt (f . E) t
 
 
