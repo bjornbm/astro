@@ -10,7 +10,8 @@ import Astro.Time.Convert
 import Data.Time
 import Data.Time.Clock.TAI
 import Control.Monad.Reader (asks)
-import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional.Prelude hiding (toDiffTime, fromDiffTime)
+import Numeric.Units.Dimensional.DK.Time
 
 
 -- | Convert a TAI epoch into a 'Data.Time.Clock.TAI.AbsoluteTime'.
@@ -70,5 +71,3 @@ convertFromUTC :: (Convert TAI t, Fractional a) => UTCTime -> Astro a (E t a)
 convertFromUTC utc = do
   lst <- asks (leapSecondTable.time)
   convert (utcToTAI lst utc)
-
-

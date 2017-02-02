@@ -51,7 +51,7 @@ meoes (x:xs) ts = go (x:xs) $ dropWhile (< epoch x) ts
     go (x0:x1:xs) (t:ts)
       | t == epoch x0 = x0:go (x0:x1:xs) ts
       | t >= epoch x1 = go (x1:xs) (t:ts)
-      | otherwise   = linearPolateMEOEm x0 x1 t`At`t:go (x0:x1:xs) ts
+      | otherwise     = linearPolateMEOEm x0 x1 t`At`t:go (x0:x1:xs) ts
 
 
 

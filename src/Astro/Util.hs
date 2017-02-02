@@ -14,6 +14,7 @@ import Astrodynamics (r_GEO)
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.NonSI (revolution)
 import Numeric.Units.Dimensional.LinearAlgebra
+import Numeric.Units.Dimensional.UnitNames (atom)
 
 import Data.Time.Clock
 import Data.Time.Clock.TAI
@@ -58,9 +59,9 @@ coerceUtcToUT1 = coerce . fromAbsoluteTime . utcToTAITime (const 0)
 timeAngle :: Floating a => a -> a -> a -> Angle a
 timeAngle h m s = h *~ hour + m *~ minute + s *~ second
   where
-    hour   = prefix (1 Prelude./ 24) revolution
-    minute = prefix (1 Prelude./ 60) hour
-    second = prefix (1 Prelude./ 60) minute
+    hour   = mkUnitR (atom "" "" "") (1 Prelude./ 24) revolution
+    minute = mkUnitR (atom "" "" "") (1 Prelude./ 60) hour
+    second = mkUnitR (atom "" "" "") (1 Prelude./ 60) minute
 
 -- | @sexagesimalAngle degrees arcminutes arcseconds@ returns the
   -- corresponding angle.

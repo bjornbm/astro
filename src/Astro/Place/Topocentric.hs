@@ -82,4 +82,4 @@ range' gs = vNorm . diffCoords (geodeticToECR gs)  -- More efficient.
 -- cartesian coordinates in the topocentric system of the measurement
 -- source.
 azElRgToCoords :: RealFloat a => Angle a -> Angle a -> Length a -> Coord Topocentric a
-azElRgToCoords az el rg = S $ fromTuple (rg, 90*~degree - el, negate az + 90*~degree)
+azElRgToCoords az el rg = S $ Sph rg (90*~degree - el) (negate az + 90*~degree)

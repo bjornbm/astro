@@ -6,7 +6,7 @@ Version:             0.20
 License:             BSD3
 License-File:        LICENSE
 Copyright:           Bjorn Buckwalter 2008-2016
-Author:              Bjorn Buckwalter 
+Author:              Bjorn Buckwalter
 Maintainer:          bjorn.buckwalter@gmail.com
 Stability:           Unstable
 Synopsis:            Experimental library for astrodynamics.
@@ -27,6 +27,7 @@ Build-Depends:       base,
                      dimensional,
                      dimensional-homo,
                      dimensional-experimental,
+                     dimensional-dk-experimental,
                      ieee,
                      ad,
                      astro-tables

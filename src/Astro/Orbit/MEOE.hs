@@ -1,11 +1,12 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Astro.Orbit.MEOE where
 
 import Numeric.Units.Dimensional.Prelude
-import Numeric.Units.Dimensional.NonSI (revolution)
+import Numeric.Units.Dimensional.NonSI (revolution, gee)
 import Numeric.Units.Dimensional.LinearAlgebra
 import Astro.Orbit.Types
 import qualified Prelude
@@ -24,14 +25,22 @@ data MEOE long a = MEOE
   -- for an orbit with inclinaton = 0°.
   } deriving (Show)
 
--- -- | Convert a MEOE into a vector (not a State Vector) of its
--- -- elements (including mu).
--- meoe2vec MEOE{..} = mu <: p <: f <: g <: h <: k <:. long longitude
---
--- vec2meoe :: Vec ( DGravitationalParameter :*: DLength
---               :*: DOne :*: DOne :*: DOne :*: DOne :*. DOne) a -> MEOE m a
--- vec2meoe v = vIterate meoe v
---   where meoe a b c d e f = MEOE a b c d e f . Long
+-- | Convert a MEOE into a vector (not a State Vector) of its
+-- elements (including mu).
+meoe2vec :: Fractional a => MEOE m a -> Vec DOne 7 a
+meoe2vec MEOE{..} = (mu / mu_Earth) <: (p / r_GEO) <: f <: g <: h <: k <:. long longitude
+  where
+    -- TODO substitute the below?
+    mu_Earth = 398600.4418 *~ (kilo meter ^ pos3 / second ^ pos2)
+    r_GEO    = 42164.2 *~ kilo meter
+
+vec2meoe :: Fractional a => Vec DOne 7 a -> MEOE m a
+vec2meoe v = MEOE (mu' * mu_Earth) (p' * r_GEO) f g h j (Long lon)
+  where
+    [mu', p', f, g, h, j, lon] = toList v
+    -- TODO substitute the below?
+    mu_Earth = 398600.4418 *~ (kilo meter ^ pos3 / second ^ pos2)
+    r_GEO    = 42164.2 *~ kilo meter
 
 
 -- TODO move orbitalPeriod somewhere more generic?

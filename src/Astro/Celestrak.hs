@@ -78,7 +78,7 @@ getUTCDay :: (Real a, Fractional a) => LeapSecondTable -> E TAI a -> Day
 getUTCDay lst = utctDay . taiToUTCTime lst . toAbsoluteTime
 
 -- | Creates a 'UT1Table' from an 'EOPArray'.
-{- 
+{-
 TODO: The IERS explanatory supplement
 <http://hpiers.obspm.fr/iers/bul/bulb/explanatory.html> says:
 
@@ -114,7 +114,6 @@ the CSSI paper on EOP addresses this? Or AsA2009?
 -}
 
 -- | Linear interpolation between two points.
-interpolate :: (Mul DOne d d, Fractional a) => (E t a, Quantity d a) -> (E t a, Quantity d a) -> E t a -> Quantity d a
+interpolate :: Fractional a => (E t a, Quantity d a) -> (E t a, Quantity d a) -> E t a -> Quantity d a
 interpolate (t0, x0) (t1, x1) t = (t .- t0) / (t1 .- t0) * (x1 - x0) + x0
   where (.-) = diffEpoch
-

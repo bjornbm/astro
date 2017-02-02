@@ -80,34 +80,33 @@ linearPolateVecT (v0`At`t0) (v1`At`t1) t = linearPolateVec0 v0 (d t1,v1) (d t)
 
 -- ==================================================================
 
--- TODO
--- -- | Interpolate two MEOEs with mean anomaly. In interpolating mean
--- -- anomaly the orbital period is taken into account to ensure proper
--- -- interpolation.
--- -- NOTE: this does not work for hyperbolic orbits, and probably not
--- -- when t1 and t0 are separated by more than one (or a half?) orbital
--- -- period?
--- linearPolateMEOEm :: RealFloat a => Datum t a -> Datum t a
---                   -> E t a -> MEOE Mean a
--- linearPolateMEOEm m0 m1 t = vec2meoe
---   $ linearPolateVecT (meoe2vec <$> m0) (meoe2vec <$> m1') t
---   where
---     m1' = (\m -> m { longitude = Long l1' }) <$> m1
---     l0 = long . longitude <$> m0
---     l1 = long . longitude <$> m1
---     l1' = adjustCyclicT l0 l1 period tau
---     period = (meoeOrbitalPeriod (value m0) + meoeOrbitalPeriod (value m1)) / _2
---
--- -- {-
--- linearPolateMEOEm_OLD :: RealFloat a
---                   => Datum t a -> Datum t a
---                   -> E t a -> MEOE Mean a
--- linearPolateMEOEm_OLD (m0`At`t0) (m1`At`t1) t = ( vec2meoe
---   $ linearPolateVecT (meoe2vec m0`At`t0) (meoe2vec m1`At`t1) t
---   ) { longitude = Long $ linearPolateT (l0`At`t0) (l1'`At`t1) t }
---   where
---     l0 = long $ longitude m0
---     l1 = long $ longitude m1
---     l1' = adjustCyclicT (l0`At`t0) (l1`At`t1) period tau
---     period = (meoeOrbitalPeriod m0 + meoeOrbitalPeriod m1) / _2
--- -- -}
+-- | Interpolate two MEOEs with mean anomaly. In interpolating mean
+-- anomaly the orbital period is taken into account to ensure proper
+-- interpolation.
+-- NOTE: this does not work for hyperbolic orbits, and probably not
+-- when t1 and t0 are separated by more than one (or a half?) orbital
+-- period?
+linearPolateMEOEm :: RealFloat a => Datum t a -> Datum t a
+                  -> E t a -> MEOE Mean a
+linearPolateMEOEm m0 m1 t = vec2meoe
+  $ linearPolateVecT (meoe2vec <$> m0) (meoe2vec <$> m1') t
+  where
+    m1' = (\m -> m { longitude = Long l1' }) <$> m1
+    l0 = long . longitude <$> m0
+    l1 = long . longitude <$> m1
+    l1' = adjustCyclicT l0 l1 period tau
+    period = (meoeOrbitalPeriod (value m0) + meoeOrbitalPeriod (value m1)) / _2
+
+-- {-
+linearPolateMEOEm_OLD :: RealFloat a
+                  => Datum t a -> Datum t a
+                  -> E t a -> MEOE Mean a
+linearPolateMEOEm_OLD (m0`At`t0) (m1`At`t1) t = ( vec2meoe
+  $ linearPolateVecT (meoe2vec m0`At`t0) (meoe2vec m1`At`t1) t
+  ) { longitude = Long $ linearPolateT (l0`At`t0) (l1'`At`t1) t }
+  where
+    l0 = long $ longitude m0
+    l1 = long $ longitude m1
+    l1' = adjustCyclicT (l0`At`t0) (l1`At`t1) period tau
+    period = (meoeOrbitalPeriod m0 + meoeOrbitalPeriod m1) / _2
+-- -}

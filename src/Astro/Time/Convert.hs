@@ -5,8 +5,9 @@ declarations necessary. One could instead use brute force and provide
 explicit 'Convert' instances for all combinations of time scales.
 -}
 
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverlappingInstances #-}  -- TODO fix this! (Removing causes failure in Time.Sidereal)
 
 module Astro.Time.Convert where
 

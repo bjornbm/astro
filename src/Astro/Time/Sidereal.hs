@@ -90,11 +90,11 @@ gast tt = do  -- = era - equationOfOrigins??
 
 -- | Equation of origins.
 --equationOfOrigins :: RealFloat a => E TT a -> Angle a
---equationOfOrigins tt = negate (gmst_p tt + equationOfEquinoxes tt) 
+--equationOfOrigins tt = negate (gmst_p tt + equationOfEquinoxes tt)
 equationOfOrigins :: RealFloat a => E TT a -> Astro a (Angle a)
 equationOfOrigins tt = do
   ee <- evalM (equationOfEquinoxes.nutation) tt
-  return $ negate (gmst_p tt + ee) 
+  return $ negate (gmst_p tt + ee)
 
 
 
@@ -106,8 +106,8 @@ equationOfOrigins tt = do
 -- from the TIO (see [Kaplan2005]). This longitude is not the same as the
 -- geodetic (ITRS) longitude, see 'longitudeCIP'!
 lmstCIP :: RealFloat a
-        => CIPLongitude a  -- ^ The longitude measured around CIP from TIO. 
-        -> E TT a 
+        => CIPLongitude a  -- ^ The longitude measured around CIP from TIO.
+        -> E TT a
         -> Astro a (Angle a)
 lmstCIP long tt = do
   gmst <- gmst tt
@@ -116,7 +116,7 @@ lmstCIP long tt = do
 -- | Local mean sidereal time (LMST).
 lmstITRS :: RealFloat a
          => GeodeticPlace a  -- ^ Geodetic (ITRS) place.
-         -> E TT a 
+         -> E TT a
          -> Astro a (Angle a)
 lmstITRS p tt = do
   (_,long) <- itrsToCIP p
@@ -127,8 +127,8 @@ lmstITRS p tt = do
 -- from the TIO (see [Kaplan2005]). This longitude is not the same as the
 -- geodetic (ITRS) longitude, see 'longitudeCIP'!
 lastCIP :: RealFloat a
-        => CIPLongitude a  -- ^ The longitude measured around CIP from TIO. 
-        -> E TT a 
+        => CIPLongitude a  -- ^ The longitude measured around CIP from TIO.
+        -> E TT a
         -> Astro a (Angle a)
 lastCIP long tt = do
   gast <- gast tt
@@ -137,9 +137,8 @@ lastCIP long tt = do
 -- | Local apparent sidereal time (LAST).
 lastITRS :: RealFloat a
          => GeodeticPlace a  -- ^ Geodetic (ITRS) place.
-         -> E TT a 
+         -> E TT a
          -> Astro a (Angle a)
 lastITRS p tt = do
   (_,long) <- itrsToCIP p
   lastCIP long tt
-
