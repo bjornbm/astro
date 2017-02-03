@@ -62,17 +62,20 @@ spec_uncropped = describe "Uncropped trajectory" $ do
 
   it "does not change ephemeris when not cropping"
     (property $ \m m' ->
-      let t = ET [m `At` t2, m' `At` t3]; ts = [t0, t0 `addTime` dt..t5] in
+      let t = ET [m `At` t2, m' `At` t3]; ts = takeWhile (<= t5) $ iterate (`addTime` dt) t0 in
+      -- let t = ET [m `At` t2, m' `At` t3]; ts = [t0, t0 `addTime` dt..t5] in
       ephemeris (crop' Nothing Nothing t) ts == ephemeris t ts)
 
   it "returns no ephemeris beyond lower validity"
     (property $ \m m' ->
-      let t = ET [m `At` t2, m' `At` t3]; ts = [t0, t0 `addTime` dt..t1] in
+      let t = ET [m `At` t2, m' `At` t3]; ts = takeWhile (<= t1) $ iterate (`addTime` dt) t0 in
+      -- let t = ET [m `At` t2, m' `At` t3]; ts = [t0, t0 `addTime` dt..t1] in
       ephemeris (crop' Nothing Nothing t) ts == [])
 
   it "returns no ephemeris beyond upper validity"
     (property $ \m m' ->
-      let t = ET [m `At` t2, m' `At` t3]; ts = [t4, t4 `addTime` dt..t5] in
+      let t = ET [m `At` t2, m' `At` t3]; ts = takeWhile (<= t5) $ iterate (`addTime` dt) t4 in
+      -- let t = ET [m `At` t2, m' `At` t3]; ts = [t4, t4 `addTime` dt..t5] in
       ephemeris (crop' Nothing Nothing t) ts == [])
 
 -- ----------------------------------------------------------------------
@@ -183,57 +186,67 @@ spec_croppedEphemeris = describe "Cropped trajectory (ephemeris)" $ do
 
   it "does not change when cropping beyond validity"
     (property $ \m m' ->
-      let t = ET [m `At` t2, m' `At` t3]; ts = [t0, t0 `addTime` dt..t5] in
+      let t = ET [m `At` t2, m' `At` t3]; ts = takeWhile (<= t5) $ iterate (`addTime` dt) t0 in
+      -- let t = ET [m `At` t2, m' `At` t3]; ts = [t0, t0 `addTime` dt..t5] in
        ephemeris t ts == ephemeris (crop t1 t4 t) ts)
 
   it "with cropped startTime is not equal to uncropped trajectory"
     (property $ \m m' ->
-      let t = ET [m `At` t1, m' `At` t3]; ts = [t0, t0 `addTime` dt..t5] in
+      let t = ET [m `At` t1, m' `At` t3]; ts = takeWhile (<= t5) $ iterate (`addTime` dt) t0 in
+      -- let t = ET [m `At` t1, m' `At` t3]; ts = [t0, t0 `addTime` dt..t5] in
       ephemeris (crop t2 t4 t) ts /= ephemeris t ts)
 
   it "with cropped startTime is suffix of uncropped trajectory"
     (property $ \m m' ->
-      let t = ET [m `At` t1, m' `At` t3]; ts = [t0, t0 `addTime` dt..t5] in
+      let t = ET [m `At` t1, m' `At` t3]; ts = takeWhile (<= t5) $ iterate (`addTime` dt) t0 in
+      -- let t = ET [m `At` t1, m' `At` t3]; ts = [t0, t0 `addTime` dt..t5] in
       (ephemeris (crop t2 t4 t) ts
       `isSuffixOf` ephemeris t ts))
 
   it "with cropped endTime is not equal to of uncropped trajectory"
     (property $ \m m' ->
-      let t = ET [m `At` t1, m' `At` t3]; ts = [t0, t0 `addTime` dt..t5] in
+      let t = ET [m `At` t1, m' `At` t3]; ts = takeWhile (<= t5) $ iterate (`addTime` dt) t0 in
+      -- let t = ET [m `At` t1, m' `At` t3]; ts = [t0, t0 `addTime` dt..t5] in
       ephemeris (cropEnd t2 t) ts /= ephemeris t ts)
 
   it "with cropped endTime is prefix of uncropped trajectory"
     (property $ \m m' ->
-      let t = ET [m `At` t1, m' `At` t3]; ts = [t0, t0 `addTime` dt..t5] in
+      let t = ET [m `At` t1, m' `At` t3]; ts = takeWhile (<= t5) $ iterate (`addTime` dt) t0 in
+      -- let t = ET [m `At` t1, m' `At` t3]; ts = [t0, t0 `addTime` dt..t5] in
       (ephemeris (cropEnd t2 t) ts
       `isPrefixOf` ephemeris t ts))
 
   it "with cropped start and end is not prefix of uncropped trajectory"
     (property $ \m m' ->
-      let t = ET [m `At` t1, m' `At` t4]; ts = [t0, t0 `addTime` dt..t5] in
+      let t = ET [m `At` t1, m' `At` t4]; ts = takeWhile (<= t5) $ iterate (`addTime` dt) t0 in
+      -- let t = ET [m `At` t1, m' `At` t4]; ts = [t0, t0 `addTime` dt..t5] in
       not (ephemeris (crop t2 t3 t) ts
       `isPrefixOf` ephemeris t ts))
 
   it "with cropped start and end is not suffix of uncropped trajectory"
     (property $ \m m' ->
-      let t = ET [m `At` t1, m' `At` t4]; ts = [t0, t0 `addTime` dt..t5] in
+      let t = ET [m `At` t1, m' `At` t4]; ts = takeWhile (<= t5) $ iterate (`addTime` dt) t0 in
+      -- let t = ET [m `At` t1, m' `At` t4]; ts = [t0, t0 `addTime` dt..t5] in
       not (ephemeris (crop t2 t3 t) ts
       `isSuffixOf` ephemeris t ts))
 
   it "with cropped start and end is infix of uncropped trajectory (ephemeris')"
     (property $ \m m' ->
-      let t = ET [m `At` t1, m' `At` t4]; ts = [t0, t0 `addTime` dt..t5] in
+      let t = ET [m `At` t1, m' `At` t4]; ts = takeWhile (<= t5) $ iterate (`addTime` dt) t0 in
+      -- let t = ET [m `At` t1, m' `At` t4]; ts = [t0, t0 `addTime` dt..t5] in
       (ephemeris (crop t2 t3 t) ts
       `isInfixOf` ephemeris t ts))
 
   it "returns no ephemeris beyond lower validity"
     (let t = ET [undefined `At` t0, undefined `At` t5]
-         ts = [t0, t0 `addTime` dt..t1]
+         ts = takeWhile (<= t1) $ iterate (`addTime` dt) t0
+        --  ts = [t0, t0 `addTime` dt..t1]
       in ephemeris (crop t2 t3 t) ts `shouldBe` [])
 
   it "returns no ephemeris beyond upper validity"
     (let t = ET [undefined `At` t0, undefined `At` t5]
-         ts = [t4, t4 `addTime` dt..t5]
+         ts = takeWhile (<= t5) $ iterate (`addTime` dt) t4
+        --  ts = [t4, t4 `addTime` dt..t5]
       in ephemeris (crop t2 t3 t) ts `shouldBe` [])
 
 -- ----------------------------------------------------------------------

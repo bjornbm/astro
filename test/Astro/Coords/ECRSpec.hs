@@ -18,6 +18,7 @@ import Astro.Time.At
 import Astro.Util (perfectGEO, perfectGEO')
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
+import Numeric.Units.Dimensional.LinearAlgebra.PosVel (radius)
 import qualified Prelude
 
 
@@ -34,7 +35,7 @@ spec_ecrToECI = describe "ecrToECI" $ do
 
   it "doesn't add out-of plane components to a perfect GEO"
     (property $ \(l::Angle D) t ->
-      (vElemAt pos2 $ c $ ecrToECI t $ perfectGEO l) == _0)
+      (vElemAt n2 $ c $ ecrToECI t $ perfectGEO l) == _0)
 
   it "is the inverse of eciToECR"
     (property $ \(p::Coord ECR D) t ->
@@ -42,11 +43,11 @@ spec_ecrToECI = describe "ecrToECI" $ do
 
   it "does not change the out-of-plane component"
     (property $ \(p::Coord ECR D) t ->
-      vElemAt pos2 (c $ ecrToECI t p) == vElemAt pos2 (c p))
+      vElemAt n2 (c $ ecrToECI t p) == vElemAt n2 (c p))
 
   it "does not change the radius"
     (property $ \(p::Coord ECR D) t ->
-      vElemAt zero (s $ecrToECI t p) ~== vElemAt zero (s p))
+      radius (s $ ecrToECI t p) ~== radius (s p))
 
 
 -- ----------------------------------------------------------

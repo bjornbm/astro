@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Astro.Coords.ECRSpec where
+module Astro.Coords.TNRSpec where
 
 import Test.Hspec
 import Test.QuickCheck

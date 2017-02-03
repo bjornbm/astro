@@ -23,6 +23,7 @@ import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional (Dimensional (..))
 import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.LinearAlgebra.Vector (Vec (ListVec))
+import Numeric.Units.Dimensional.LinearAlgebra.PosVel (Sph (..))
 import Numeric.Units.Dimensional.AEq
 import qualified Prelude
 import Astro.Util.Cyclic (plusMinusPi, zeroTwoPi)
@@ -148,6 +149,9 @@ instance (RealFloat a, AEq a) => AEq (E t a) where
 
 instance (RealFloat a, AEq a) => AEq (PosVel s a) where
   pv1 ~== pv2 = cpos pv1 ~== cpos pv2 && cvel pv1 ~== cvel pv2
+
+instance (RealFloat a, AEq a) => AEq (Sph d a) where
+  Sph r1 zen1 ra1 ~== Sph r2 zen2 ra2 = r1 ~== r2 && zen1 ~== zen2 && ra1 ~== ra2
 
 deriving instance AEq a => AEq (SemiMajorAxis a)
 deriving instance AEq a => AEq (SemiLatusRectum a)

@@ -17,7 +17,7 @@ import Astro.Trajectory (Datum)
 import Astro.Orbit.MEOE
 
 import Numeric.Units.Dimensional.Prelude
-import Numeric.Units.Dimensional.LinearAlgebra.PosVel (SPos)
+import Numeric.Units.Dimensional.LinearAlgebra.PosVel (CPos)
 import qualified Prelude
 
 
@@ -64,22 +64,22 @@ spec_linearPolateT = describe "linearPolateT (t0,y0) (t1,y1) t" $ do
 spec_linearPolateVec = describe "Interpolate.linearPolateVec" $ do
 
   it "Interpolating at the start returns the start value"
-    (property $ \(t1::Time D) (x1::SPos D) t2 x2 -> t1 /= t2
+    (property $ \(t1::Time D) (x1::CPos D) t2 x2 -> t1 /= t2
       ==> linearPolateVec (t1, x1) (t2, x2) t1 ~== x1)
 
   it "Interpolating at the end returns the end value"
-    (property $ \(t1::Time D) (x1::SPos D) t2 x2 -> t1 /= t2
+    (property $ \(t1::Time D) (x1::CPos D) t2 x2 -> t1 /= t2
       ==> linearPolateVec (t1, x1) (t2, x2) t2 ~== x2)
 
 
 spec_linearPolateVecT = describe "Interpolate.polateVecT" $ do
 
   it "Interpolating at the start time returns the start value"
-    (property $ \(t1::E UT1 D) (x1::SPos D) t2 x2 -> t1 /= t2
+    (property $ \(t1::E UT1 D) (x1::CPos D) t2 x2 -> t1 /= t2
       ==> linearPolateVecT (x1`At`t1) (x2`At`t2) t1 ~== x1)
 
   it "Interpolating at the end time returns the end value"
-    (property $ \(t1::E UT1 D) (x1::SPos D) t2 x2 -> t1 /= t2
+    (property $ \(t1::E UT1 D) (x1::CPos D) t2 x2 -> t1 /= t2
       ==> linearPolateVecT (x1`At`t1) (x2`At`t2) t2 ~== x2)
 
 

@@ -35,8 +35,9 @@ spec = do
 spec_zeroManeuver = describe "Zero maneuver " $ do
 
   it "does not affect the trajectory"
-    ( ephemeris (applyManeuver testTrajectory (zeroMan`At`mjd' 1)) [mjd' 0,mjd' 1..]
-    == ephemeris testTrajectory [mjd' 0,mjd' 1..]
+    ( ephemeris (applyManeuver testTrajectory (zeroMan`At`mjd' 1)) (map mjd' [0..])
+    -- ( ephemeris (applyManeuver testTrajectory (zeroMan`At`mjd' 1)) [mjd' 0,mjd' 1..]
+    == ephemeris testTrajectory (map mjd' [0..])
     )
 
   where
