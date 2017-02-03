@@ -4,15 +4,22 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE DataKinds #-}
 
 
 module TestInstances where
 
 import Control.Applicative
+import Control.Monad (replicateM)
 import Test.QuickCheck hiding (property)-- (Arbitrary, arbitrary, (==>))
 import Data.AEq
+import Data.Proxy
+import GHC.TypeLits
 import TestUtil
 import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional (Dimensional (..))
 import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.LinearAlgebra.Vector (Vec (ListVec))
@@ -28,7 +35,7 @@ import Astro.Orbit.MEOE as M -- (MEOE (MEOE), meoe2vec)
 import qualified Astro.Orbit.COE as C -- (COE (COE), coe2vec)
 import Astro.Orbit.Conversion (meoe2coe)
 import Astro.Orbit.Maneuver
-import Astro.Time
+import Astro.Time hiding (coerce)
 import Astro.Time.At
 
 
@@ -46,19 +53,22 @@ zeroOneArbitrary :: (Arbitrary a, RealFrac a) => Gen (Dimensionless a)
 zeroOneArbitrary = (*~one) . snd . properFraction <$> arbitrary
 
 -- | @NonZeroD x@ has an Arbitrary instance that guarantees that @x \/= 0@.
-newtype NonZeroD d a = NonZeroD { getNonZeroD :: Quantity d a } deriving (Show)
+newtype NonZeroD d a = NonZeroD { getNonZeroD :: Quantity d a }
 instance (Arbitrary a, Eq a, Num a) => Arbitrary (NonZeroD d a) where
   arbitrary = NonZeroD <$> suchThat arbitrary (/= _0)
+deriving instance (KnownDimension d, Fractional a, Show a) => Show (NonZeroD d a)
 
 -- | @PositiveD x@ has an Arbitrary instance that guarantees that @x \> 0@.
-newtype PositiveD d a = PositiveD { getPositiveD :: Quantity d a } deriving (Show)
+newtype PositiveD d a = PositiveD { getPositiveD :: Quantity d a }
 instance (Arbitrary a, Ord a, Num a) => Arbitrary (PositiveD d a) where
   arbitrary = PositiveD <$> suchThat arbitrary (> _0)
+deriving instance (KnownDimension d, Fractional a, Show a) => Show (PositiveD d a)
 
 -- | @NonNegativeD x@ has an Arbitrary instance that guarantees that @x \>= 0@.
-newtype NonNegativeD d a = NonNegativeD { getNonNegativeD :: Quantity d a } deriving (Show)
+newtype NonNegativeD d a = NonNegativeD { getNonNegativeD :: Quantity d a }
 instance (Arbitrary a, Ord a, Num a) => Arbitrary (NonNegativeD d a) where
   arbitrary = NonNegativeD <$> suchThat arbitrary (>= _0)
+deriving instance (KnownDimension d, Fractional a, Show a) => Show (NonNegativeD d a)
 
 -- | @ZeroOneD x@ has an Arbitrary instance that guarantees that @0 <= x < 1@.
 newtype ZeroOneD a = ZeroOneD { getZeroOneD :: Dimensionless a } deriving (Show)
@@ -70,10 +80,13 @@ instance (Arbitrary a, RealFrac a) => Arbitrary (ZeroOneD a) where
 -- -------------------
 
 instance (Arbitrary a) => Arbitrary (Quantity d a) where
-  arbitrary = Dimensional <$> arbitrary
+  arbitrary = coerceQ <$> arbitrary
+    where coerceQ = coerce :: a -> Quantity d a
 
-instance (VTuple (Vec ds a) t, Arbitrary t) => Arbitrary (Vec ds a) where
-  arbitrary = fromTuple <$> arbitrary
+instance (KnownNat n, Arbitrary a) => Arbitrary (Vec d n a) where
+  arbitrary = fromListM =<< vectorOf n arbitrary
+    where
+      n = fromInteger $ natVal (Proxy :: Proxy n)
 
 instance Arbitrary a => Arbitrary (Coord s a) where
   arbitrary = C <$> arbitrary

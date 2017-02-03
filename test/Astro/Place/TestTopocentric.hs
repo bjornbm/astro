@@ -109,9 +109,9 @@ prop_degenerate1 = degeneratePlace place
 
 prop_topo1_fail1 = prop_topo1 place p
   where
-    p = C $ fromTuple ((-240.34114081130468)*~meter
-                        , 102.79932480283043*~meter
-                        , 186.62064762372555*~meter)
+    p = C $ (-240.34114081130468)*~meter
+          <:  102.79932480283043 *~meter
+          <:. 186.62064762372555 *~meter
     place = GeodeticPlace (ReferenceEllipsoid (136781.86798882156*~meter)
                                               (167.72821654743436*~meter))
                           ((-2243.8289959047747)*~radian)
@@ -120,9 +120,9 @@ prop_topo1_fail1 = prop_topo1 place p
 
 prop_obsECR_fail1 = prop_obsECR place p
   where
-    p = C $ fromTuple ((-16.424578194638578)*~meter
-                      , (-89.47810248383104)*~meter
-                      , (-1566.516520378069)*~meter)
+    p = C $  (-16.424578194638578)*~meter
+          <:  (-89.47810248383104)*~meter
+          <:. (-1566.516520378069)*~meter
     place = GeodeticPlace (ReferenceEllipsoid (136607.51358690596*~meter)
                                                 (155.740741518507*~meter))
                           (79.93674030440873*~radian)
@@ -137,9 +137,9 @@ C < 10.924475023284334 m, -113.26486229757461 m, 43.599269604222506 m >
 
 prop_obsECR_fail2 = prop_obsECR place p
   where
-    p = C $ fromTuple (95.76534753065962*~meter
-                  , (-26.02673518931036)*~meter
-                  , (-75.65015287140265)*~meter)
+    p = C $     95.76534753065962 *~meter
+          <:  (-26.02673518931036)*~meter
+          <:. (-75.65015287140265)*~meter
     place = GeodeticPlace (ReferenceEllipsoid (276733.3457887228*~meter)
                                               (276730.57152002316*~meter))
                           ((-152.91564055491563)*~radian)
@@ -148,9 +148,9 @@ prop_obsECR_fail2 = prop_obsECR place p
 
 prop_obsECR_fail3 = prop_obsECR place p
   where
-    p = C $ fromTuple ((-12.670478806591223)*~meter
-                      , (-7.520050866897443)*~meter
-                      , (-67.76922633914856)*~meter )
+    p = C $  (-12.670478806591223)*~meter
+          <:  (-7.520050866897443)*~meter
+          <:. (-67.76922633914856)*~meter
     place = GeodeticPlace
           {refEllips = ReferenceEllipsoid
                      {equatorialRadius = 134.15569877277596*~meter
@@ -160,7 +160,7 @@ prop_obsECR_fail3 = prop_obsECR place p
           , height = 174062.2962703866*~meter}
 
 {-
-*** Failed! Falsifiable (after 903 tests):  
+*** Failed! Falsifiable (after 903 tests):
 GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 154314.88808559094 m, polarRadius = 92.02164361899281 m}, latitude = 64.84504602560372, longitude = -12.454605679732511, height = 59.292381438053056 m}
 C < 16.99978234375992 m, -60.30380096338773 m, 4.689191066151387 m >
 -}

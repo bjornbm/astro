@@ -17,7 +17,8 @@ cmpE accuracy x x' = abs(x - x') < accuracy
 run = (flip runAstro) defaultAstroData
 
 -- Accuracies.
-eeError = 1 *~ nano arcsecond
+-- eeError = 1 *~ nano arcsecond
+eeError = 1e-9 *~ arcsecond
 
 --prop_ee_equals_gmst_minus_oo :: Double -> Bool
 --prop_ee_equals_gmst_minus_oo t = run $ do
@@ -58,4 +59,3 @@ main = do
   quickCheck prop_gast_era_eo
   quickCheck prop_ee_gast_gmst
   quickCheck prop_eo_gmstp_ee
-
