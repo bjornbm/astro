@@ -5,6 +5,7 @@
 
 module Astro.Orbit.MEOE where
 
+import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.NonSI (revolution, gee)
 import Numeric.Units.Dimensional.LinearAlgebra
@@ -26,21 +27,14 @@ data MEOE long a = MEOE
   } deriving (Show)
 
 -- | Convert a MEOE into a vector (not a State Vector) of its
--- elements (including mu).
-meoe2vec :: Fractional a => MEOE m a -> Vec DOne 7 a
-meoe2vec MEOE{..} = (mu / mu_Earth) <: (p / r_GEO) <: f <: g <: h <: k <:. long longitude
-  where
-    -- TODO substitute the below?
-    mu_Earth = 398600.4418 *~ (kilo meter ^ pos3 / second ^ pos2)
-    r_GEO    = 42164.2 *~ kilo meter
+-- elements (including mu), but all dimensionless.
+meoe2vecUnsafe :: Fractional a => MEOE m a -> Vec DOne 7 a
+meoe2vecUnsafe MEOE{..} = coerce mu <: coerce p <: f <: g <: h <: k <:. long longitude
 
-vec2meoe :: Fractional a => Vec DOne 7 a -> MEOE m a
-vec2meoe v = MEOE (mu' * mu_Earth) (p' * r_GEO) f g h j (Long lon)
+vec2meoeUnsafe :: Fractional a => Vec DOne 7 a -> MEOE m a
+vec2meoeUnsafe v = MEOE (coerce mu') (coerce p') f g h j (Long lon)
   where
     [mu', p', f, g, h, j, lon] = toList v
-    -- TODO substitute the below?
-    mu_Earth = 398600.4418 *~ (kilo meter ^ pos3 / second ^ pos2)
-    r_GEO    = 42164.2 *~ kilo meter
 
 
 -- TODO move orbitalPeriod somewhere more generic?
