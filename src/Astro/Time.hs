@@ -101,17 +101,11 @@ module Astro.Time (
   ) where
 
 
-import Numeric.Units.Dimensional.Prelude  -- hiding (century)
-import Numeric.Units.Dimensional.UnitNames (atom)  -- hiding (century)
+import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional.NonSI (century)
 import qualified Prelude
 import Data.Time hiding (utc)
---import System.Locale (TimeLocale (..), defaultTimeLocale)
 
-
--- A Julian century.
--- TODO move somewhere (also in two places in astro-tables)!
-century :: Floating a => Unit 'NonMetric DTime a
-century = mkUnitR (atom "cen" "cen" "century") 36525 day
 
 -- | Representation of an epoch parameterized by time scale and
 -- numerical representation. When Double is used for the numerical
