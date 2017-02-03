@@ -25,7 +25,7 @@ import qualified Prelude
 tdbMinusTT :: Floating a => E TT a -> Time a
 tdbMinusTT tt = 0.001657*~second * sin g + 0.000022*~second * sin deltaL
   where
-    t   = diffEpoch tt j2000  
+    t   = diffEpoch tt j2000
     -- The mean anomaly of the Earth in its orbit around the Sun.
     g = 357.53*~degree + 0.98560028*~(degree/day) * t
     -- The difference in the mean ecliptic longitudes of the Sun and Jupiter.
@@ -44,9 +44,8 @@ ttMinusTDB (E t) = negate $ tdbMinusTT (E t)
 
 -- | Convert a TT epoch into a TDB epoch.
 ttToTDB :: Floating a => E TT a -> E TDB a
-ttToTDB tt = coerce $ addTime tt (tdbMinusTT tt)
+ttToTDB tt = coerceT $ addTime tt (tdbMinusTT tt)
 
 -- | Convert a TDB epoch into a TT epoch.
 tdbToTT :: Floating a => E TDB a -> E TT a
-tdbToTT tdb = coerce $ addTime tdb (ttMinusTDB tdb)
-
+tdbToTT tdb = coerceT $ addTime tdb (ttMinusTDB tdb)

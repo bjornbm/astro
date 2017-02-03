@@ -40,7 +40,7 @@ module Astro.Time (
 
   -- * Time Scales
   E (E)
-  , coerce
+  , coerceT  -- TODO remove?
   --, Convert
   --, convert
   -- * Terrestrial Time Scales
@@ -103,6 +103,7 @@ module Astro.Time (
 
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.NonSI (century)
+import Data.Coerce
 import qualified Prelude
 import Data.Time hiding (utc)
 
@@ -326,11 +327,11 @@ ttMinusTAI = 32.184 *~ second  -- (2.4)
 
 -- | Convert a TAI epoch into a TT epoch.
 taiToTT :: Fractional a => E TAI a -> E TT a
-taiToTT e = coerce $ addTime e ttMinusTAI
+taiToTT e = coerceT $ addTime e ttMinusTAI
 
 -- | Convert a TT epoch into a TAI epoch.
 ttToTAI :: Fractional a => E TT a -> E TAI a
-ttToTAI e = coerce $ subTime e ttMinusTAI
+ttToTAI e = coerceT $ subTime e ttMinusTAI
 
 
 -- *** J2000
@@ -410,11 +411,11 @@ tcgMinusTT tt = (tt .- convergenceEpochTT) * (l_G + l_G^pos2)  -- (27) of [dav].
 
 -- | Convert a TCG epoch into a TT epoch.
 tcgToTT :: Fractional a => E TCG a -> E TT a
-tcgToTT tcg = coerce $ addTime tcg (ttMinusTCG tcg)
+tcgToTT tcg = coerceT $ addTime tcg (ttMinusTCG tcg)
 
 -- | Convert a TT epoch into a TCG epoch.
 ttToTCG :: Fractional a => E TT a -> E TCG a
-ttToTCG tt = coerce $ addTime tt (tcgMinusTT tt)
+ttToTCG tt = coerceT $ addTime tt (tcgMinusTT tt)
 
 
 -- * Barycentric time-scales
@@ -486,10 +487,10 @@ tdb_0 = (-6.55e-5) *~ second
 
 -- | The TDB epoch corresponding to 1977 January 1.0 TAI.
 convergenceEpochTDB :: Fractional a => E TDB a
-convergenceEpochTDB = coerce $ addTime convergenceEpochTCG tdb_0
+convergenceEpochTDB = coerceT $ addTime convergenceEpochTCG tdb_0
 
-coerce :: E t a -> E t' a
-coerce (E t) = E t
+coerceT :: E t a -> E t' a
+coerceT = coerce
 
 -- | The difference between the TDB and TCB time scales as a function of
 -- TCB epoch.

@@ -12,8 +12,8 @@ import Data.Default
 defaultTimeData :: Floating a => TimeData a
 defaultTimeData = TimeData
   { leapSecondTable = lst
-  , taiToUT1 = coerce  -- Astro.Time.taiToUT1 (const 0) ??
-  , ut1ToTAI = coerce
+  , taiToUT1 = coerceT  -- Astro.Time.taiToUT1 (const 0) ??
+  , ut1ToTAI = coerceT
   ,  ttToTDB = TDB.ttToTDB
   , tdbToTT  = TDB.tdbToTT
   }
