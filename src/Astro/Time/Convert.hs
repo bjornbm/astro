@@ -7,7 +7,6 @@ explicit 'Convert' instances for all combinations of time scales.
 
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverlappingInstances #-}  -- TODO fix this! (Removing causes failure in Time.Sidereal)
 
 module Astro.Time.Convert where
 
@@ -54,7 +53,7 @@ instance (ConvertTT t) => Convert TT t where convert = fromTT
 instance (ConvertTT t) => Convert t TT where convert = toTT
 
 -- Generic Convert instance, via TT.
-instance (ConvertTT t, ConvertTT t') => Convert t t'
+instance {-# OVERLAPPABLE #-} (ConvertTT t, ConvertTT t') => Convert t t'
   where convert t = toTT t >>= fromTT
 
 -- Specific conversion instances for cases where going via
