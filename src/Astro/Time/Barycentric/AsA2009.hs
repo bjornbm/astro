@@ -44,8 +44,8 @@ ttMinusTDB (E t) = negate $ tdbMinusTT (E t)
 
 -- | Convert a TT epoch into a TDB epoch.
 ttToTDB :: Floating a => E TT a -> E TDB a
-ttToTDB tt = coerceT $ addTime tt (tdbMinusTT tt)
+ttToTDB tt = coerceE $ addTime tt (tdbMinusTT tt)
 
 -- | Convert a TDB epoch into a TT epoch.
 tdbToTT :: Floating a => E TDB a -> E TT a
-tdbToTT tdb = coerceT $ addTime tdb (ttMinusTDB tdb)
+tdbToTT tdb = coerceE $ addTime tdb (ttMinusTDB tdb)

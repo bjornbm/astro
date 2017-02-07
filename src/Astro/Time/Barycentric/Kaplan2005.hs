@@ -45,13 +45,13 @@ the 10 microsecond accuracy inherent in the formula in the first place).
 -- | The difference between the TDB and TT time scales as a function of
 -- TT epoch.
 ttMinusTDB :: Floating a => E TDB a -> Time a
-ttMinusTDB = negate . tdbMinusTT . coerceT
+ttMinusTDB = negate . tdbMinusTT . coerceE
 
 
 -- | Convert a TT epoch into a TDB epoch.
 ttToTDB :: Floating a => E TT a -> E TDB a
-ttToTDB tt = coerceT $ addTime tt (tdbMinusTT tt)
+ttToTDB tt = coerceE $ addTime tt (tdbMinusTT tt)
 
 -- | Convert a TDB epoch into a TT epoch.
 tdbToTT :: Floating a => E TDB a -> E TT a
-tdbToTT tdb = coerceT $ addTime tdb (ttMinusTDB tdb)
+tdbToTT tdb = coerceE $ addTime tdb (ttMinusTDB tdb)
