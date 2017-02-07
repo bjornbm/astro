@@ -1,5 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE NamedFieldPuns #-}
+
 module Astro.Orbit.ConversionSpec where
 
 import Test.Hspec
@@ -32,6 +34,7 @@ spec = do
 
 type SVD = SV Double
 type CT = COE True Double
+type CM = COE Mean Double
 type MT = MEOE True Double
 
 -- ----------------------------------------------------------
@@ -164,9 +167,13 @@ spec_coe2coeM = describe "coe2coeM2coe" $ do
     (property $ \(c'::CT) -> let c = c'{ ecc = _0 } in
       anom (anomaly c) ~==~ anom (anomaly (coe2coeM c)))
 
-  it "Converting an COE with non-zero eccentricity to a COEm changes the anomaly"
-    (property $ \(c::CT) -> ecc c < _1 && ecc c /= _0 ==>
-      not (anom (anomaly c) ~==~ anom (anomaly (coe2coeM c))))
+  it "Converting an COE with non-zero eccentricity to a COEm changes the anomaly" $
+    property $ \(c@COE{ecc}::CT) -> ecc < _1 && ecc > _0 ==>
+      not $ (anom . anomaly) c ~==~ (anom . anomaly . coe2coeM) c
+
+  it "Converting an COEm with non-zero eccentricity to a COE changes the anomaly" $
+    property $ \(c@COE{ecc}::CM) -> ecc < _1 && ecc > _0 ==>
+      not $ (anom . anomaly) c ~==~ (anom . anomaly . coeM2coe) c
 
 -- ----------------------------------------------------------
 spec_meoe2meoeM = describe "meoe2meoeM2meoe" $ do

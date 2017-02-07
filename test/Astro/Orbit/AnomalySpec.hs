@@ -54,6 +54,10 @@ spec_anomalyConversion = describe "Anomaly conversions" $ do
   -- Could use the Arbitrary instance for Eccentricity, but would have
   -- to discard eccentricity >= 1.
 
+  it "TA and EA are not equal for non-zero eccentricity."
+    (property $ \e' t -> let e = Ecc $ fractionalPart e' :: Eccentricity Double
+      in ecc e /= _0 && anom t /= _0 && anom t /= pi ==> (anom . ta2ea e) t /= anom t)
+
   it "Two ways of computing eccentric anomaly from true anomaly are identical."
     (property $ \e' t -> let e = fractionalPart e'
       in eccAnomaly1 e t ~== eccAnomaly2 e t)
