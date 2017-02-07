@@ -85,6 +85,14 @@ test-suite properties
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Test.lhs
+  other-modules:       Astro.Place.TestTopocentric
+                     , Astro.TestCelestrak
+                     , Astro.TestTime
+                     , Astro.Time.Barycentric.TestAsA2009
+                     , IAU2000.TestEquations
+                     , TestInstances
+                     , TestUtil
+
   build-depends:       base
                      , dimensional
                      , dimensional-experimental
@@ -103,6 +111,21 @@ test-suite specs
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
+  other-modules:       Astro.Coords.ECRSpec
+                     , Astro.Coords.TNRSpec
+                     , Astro.Orbit.AnomalySpec
+                     , Astro.Orbit.ConversionSpec
+                     , Astro.Orbit.InterpolateSpec
+                     , Astro.Orbit.MEOESpec
+                     , Astro.Orbit.ManeuverSpec
+                     , Astro.Time.AtSpec
+                     , Astro.Time.SiderealSpec
+                     , Astro.Trajectory.CroppedSpec
+                     , Astro.Util.CyclicSpec
+                     , Astro.UtilSpec
+                     , AstrodynamicsSpec
+                     , TestInstances
+                     , TestUtil
   build-depends:       base
                      , dimensional
                      , dimensional-experimental
