@@ -54,7 +54,7 @@ elevation = declination . s
 
 azimuth :: RealFloat a => Coord Topocentric a -> Angle a
 azimuth = az . s
-  where az v = 90*~degree - rightAscension v  -- From N/Y towards E/X.
+  where az v = tau / _4 - rightAscension v  -- From N/Y towards E/X.
 
 range :: RealFloat a => Coord Topocentric a -> Length a
 range = radius . s
@@ -63,14 +63,13 @@ range = radius . s
 -- defined by the geodetic place. The input position should be defined
 -- in the geocentric coordinate system.
 elevation' :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Angle a
-elevation' gs = declination . s . ecrToTopocentric gs
+elevation' gs = elevation . ecrToTopocentric gs
 
 -- | Compute azimuth in the topocentric coordinate system
 -- defined by the geodetic place. The input position should be defined
 -- in the geocentric coordinate system.
 azimuth' :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Angle a
-azimuth'   gs = azimuth' . s . ecrToTopocentric gs
-  where azimuth' s = 90*~degree - rightAscension s  -- From N/Y towards E/X.
+azimuth' gs = azimuth . ecrToTopocentric gs
 
 -- | Computes the range from the given geodetic place to the given
 -- geocentric position.
@@ -82,4 +81,4 @@ range' gs = vNorm . diffCoords (geodeticToECR gs)  -- More efficient.
 -- cartesian coordinates in the topocentric system of the measurement
 -- source.
 azElRgToCoords :: RealFloat a => Angle a -> Angle a -> Length a -> Coord Topocentric a
-azElRgToCoords az el rg = S $ Sph rg (90*~degree - el) (negate az + 90*~degree)
+azElRgToCoords az el rg = S $ Sph rg (tau / _4 - el) (negate az + tau / _4)
