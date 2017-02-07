@@ -16,63 +16,116 @@ Description:
     Orbit representations and ephemeris. TLE parsing.
 Category:            Physics, Astrodynamics
 Build-Type:          Simple
-Build-Depends:       base,
-                     old-locale,
-                     time,
-                     mtl,
-                     array,
-                     data-default > 0.5,
-                     leapseconds-announced,
-                     numtype-dk,
-                     dimensional,
-                     dimensional-homo,
-                     dimensional-experimental,
-                     dimensional-dk-experimental,
-                     ieee754,
-                     ad,
-                     astro-tables
-hs-source-dirs:      src
-Exposed-Modules:     Astro
-                     Astro.AD
-                     Astro.DefaultData
-                     Astro.Coords
-                     Astro.Coords.ECR
-                     Astro.Coords.PosVel
-                     Astro.Coords.TNR
-                     Astro.Place
-                     Astro.Place.ReferenceEllipsoid
-                     Astro.Place.Topocentric
-                     Astro.Time
-                     Astro.Time.Barycentric.AsA2009
-                     Astro.Time.Barycentric.Kaplan2005
-                     Astro.Time.Barycentric.TT
-                     Astro.Time.Convert
-                     Astro.Time.ForwardAD
-                     Astro.Time.Interop
-                     Astro.Time.Sidereal
-                     Astro.Time.At
-                     Astro.Celestrak
-                     IAU2000.FundamentalArguments
-                     IAU2000.Nutation
-                     IAU2000.Equations
-                     Astrodynamics
-                     Tmp.Lifts
-                     Astro.Util
-                     --TLE
-                     --TLE.Parse
-                     --TLE.Util
-                     -- The below were originally in astro-orbit
-                     Astro.Orbit.Anomaly
-                     Astro.Orbit.COE
-                     Astro.Orbit.Conversion
-                     Astro.Orbit.Interpolate
-                     Astro.Orbit.MEOE
-                     Astro.Orbit.SV
-                     Astro.Orbit.Types
-                     Astro.Orbit.Maneuver
-                     Astro.SolarCoordinates
-                     Astro.Trajectory
-                     Astro.Trajectory.Cropped
-                     Astro.Trajectory.EphemTrajectory
-                     Astro.Util.Cyclic
 Extra-source-files:  README
+cabal-version:       >=1.10
+
+library
+  default-language:    Haskell2010
+  hs-source-dirs:      src
+  Build-Depends:       base,
+                       old-locale,
+                       time,
+                       mtl,
+                       array,
+                       data-default > 0.5,
+                       leapseconds-announced,
+                       numtype-dk,
+                       dimensional,
+                       dimensional-homo,
+                       dimensional-experimental,
+                       dimensional-dk-experimental,
+                       ieee754,
+                       ad,
+                       astro-tables
+  Exposed-Modules:     Astro
+                       Astro.AD
+                       Astro.DefaultData
+                       Astro.Coords
+                       Astro.Coords.ECR
+                       Astro.Coords.PosVel
+                       Astro.Coords.TNR
+                       Astro.Place
+                       Astro.Place.ReferenceEllipsoid
+                       Astro.Place.Topocentric
+                       Astro.Time
+                       Astro.Time.Barycentric.AsA2009
+                       Astro.Time.Barycentric.Kaplan2005
+                       Astro.Time.Barycentric.TT
+                       Astro.Time.Convert
+                       Astro.Time.ForwardAD
+                       Astro.Time.Interop
+                       Astro.Time.Sidereal
+                       Astro.Time.At
+                       Astro.Celestrak
+                       IAU2000.FundamentalArguments
+                       IAU2000.Nutation
+                       IAU2000.Equations
+                       Astrodynamics
+                       Tmp.Lifts
+                       Astro.Util
+                       --TLE
+                       --TLE.Parse
+                       --TLE.Util
+                       -- The below were originally in astro-orbit
+                       Astro.Orbit.Anomaly
+                       Astro.Orbit.COE
+                       Astro.Orbit.Conversion
+                       Astro.Orbit.Interpolate
+                       Astro.Orbit.MEOE
+                       Astro.Orbit.SV
+                       Astro.Orbit.Types
+                       Astro.Orbit.Maneuver
+                       Astro.SolarCoordinates
+                       Astro.Trajectory
+                       Astro.Trajectory.Cropped
+                       Astro.Trajectory.EphemTrajectory
+                       Astro.Util.Cyclic
+
+test-suite properties
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Test.lhs
+  build-depends:       base
+                     , dimensional
+                     , dimensional-experimental
+                     , dimensional-homo
+                     , astro
+                     , QuickCheck
+                     , ieee754
+                     , hspec
+                     , time
+                     , array
+                     -- , template-haskell
+  ghc-options:         -threaded
+  default-language:    Haskell2010
+
+test-suite specs
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Spec.hs
+  build-depends:       base
+                     , dimensional
+                     , dimensional-experimental
+                     , dimensional-homo
+                     , astro
+                     , QuickCheck
+                     , ieee754
+                     , hspec
+                     , time
+                     , array
+                     -- , template-haskell
+  ghc-options:         -threaded
+  default-language:    Haskell2010
+
+-- test-suite dimensional-homo-test
+--   type:                exitcode-stdio-1.0
+--   hs-source-dirs:      test
+--   main-is:             Spec.hs
+--   build-depends:       base
+--                      , dimensional-homo
+--   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+--   default-language:    Haskell2010
+
+source-repository head
+  type:     git
+  location: https://github.com/bjornbm/astro

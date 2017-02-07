@@ -42,7 +42,7 @@ prop_UT1_interpolate0 arr = mkUT1Table arr tai == (-0.5922280)*~second - 33*~sec
 prop_UT1_interpolate1 arr = mkUT1Table arr tai ==   0.4066064 *~second - 34*~second
   where tai = utcToTAI (mkLeapSecondTable arr) $ clockUTC 2009 01 01 0 0 0
 prop_UT1_interpolate_mid arr = mkUT1Table arr tai == (x0 + x1) / _2
-  where 
+  where
     tai = utcToTAI (mkLeapSecondTable arr) $ UTCTime (ModifiedJulianDay 54831) 43200.5
     x0 = (-0.5922280)*~second - 33*~second
     x1 =   0.4066064 *~second - 34*~second
@@ -56,7 +56,7 @@ prop_convertUT1 t = cmpE (1e-4*~second) ut1 $ fromUniversalTime (toUniversalTime
 -- Driver
 -- ======
 main = do
-  arr <- readFile "testdata/eop_test.txt" >>= return . mkEOPArray . parseEOPData
+  arr <- readFile "test/testdata/eop_test.txt" >>= return . mkEOPArray . parseEOPData
 
   onceCheck prop_interpolate_mid
   onceCheck prop_interpolate_0
@@ -78,5 +78,3 @@ main = do
   quickCheck prop_convertUT1
 
   -- print $ convertToUT1 (mkUT1Table arr) (clock 2008 10 27 0 0 0 TAI)
-
-
