@@ -56,7 +56,7 @@ prop_obs p = p ~== p'
 
 -- | Going to and from az/el/rg observations in ECR is id.
 prop_obsECR :: GeodeticPlace Double -> Coord ECR Double -> Property
-prop_obsECR place p = not (degeneratePlace place) ==> p ~== p'
+prop_obsECR place p = not (degeneratePlace place || vNorm (c p) == _0) ==> p ~== p'
   where
     az = azimuth'   place p
     el = elevation' place p
