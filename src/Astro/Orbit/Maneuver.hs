@@ -48,13 +48,13 @@ instance (Fractional a, Ord a) => Trajectory ManTrajectory t a where
 
 maneuverToRelElems :: Floating a => At t a (Maneuver a) -> Datum t a -> Datum t a
 maneuverToRelElems (man`At`tman) (m`At`t) = undefined {- m
-  { 
+  {
 
   }
   Elements t dl dd (e_x, e_y) (di * sin ra, di * negate (cos ra))
-  
+
   where
-    manRA = 
+    manRA =
 
     dl   = _2 * (e_y * cos ra - e_x * sin ra)
     dd   = negate (_3 * dv_t / r_GEO)
