@@ -158,13 +158,13 @@ deriving instance AEq a => AEq (SemiLatusRectum a)
 deriving instance AEq a => AEq (Eccentricity a)
 
 instance (RealFloat a, Eq a) => Eq (Anomaly t a) where
-  Anom x == Anom y = x ==~ y
+  Anom x == Anom y = x ==~ y  -- TODO Cyclic may be good, but also approximate for Eq??
 
 instance (RealFloat a, AEq a) => AEq (Anomaly t a) where
   Anom x ~== Anom y = x ~==~ y
 
 instance (RealFloat a, Eq a) => Eq (Longitude l a) where
-  Long x == Long y = x ==~ y
+  Long x == Long y = x ==~ y  -- TODO Cyclic may be good, but also approximate for Eq??
 
 instance (RealFloat a, AEq a) => AEq (Longitude l a) where
   Long x ~== Long y = x ~==~ y

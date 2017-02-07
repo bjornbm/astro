@@ -5,6 +5,7 @@ module Astro.Orbit.Anomaly where
 -- [1] http://mathworld.wolfram.com/KeplersEquation.html
 
 import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.AEq
 import qualified Prelude
 import Astro.Orbit.Types
@@ -29,9 +30,10 @@ ea2ta Ecc{ecc} (Anom ea) = Anom $ _2 * atan (sqrt ((_1 + ecc) / (_1 - ecc)) * ta
 -- | Compute eccentric anomaly from mean anomaly using Newton's
 -- method as shown on [1].
 ma2ea :: (RealFloat a, AEq a) => Eccentricity a -> Anomaly Mean a -> Anomaly Eccentric a
-ma2ea ecc ma'@(Anom ma) = Anom $ iterateUntil converged (keplerStep ecc ma') ma
+ma2ea ecc ma = iterateUntil converged (keplerStep ecc ma) ea0
   where
-    converged x y = abs (x - y) < 1 *~ arcsecond  -- TODO select a more principled delta?
+    ea0 = coerce ma
+    converged ea1 ea2 = abs (anom ea1 - anom ea2) < 1 *~ arcsecond  -- TODO select a more principled delta?
 
 -- | Compute true anomaly from mean anomaly using Newton's
 -- method as shown on [1].
@@ -48,8 +50,9 @@ ta2ma ecc = ea2ma ecc . ta2ea ecc
 
 -- | A step in solving Kepler's equation per [1].
 keplerStep :: Floating a => Eccentricity a -> Anomaly Mean a
-           -> Angle a -> Angle a
-keplerStep (Ecc ecc) (Anom ma) ea_ = ea_ + (ma + ecc * sin ea_ - ea_) / (_1 - ecc * cos ea_)
+           -> Anomaly Eccentric a -> Anomaly Eccentric a
+keplerStep (Ecc ecc) (Anom ma) (Anom ea) = Anom $
+  ea + (ma + ecc * sin ea - ea) / (_1 - ecc * cos ea)
 
 -- | Iterate a function on its result until the predicate
 -- holds true for two subsequent results. Then returns
