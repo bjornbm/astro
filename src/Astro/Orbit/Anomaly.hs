@@ -1,5 +1,4 @@
 {-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE EmptyDataDecls #-}
 
 module Astro.Orbit.Anomaly where
 
@@ -30,7 +29,9 @@ ea2ta Ecc{ecc} (Anom ea) = Anom $ _2 * atan (sqrt ((_1 + ecc) / (_1 - ecc)) * ta
 -- | Compute eccentric anomaly from mean anomaly using Newton's
 -- method as shown on [1].
 ma2ea :: (RealFloat a, AEq a) => Eccentricity a -> Anomaly Mean a -> Anomaly Eccentric a
-ma2ea ecc ma'@(Anom ma) = Anom $ iterateUntil (~==) (keplerStep ecc ma') ma
+ma2ea ecc ma'@(Anom ma) = Anom $ iterateUntil converged (keplerStep ecc ma') ma
+  where
+    converged x y = abs (x - y) < 1 *~ arcsecond  -- TODO select a more principled delta?
 
 -- | Compute true anomaly from mean anomaly using Newton's
 -- method as shown on [1].

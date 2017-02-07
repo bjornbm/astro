@@ -81,6 +81,11 @@ spec_anomalyConversion = describe "Anomaly conversions" $ do
     (property $ \e' ea -> let e = Ecc $ fractionalPart e' :: Eccentricity Double
       in (ma2ea e . ea2ma e) ea ~== ea)
 
+  it "Converting EA to MA and back should not change it. (Failure case)" $ do
+    let e  = Ecc $ fractionalPart (2.4344584473354116 *~ one) :: Eccentricity Double
+        ea = Anom $ (-3.3609126772415534) *~ radian
+      in (ma2ea e . ea2ma e) ea ~== ea
+
   it "At perigee EA and MA should be equally 0."
     (property $ \e' -> let e = Ecc $ fractionalPart e'
       in ea2ma e ea0 == ma0 && ma2ea e ma0 == ea0)
