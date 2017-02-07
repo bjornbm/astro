@@ -28,7 +28,7 @@ Build-Depends:       base,
                      dimensional-homo,
                      dimensional-experimental,
                      dimensional-dk-experimental,
-                     ieee,
+                     ieee754,
                      ad,
                      astro-tables
 hs-source-dirs:      src
