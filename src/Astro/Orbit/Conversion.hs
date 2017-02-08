@@ -27,7 +27,7 @@ sv2coe :: RealFloat a => GravitationalParameter a -> SV a -> COE True a
 sv2coe mu pv = COE
   { mu   = mu
   , slr  = p
-  , ecc  = vNorm e'
+  , ecc  = norm e'
   , inc  = inc
   , aop  = aop
   , raan = raan
@@ -39,7 +39,7 @@ sv2coe mu pv = COE
 
     -- Angular momentum
     h' = r `crossProduct` v  -- Angular momentum vector.
-    h  = vNorm h'
+    h  = norm h'
     (h_x, h_y, h_z) = toTuple h'
 
     -- Semi-latus rectum
@@ -52,11 +52,11 @@ sv2coe mu pv = COE
     m' = h' `crossProduct` n'  -- Vector 90° ahead of n' (AN) in orbit plane.
 
     -- Eccentricity and perigee.
-    e' = v `crossProduct` h' >/ mu >-< vNormalize r  -- See e.g. Wikipedia.
-    aop = atan2 (e' >.< vNormalize m') (e' >.< n')     -- 0 for e' == 0'.
+    e' = v `crossProduct` h' >/ mu >-< normalize r  -- See e.g. Wikipedia.
+    aop = atan2 (e' >.< normalize m') (e' >.< n')     -- 0 for e' == 0'.
 
     -- Argument of latitude (angle from AN to r).
-    u = atan2 (r >.< vNormalize m') (r >.< n')
+    u = atan2 (r >.< normalize m') (r >.< n')
     -- True anomaly.
     trueAnomaly = u - aop
 

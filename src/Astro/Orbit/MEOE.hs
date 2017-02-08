@@ -34,7 +34,7 @@ meoe2vecUnsafe MEOE{..} = coerce mu <: coerce p <: f <: g <: h <: k <:. long lon
 vec2meoeUnsafe :: Fractional a => Vec DOne 7 a -> MEOE m a
 vec2meoeUnsafe v = MEOE (coerce mu') (coerce p') f g h j (Long lon)
   where
-    [mu', p', f, g, h, j, lon] = toList v
+    [mu', p', f, g, h, j, lon] = listElems v
 
 
 -- TODO move orbitalPeriod somewhere more generic?

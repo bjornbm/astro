@@ -15,9 +15,9 @@ import qualified Astrodynamics
 -- with the velocity vector (i.e. “tangential” only for circular orbits).
 orbitalFrame :: RealFloat a => PosVel ECI a -> CoordSys a
 orbitalFrame pv = consRow t $ consRow n $ rowMatrix r where
-  r = vNormalize $ cpos pv
-  n = vNormalize $ crossProduct (cpos pv) (cvel pv)
-  t = vNormalize $ crossProduct n r
+  r = normalize $ cpos pv
+  n = normalize $ crossProduct (cpos pv) (cvel pv)
+  t = normalize $ crossProduct n r
 
 
 -- | Converts ECI position to orbital frame defined by PosVel.

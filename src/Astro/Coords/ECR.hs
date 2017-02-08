@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {- | Module for converting between ECR and other frames. This module is
 -- currently somewhat unprincipled in that is uses constants for
--- Earth's rate of rotation rather than variable Earth rotation angle 
+-- Earth's rate of rotation rather than variable Earth rotation angle
   --
   -- TODO Use @Astro.Time.Sidereal.era@ instead of @Astrodynamics@.
   --
@@ -27,9 +27,9 @@ import qualified Astrodynamics
 -- with the velocity vector (i.e. “tangential” only for circular orbits).
 orbitalFrameECR :: RealFloat a => PosVel ECR a -> CoordSys a
 orbitalFrameECR pv = consRow t $ consRow n $ rowMatrix r where
-  r = vNormalize (cpos pv)
-  t = vNormalize $ crossProduct n r
-  n = vNormalize (crossProduct (cpos pv) v)
+  r = normalize $ cpos pv
+  t = normalize $ crossProduct n r
+  n = normalize $ crossProduct (cpos pv) v
   v = (w `crossProduct` cpos pv) >+< cvel pv
   w = 0*~day^neg1 <: 0*~day^neg1 <:. Astrodynamics.phi -- TODO copout using phi!
 

@@ -26,9 +26,9 @@ import qualified Prelude
 -- Note that the our Zenith is defined by the reference ellipsoid (as
 -- opposed to e.g. the geoid).
 topocentricX, topocentricY, topocentricZ :: RealFloat a => GeodeticPlace a -> Axis a
-topocentricX p = vNormalize $ diffV (\x -> c $ geodeticToECR (lift p){longitude = x}) (longitude p)
-topocentricY p = vNormalize $ diffV (\x -> c $ geodeticToECR (lift p){latitude  = x}) (latitude  p)
-topocentricZ p = vNormalize $ diffV (\x -> c $ geodeticToECR (lift p){height    = x}) (height    p)
+topocentricX p = normalize $ diffV (\x -> c $ geodeticToECR (lift p){longitude = x}) (longitude p)
+topocentricY p = normalize $ diffV (\x -> c $ geodeticToECR (lift p){latitude  = x}) (latitude  p)
+topocentricZ p = normalize $ diffV (\x -> c $ geodeticToECR (lift p){height    = x}) (height    p)
 
 -- | Calculates the topocentric coordinate system for the given
 -- geodetic place. The returned topocentric coordinate system is
@@ -74,7 +74,7 @@ azimuth' gs = azimuth . ecrToTopocentric gs
 -- | Computes the range from the given geodetic place to the given
 -- geocentric position.
 range' :: RealFloat a => GeodeticPlace a -> Coord ECR a -> Length a
-range' gs = vNorm . diffCoords (geodeticToECR gs)  -- More efficient.
+range' gs = norm . diffCoords (geodeticToECR gs)  -- More efficient.
 --range gs = radius . s . ecrToTopocentric gs  -- Rather inefficient!
 
 -- Convert a tripple of azimuth, elevation, and range observations into
