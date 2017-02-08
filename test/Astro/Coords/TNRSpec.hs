@@ -39,7 +39,7 @@ spec_trivialSV = describe "A trivial state vector" $ do
     orbitalFrame pv == _Y |: _Z |:. _X
 
   it "gives a correct attiude (RPY) frame" $
-    attitudeCoordSys pv ~== _Y |: vNegate _Z |:. vNegate _X
+    attitudeCoordSys pv ~== _Y |: negateVec _Z |:. negateVec _X
 
   where
     r = scaleVec ((1::Double) *~ meter) _X :: Car DLength Double
@@ -49,15 +49,15 @@ spec_trivialSV = describe "A trivial state vector" $ do
 spec_trivialRetroSV = describe "A trivial retrograde state vector" $ do
 
   it "gives a correct orbital (TNR) frame" $
-    orbitalFrame pv == vNegate _Y |: vNegate _Z |:. _X
+    orbitalFrame pv == negateVec _Y |: negateVec _Z |:. _X
 
   it "gives a correct attiude (RPY) frame" $
-    attitudeCoordSys pv ~== vNegate _Y |: _Z |:. vNegate _X
+    attitudeCoordSys pv ~== negateVec _Y |: _Z |:. negateVec _X
 
   where
     r = scaleVec ((1::Double) *~ meter) _X
     v = scaleVec (1 *~ (meter / second)) _Y
-    pv = C' r (vNegate v)
+    pv = C' r (negateVec v)
 
 -- ----------------------------------------------------------
 spec_eciToECR = describe "eciToECR" $ do

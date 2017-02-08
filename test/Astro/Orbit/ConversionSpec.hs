@@ -195,7 +195,7 @@ spec_meoe2meoeM = describe "meoe2meoeM2meoe" $ do
 -- Convenience and utility functions.
 
 -- | Magnitude of orbit angular momentum per mass unit.
-orbmom v = vNorm (pos v `crossProduct` vel v)
+orbmom v = norm (pos v `crossProduct` vel v)
 
 mps = meter / second
 
@@ -209,8 +209,8 @@ fudgeSV state = sv (r >+< (a<:a<:.a)) (v >+< (b<:b<:.b))
   where
     r = pos state
     v = vel state
-    a = vNorm r * (1e-6*~one)
-    b = vNorm v * (1e-6*~one)
+    a = norm r * (1e-6*~one)
+    b = norm v * (1e-6*~one)
 
 
 -- Test elements.
