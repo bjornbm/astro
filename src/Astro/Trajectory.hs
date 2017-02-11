@@ -11,6 +11,7 @@ import Astro.Orbit.MEOE
 import Astro.Orbit.Types
 import Numeric.Units.Dimensional.Prelude
 import Data.Maybe (listToMaybe)
+import qualified Prelude
 
 type Datum t a = At t a (MEOE Mean a)
 

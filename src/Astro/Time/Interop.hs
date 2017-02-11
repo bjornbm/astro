@@ -10,9 +10,9 @@ import Astro.Time.Convert
 import Data.Time
 import Data.Time.Clock.TAI
 import Control.Monad.Reader (asks)
-import Numeric.Units.Dimensional.Prelude hiding (toDiffTime, fromDiffTime)
+import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.DK.Time
-
+import qualified Prelude
 
 -- | Convert a TAI epoch into a 'Data.Time.Clock.TAI.AbsoluteTime'.
 toAbsoluteTime :: (Real a, Fractional a) => E TAI a -> AbsoluteTime

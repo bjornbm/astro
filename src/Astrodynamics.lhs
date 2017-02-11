@@ -11,10 +11,10 @@ other modules.
 > import Astro.Time
 > import Astro.Time.Interop
 > import qualified Astro.Time.Sidereal (gmst', phi)
-> import Prelude 
+> import Prelude
 >   ( fromIntegral, toRational, properFraction
 >   , Fractional, RealFloat, Num, realToFrac
->   , ($), (.), (<), (++)
+>   , ($), (<), (++)
 >   , map
 >   )
 > import qualified Prelude as P
@@ -87,8 +87,8 @@ Calculates the right ascension of the Greenwich meridian at the epoch.
 
 > greenwichRA t = Astro.Time.Sidereal.gmst' t
 
-Calculates the right ascension of the longitude at the epoch. This 
-This function is often used with a 'MeanLongitude' instead of a 
+Calculates the right ascension of the longitude at the epoch. This
+This function is often used with a 'MeanLongitude' instead of a
 'Longitude'.
 
 > longitudeRA t l = greenwichRA t + l
@@ -164,7 +164,7 @@ Utility functions
 Limit an angle to within 0 and 2 pi.
 
 > angleMod :: (RealFloat a) => Angle a -> Angle a
-> angleMod x = (if f < 0 then (1 P.+ f) else f) *~ revolution 
+> angleMod x = (if f < 0 then (1 P.+ f) else f) *~ revolution
 >   where
 >       (n, f) = properFraction (x /~ revolution)
 
@@ -206,7 +206,7 @@ IS-11 ephemeris upload check.
 > ra = atan2 y x
 > l = angleMod $ ra - greenwichRA t
 > -- -}
- 
+
 
 > {-
 > long1  = 32.9 *~ degree

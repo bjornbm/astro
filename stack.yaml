@@ -37,6 +37,7 @@ resolver: lts-7.18
 # will not be run. This is useful for tweaking upstream packages.
 packages:
 - '.'
+- '../dimensional'
 - '../dimensional-homo'
 - '../dimensional-experimental'
 - '../dimensional-dk-experimental'

@@ -24,7 +24,7 @@ import Numeric.Units.Dimensional (Dimensional (..))
 import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.LinearAlgebra.Vector (Vec (ListVec))
 import Numeric.Units.Dimensional.LinearAlgebra.PosVel (Sph (..))
-import Numeric.Units.Dimensional.AEq
+-- import Numeric.Units.Dimensional.AEq
 import qualified Prelude
 import Astro.Util.Cyclic (plusMinusPi, zeroTwoPi)
 import Astro.Coords
@@ -57,19 +57,19 @@ zeroOneArbitrary = (*~one) . snd . properFraction <$> arbitrary
 newtype NonZeroD d a = NonZeroD { getNonZeroD :: Quantity d a }
 instance (Arbitrary a, Eq a, Num a) => Arbitrary (NonZeroD d a) where
   arbitrary = NonZeroD <$> suchThat arbitrary (/= _0)
-deriving instance (KnownDimension d, Fractional a, Show a) => Show (NonZeroD d a)
+deriving instance (KnownDimension d, Real a, Show a) => Show (NonZeroD d a)
 
 -- | @PositiveD x@ has an Arbitrary instance that guarantees that @x \> 0@.
 newtype PositiveD d a = PositiveD { getPositiveD :: Quantity d a }
 instance (Arbitrary a, Ord a, Num a) => Arbitrary (PositiveD d a) where
   arbitrary = PositiveD <$> suchThat arbitrary (> _0)
-deriving instance (KnownDimension d, Fractional a, Show a) => Show (PositiveD d a)
+deriving instance (KnownDimension d, Real a, Show a) => Show (PositiveD d a)
 
 -- | @NonNegativeD x@ has an Arbitrary instance that guarantees that @x \>= 0@.
 newtype NonNegativeD d a = NonNegativeD { getNonNegativeD :: Quantity d a }
 instance (Arbitrary a, Ord a, Num a) => Arbitrary (NonNegativeD d a) where
   arbitrary = NonNegativeD <$> suchThat arbitrary (>= _0)
-deriving instance (KnownDimension d, Fractional a, Show a) => Show (NonNegativeD d a)
+deriving instance (KnownDimension d, Real a, Show a) => Show (NonNegativeD d a)
 
 -- | @ZeroOneD x@ has an Arbitrary instance that guarantees that @0 <= x < 1@.
 newtype ZeroOneD a = ZeroOneD { getZeroOneD :: Dimensionless a } deriving (Show)

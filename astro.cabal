@@ -95,6 +95,7 @@ test-suite properties
 
   build-depends:       base
                      , dimensional
+                     , dimensional-dk-experimental
                      , dimensional-experimental
                      , dimensional-homo
                      , astro
@@ -129,6 +130,7 @@ test-suite specs
   build-depends:       base
                      , dimensional
                      , dimensional-experimental
+                     , dimensional-dk-experimental
                      , dimensional-homo
                      , astro
                      , QuickCheck

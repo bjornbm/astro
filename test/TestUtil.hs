@@ -11,7 +11,7 @@ import qualified Debug.Trace
 import Test.QuickCheck
 
 import Numeric.Units.Dimensional.Prelude
-import Numeric.Units.Dimensional.AEq
+-- import Numeric.Units.Dimensional.DK.AEq
 import qualified Prelude
 
 import Astro.Util.Cyclic
