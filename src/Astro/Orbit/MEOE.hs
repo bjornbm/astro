@@ -26,16 +26,6 @@ data MEOE long a = MEOE
   -- for an orbit with inclinaton = 0°.
   } deriving (Show)
 
--- | Convert a MEOE into a vector (not a State Vector) of its
--- elements (including mu), but all dimensionless.
-meoe2vecUnsafe :: Fractional a => MEOE m a -> Vec DOne 7 a
-meoe2vecUnsafe MEOE{..} = coerce mu <: coerce p <: f <: g <: h <: k <:. long longitude
-
-vec2meoeUnsafe :: Fractional a => Vec DOne 7 a -> MEOE m a
-vec2meoeUnsafe v = MEOE (coerce mu') (coerce p') f g h j (Long lon)
-  where
-    [mu', p', f, g, h, j, lon] = listElems v
-
 
 -- TODO move orbitalPeriod somewhere more generic?
 orbitalPeriod :: Floating a => GravitationalParameter a -> SemiMajorAxis a -> Time a

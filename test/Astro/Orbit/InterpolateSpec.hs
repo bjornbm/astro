@@ -85,14 +85,6 @@ spec_linearPolateVecT = describe "Interpolate.polateVecT" $ do
 
 spec_linearPolateMEOEm = describe "linearPolateMEOEm (m0`At`t0) (m1`At`t1) t" $ do
 
-  it "OLD returns m0 when interpolating at t0." $ property $
-    \(m0`At`t0::Datum UT1 D) (m1`At`t1) -> t0 /= t1
-      ==> linearPolateMEOEm_OLD (m0`At`t0) (m1`At`t1) t0 == m0
-
-  it "OLD returns m1 when interpolating at t1." $ property $
-    \(m0`At`t0::Datum UT1 D) (m1`At`t1) -> t0 /= t1
-      ==> linearPolateMEOEm_OLD (m0`At`t0) (m1`At`t1) t1 ~== m1
-
   it "returns m0 when interpolating at t0."  $ property $
     \(m0`At`t0::Datum UT1 D) (m1`At`t1) -> t0 /= t1
       ==> linearPolateMEOEm (m0`At`t0) (m1`At`t1) t0 == m0
@@ -100,11 +92,6 @@ spec_linearPolateMEOEm = describe "linearPolateMEOEm (m0`At`t0) (m1`At`t1) t" $ 
   it "returns m1 when interpolating at t1." $ property $
     \(m0`At`t0::Datum UT1 D) (m1`At`t1) -> t0 /= t1
       ==> linearPolateMEOEm (m0`At`t0) (m1`At`t1) t1 ~== m1
-
-  it "OLD is equivalent." $ property $
-    \(m0`At`t0::Datum UT1 D) (m1`At`t1) t -> t0 /= t1
-      ==> linearPolateMEOEm (m0`At`t0) (m1`At`t1) t
-      ~== linearPolateMEOEm_OLD (m0`At`t0) (m1`At`t1) t
 
   it "works for a previously failing test case" $
     let m0 = At {value = MEOE { mu = (196.85310683970377)*~(meter^pos3/second^pos2)
