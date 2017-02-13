@@ -26,9 +26,15 @@ import qualified Prelude
 -- Note that the our Zenith is defined by the reference ellipsoid (as
 -- opposed to e.g. the geoid).
 topocentricX, topocentricY, topocentricZ :: RealFloat a => GeodeticPlace a -> Axis a
-topocentricX p = normalize $ diffV (\x -> c $ geodeticToECR (lift p){longitude = x}) (longitude p)
-topocentricY p = normalize $ diffV (\x -> c $ geodeticToECR (lift p){latitude  = x}) (latitude  p)
-topocentricZ p = normalize $ diffV (\x -> c $ geodeticToECR (lift p){height    = x}) (height    p)
+topocentricX p = normalize $ diffV
+  (\x -> c $ geodeticToECR (lift p){longitude = GeoLongitude x})
+  (geoLongitude $ longitude p)
+topocentricY p = normalize $ diffV
+  (\x -> c $ geodeticToECR (lift p){latitude  = GeodeticLatitude x})
+  (geodeticLatitude $ latitude  p)
+topocentricZ p = normalize $
+  diffV (\x -> c $ geodeticToECR (lift p){height = x})
+  (height p)
 
 -- | Calculates the topocentric coordinate system for the given
 -- geodetic place. The returned topocentric coordinate system is

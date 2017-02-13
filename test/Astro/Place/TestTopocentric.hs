@@ -20,19 +20,19 @@ import Data.AEq
 -- ==========
 
 -- | 3rd party data validation.
-prop_va long f x = cmpE e (f cibinong $ perfectGEO $ long*~degree) (x*~degree)
+prop_va long f x = cmpE e (f cibinong $ perfectGEO $ degE long) (x*~degree)
   where
     e = 0.1 *~ degree
     cibinong = GeodeticPlace wgs84
-      (negate $ sexagesimalAngle 6 26 52)
-      (sexagesimalAngle 106 56 10)
+      (GeodeticLatitude $ negate $ sexagesimalAngle   6 26 52)
+      (GeoLongitude              $ sexagesimalAngle 106 56 10)
       (0*~meter)
 
 -- | Converting geocentric to topocentric and back should be identity function.
 prop_topo1 :: GeodeticPlace Double -> Coord ECR Double -> Property
 prop_topo1 place p = not (degeneratePlace place) ==> p ~== p'
   where
-    p' = topocentricToECR place $ ecrToTopocentric place $ p
+    p' = topocentricToECR place $ ecrToTopocentric place p
 {- prop_topo1
 *** Failed! Falsifiable (after 720 tests):
 GeodeticPlace {refEllips = ReferenceEllipsoid {equatorialRadius = 21972.493449352645 m, polarRadius = 2.1731050756815637 m}, latitude = 39.30500938162273, longitude = 69.62167787937885, height = 26.50133090234193 m}
@@ -43,7 +43,7 @@ C < -12.02345499632946 m, -138.2024450210176 m, -23.342674229564704 m >
 prop_topo2 :: GeodeticPlace Double -> Coord Topocentric Double -> Property
 prop_topo2 place p = not (degeneratePlace place) ==> p ~== p'
   where
-    p' = ecrToTopocentric place $ topocentricToECR place $ p
+    p' = ecrToTopocentric place $ topocentricToECR place p
 
 -- | Going to and from az/el/rg observations is id.
 prop_obs :: Coord Topocentric Double -> Bool
@@ -78,15 +78,15 @@ main = do
   onceCheck $ prop_va 150.5 elevation' 39.3
   onceCheck $ prop_va 172   azimuth'   87.0
   onceCheck $ prop_va 172   elevation' 16.4
-  onceCheck $ prop_degenerate1
+  onceCheck prop_degenerate1
   manyCheck prop_topo1
-  onceCheck $ prop_topo1_fail1
+  onceCheck prop_topo1_fail1
   manyCheck prop_topo2
   manyCheck prop_obs
   manyCheck prop_obsECR
-  onceCheck $ prop_obsECR_fail1
-  onceCheck $ prop_obsECR_fail2
-  onceCheck $ prop_obsECR_fail3
+  onceCheck prop_obsECR_fail1
+  onceCheck prop_obsECR_fail2
+  onceCheck prop_obsECR_fail3
 
 
 -- Prior failures
@@ -97,8 +97,8 @@ main = do
 -- that the degenerary test catches the original problematic case.
 prop_degenerate1 = degeneratePlace place
   where
-    place = GeodeticPlace (ReferenceEllipsoid (4.0*~meter) (3.0*~meter))
-                          _0 _0 ((-2.25)*~meter)
+    place = GeodeticPlace (ReferenceEllipsoid (4*~meter) (3*~meter))
+                          (degN 0) (degE 0) ((-2.25)*~meter)
 
 
 -- FP inaccuracies
@@ -114,8 +114,8 @@ prop_topo1_fail1 = prop_topo1 place p
           <:. 186.62064762372555 *~meter
     place = GeodeticPlace (ReferenceEllipsoid (136781.86798882156*~meter)
                                               (167.72821654743436*~meter))
-                          ((-2243.8289959047747)*~radian)
-                          (20.39182594235854*~radian)
+                          (GeodeticLatitude $ (-2243.8289959047747)*~radian)
+                          (GeoLongitude     $ 20.39182594235854*~radian)
                           (13.25536345487733*~meter)
 
 prop_obsECR_fail1 = prop_obsECR place p
@@ -125,8 +125,8 @@ prop_obsECR_fail1 = prop_obsECR place p
           <:. (-1566.516520378069)*~meter
     place = GeodeticPlace (ReferenceEllipsoid (136607.51358690596*~meter)
                                                 (155.740741518507*~meter))
-                          (79.93674030440873*~radian)
-                          (60.60648347976257*~radian)
+                          (GeodeticLatitude $ 79.93674030440873*~radian)
+                          (GeoLongitude     $ 60.60648347976257*~radian)
                           (58.278163555009634*~meter)
 {- prop_obsECR
 *** Failed! Falsifiable (after 746 tests):
@@ -142,8 +142,8 @@ prop_obsECR_fail2 = prop_obsECR place p
           <:. (-75.65015287140265)*~meter
     place = GeodeticPlace (ReferenceEllipsoid (276733.3457887228*~meter)
                                               (276730.57152002316*~meter))
-                          ((-152.91564055491563)*~radian)
-                          ((-94.14913720744624)*~radian)
+                          (GeodeticLatitude $ (-152.91564055491563)*~radian)
+                          (GeoLongitude     $ (-94.14913720744624)*~radian)
                           (187.078596831506*~meter)
 
 prop_obsECR_fail3 = prop_obsECR place p
@@ -155,8 +155,8 @@ prop_obsECR_fail3 = prop_obsECR place p
           {refEllips = ReferenceEllipsoid
                      {equatorialRadius = 134.15569877277596*~meter
                      , polarRadius = 65.24417626981652*~meter}
-          , latitude = 96.5645385211402*~radian
-          , longitude = (-5.66974812882677)*~radian
+          , latitude = GeodeticLatitude $ 96.5645385211402*~radian
+          , longitude = GeoLongitude $ (-5.66974812882677)*~radian
           , height = 174062.2962703866*~meter}
 
 {-

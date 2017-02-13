@@ -8,6 +8,7 @@ module Astro.Util ( r_GEO  -- From Astrodynamics
 
 import Astro.Coords
 import Astro.Coords.PosVel
+import Astro.Place
 import Astro.Time
 import Astro.Time.Interop
 import Astrodynamics (r_GEO)
@@ -21,18 +22,15 @@ import Data.Time.Clock.TAI
 import qualified Prelude
 
 
-type Longitude = Angle
-
-
 -- Perfect GEO vectors
 -- -------------------
 
 -- | ECEF position of a perfectly geostationary SC.
-perfectGEO :: Floating a => Longitude a -> Coord ECR a
-perfectGEO l = C (r_GEO * cos l <: r_GEO * sin l <:. _0)
+perfectGEO :: Floating a => GeoLongitude a -> Coord ECR a
+perfectGEO (GeoLongitude l) = C (r_GEO * cos l <: r_GEO * sin l <:. _0)
 
 -- | ECEF @PosVel@ of a perfectly geostationary SC.
-perfectGEO' :: RealFloat a => Longitude a -> PosVel ECR a
+perfectGEO' :: RealFloat a => GeoLongitude a -> PosVel ECR a
 perfectGEO' l = C' (c $ perfectGEO l) (_0 <: _0 <:. _0)
 
 

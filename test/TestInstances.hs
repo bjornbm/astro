@@ -92,6 +92,12 @@ instance (KnownNat n, Arbitrary a) => Arbitrary (Vec d n a) where
 instance Arbitrary a => Arbitrary (Coord s a) where
   arbitrary = C <$> arbitrary
 
+instance Arbitrary a => Arbitrary (GeodeticLatitude a) where
+  arbitrary = GeodeticLatitude <$> arbitrary
+
+instance Arbitrary a => Arbitrary (GeoLongitude a) where
+  arbitrary = GeoLongitude <$> arbitrary
+
 instance (Fractional a, Ord a, Arbitrary a) => Arbitrary (GeodeticPlace a) where
   arbitrary = GeodeticPlace <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary
 
