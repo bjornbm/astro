@@ -32,3 +32,10 @@
 -  Use dlists instead of lists.
 
 -  Use vectors instead of lists.
+
+
+-  Harmonize PosVel and Coord. Retire PosVel?
+
+-  Lenses for data structures (Place, Astro, …)
+
+-  Newtype quantities gratuitiously. SMA a = Length a. Furthermore use symbols (SMA "EH2" a) to ensure consistency in combining symbols.
