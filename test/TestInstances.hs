@@ -24,7 +24,6 @@ import Numeric.Units.Dimensional (Dimensional (..))
 import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.LinearAlgebra.Vector (Vec (ListVec))
 import Numeric.Units.Dimensional.LinearAlgebra.PosVel (Sph (..))
--- import Numeric.Units.Dimensional.AEq
 import qualified Prelude
 import Astro.Util.Cyclic (plusMinusPi, zeroTwoPi)
 import Astro.Coords

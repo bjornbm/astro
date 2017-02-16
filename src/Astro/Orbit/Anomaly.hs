@@ -6,7 +6,6 @@ module Astro.Orbit.Anomaly where
 
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.Coercion
-import Numeric.Units.Dimensional.AEq
 import qualified Prelude
 import Astro.Orbit.Types
 import Data.AEq
