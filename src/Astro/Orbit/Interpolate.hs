@@ -1,8 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TupleSections #-}
-{-# LANGUAGE TypeFamilies #-}
-
 module Astro.Orbit.Interpolate where
 
 import qualified Prelude
@@ -22,23 +17,25 @@ import Astro.Trajectory (Datum)
 -- dimensional (TODO: move?)
 -- -------------------------
 -- Interpolate.
-linearPolate :: Fractional a -- (Div d d DOne, Mul DOne dy dy, Fractional a)
+linearPolate :: Fractional a
              => (Quantity d a, Quantity dy a) -> (Quantity d a, Quantity dy a)
              -> Quantity d a -> Quantity dy a
 linearPolate (x0,y0) (x1,y1) x = linearPolate0 y0 (x1-x0,y1) (x-x0)
 
 -- Polate assuming y0 corresponds to x0 = 0.
-linearPolate0 :: Fractional a -- (Div d d DOne, Mul DOne dy dy, Fractional a)
+linearPolate0 :: Fractional a
               => Quantity dy a -> (Quantity d a, Quantity dy a)
               -> Quantity d a -> Quantity dy a
 --linearPolate0 y0 (x1,y1) x = y0 + x / x1 * (y1 - y0)
 linearPolate0 y0 (x1,y1) x = y0 + linearPolate00 (x1,y1-y0) x
 
 -- Polate assuming x0 = 0 and y0 = 0.
-linearPolate00 :: Fractional a -- (Div d d DOne, Mul DOne dy dy, Fractional a)
+linearPolate00 :: Fractional a
                => (Quantity d a, Quantity dy a)
                -> Quantity d a -> Quantity dy a
-linearPolate00 (x1,y1) x = x / x1 * y1
+-- linearPolate00 (_ , _ ) _0 = _0  -- TODO good to have in case x1 is zero (degenerate)?
+-- linearPolate00 (_0, _ ) _  = error "Degenerate polation"  -- TODO good to have in case x1 is zero (degenerate)?
+linearPolate00 (x1, y1) x = x / x1 * y1
 
 
 -- dimensional-vectors (TODO: move?)
