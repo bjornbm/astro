@@ -26,7 +26,8 @@ eciToOrbitalFrame pv p = C $ orbitalFrame pv `matVec` (c p `elemSub` cpos pv)
 
 -- | Computes the attitude coordinate system (RPY) for a satellite where
 -- the Z (yaw) axis is nadir-pointing, the Y (pitch) axis is normal to
--- the orbit plane, and the X (roll) axis completes the coordinate system.
+-- the orbit plane and antiparallel to the angular velocity vector, and
+-- the X (roll) axis completes the coordinate system.
 -- (The X (roll) axis does not align with the velocity vector.)
 attitudeCoordSys :: RealFloat a => PosVel ECI a -> CoordSys a
 attitudeCoordSys pv = rotX pi |*| orbitalFrame pv
