@@ -7,6 +7,7 @@ module Astro.Time.Interop where
 import Astro
 import Astro.Time
 import Astro.Time.Convert
+import Data.Maybe (fromJust)
 import Data.Time
 import Data.Time.Clock.TAI
 import Control.Monad.Reader (asks)
@@ -52,12 +53,14 @@ clockUTC y m d h min s = UTCTime (fromGregorian y m d) (timeOfDayToTime $ TimeOf
 -- Conversion
 -- ----------
 -- | Conversion from UTCTime.
-utcToTAI :: Fractional a => LeapSecondTable -> UTCTime -> E TAI a
-utcToTAI lst = fromAbsoluteTime . utcToTAITime lst
+utcToTAI :: Fractional a => LeapSecondMap -> UTCTime -> E TAI a
+utcToTAI lst = fromAbsoluteTime . fromJust . utcToTAITime lst
+                          -- TODO ^^^^^^^^ error handling or fail in Astro?
 
 -- | Conversion to UTCTime.
-taiToUTC :: (Real a, Fractional a) => LeapSecondTable -> E TAI a -> UTCTime
-taiToUTC lst = taiToUTCTime lst . toAbsoluteTime
+taiToUTC :: (Real a, Fractional a) => LeapSecondMap -> E TAI a -> UTCTime
+taiToUTC lst = fromJust . taiToUTCTime lst . toAbsoluteTime
+       -- TODO ^^^^^^^^ error handling or fail in Astro?
 
 -- | Monadic conversion to UTCTime.
 convertToUTC :: (Convert t TAI, Real a, Fractional a) => E t a -> Astro a UTCTime

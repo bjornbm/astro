@@ -15,7 +15,8 @@
 # resolver:
 #  name: custom-snapshot
 #  location: "./custom-snapshot.yaml"
-resolver: lts-8.0
+# resolver: lts-8.0
+resolver: nightly-2017-08-15
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -37,15 +38,38 @@ resolver: lts-8.0
 # will not be run. This is useful for tweaking upstream packages.
 packages:
 - '.'
-- '../dimensional'
-- '../dimensional-homo'
-- '../dimensional-experimental'
-- '../dimensional-dk-experimental'
-- '../astro-tables'
+- location:
+    git: https://github.com/bjornbm/astro-tables.git
+    commit: HEAD
+  extra-dep: true
+- location:
+    git: https://github.com/bjornbm/dimensional.git
+    commit: HEAD
+  extra-dep: true
+- location:
+    git: https://github.com/bjornbm/dimensional-dk-experimental.git
+    #commit: 6fd9c299d64b62f58a1e9b4ead0d8c40b3b2df46
+    commit: origin/dimensional-head
+  extra-dep: true
+- location:
+    git: https://github.com/bjornbm/dimensional-experimental.git
+    commit: HEAD
+  extra-dep: true
+- location:
+    git: https://github.com/bjornbm/dimensional-homo.git
+    commit: HEAD
+  extra-dep: true
+
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
 extra-deps:
 - numeric-quest-0.2.0.1
+- vector-space-0.11
+- Boolean-0.2.4
+- MemoTrie-0.6.8
+- NumInstances-1.4
+- newtype-generics-0.5.0.1
+# - Win32-2.5.4.1
 
 # Override default flag values for local packages and extra-deps
 flags: {}

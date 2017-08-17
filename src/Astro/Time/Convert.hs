@@ -13,7 +13,6 @@ module Astro.Time.Convert where
 import Astro
 import Astro.Time hiding (taiToUT1, ut1ToTAI)
 import Control.Monad.Reader
-import Data.Time.Clock.TAI (LeapSecondTable)
 import Data.Fixed
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude

@@ -6,7 +6,7 @@ module Astro where
 import Astro.Place.ReferenceEllipsoid
 import Astro.Time
 import Control.Monad.Reader
-import Data.Time.Clock.TAI (LeapSecondTable)
+import Data.Time.Clock.TAI (LeapSecondMap)
 import Data.Fixed
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
@@ -17,8 +17,8 @@ eval f x = asks (($x) . f)
 evalM f x = asks f >>= ($x)
 
 
-data TimeData a = TimeData 
-  { leapSecondTable :: LeapSecondTable
+data TimeData a = TimeData
+  { leapSecondTable :: LeapSecondMap
   , taiToUT1 :: E TAI a -> E UT1 a
   , ut1ToTAI :: E UT1 a -> E TAI a
   ,  ttToTDB :: E TT a  -> E TDB a
@@ -52,4 +52,3 @@ data AstroData a = AstroData
 type Astro a = Reader (AstroData a)
 runAstro :: Astro a b -> AstroData a -> b
 runAstro = runReader
-

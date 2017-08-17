@@ -6,6 +6,7 @@ import Numeric.Units.Dimensional.Prelude
 import Astro.Time
 import Astro.Time.Interop
 import Data.Char (isSpace)
+import Data.Maybe (fromJust)
 import Data.Ratio
 import Data.List (isPrefixOf)
 import Data.Time
@@ -66,7 +67,7 @@ mkEOPArray table = array (fst $ head table, fst $ last table) table
 
 
 -- | Creates a 'Data.Time.Clock.TAI.LeapSecondTable' from an 'EOPArray'.
-mkLeapSecondTable :: EOPArray a -> LeapSecondTable
+mkLeapSecondTable :: EOPArray a -> LeapSecondMap
 mkLeapSecondTable a d = if d <= i then get i else if d >= j then get j else get d
   where
     (i,j) = bounds a
@@ -74,8 +75,9 @@ mkLeapSecondTable a d = if d <= i then get i else if d >= j then get j else get 
 
 
 -- | Returns the UTC day that the epoch occurs on.
-getUTCDay :: (Real a, Fractional a) => LeapSecondTable -> E TAI a -> Day
-getUTCDay lst = utctDay . taiToUTCTime lst . toAbsoluteTime
+getUTCDay :: (Real a, Fractional a) => LeapSecondMap -> E TAI a -> Day
+getUTCDay lst = utctDay . fromJust . taiToUTCTime lst . toAbsoluteTime
+                  -- TODO ^^^^^^^^ error handling or fail in Astro?
 
 -- | Creates a 'UT1Table' from an 'EOPArray'.
 {-
@@ -99,7 +101,8 @@ mkUT1Table a t = if d < i then get i else if d >= j then get j
     d = getUTCDay lst t
     t0 = utcDayToTAI d
     t1 = utcDayToTAI (succ d)
-    utcDayToTAI d = fromAbsoluteTime $ utcToTAITime lst (UTCTime d 0)
+    utcDayToTAI d = fromAbsoluteTime $ fromJust $ utcToTAITime lst (UTCTime d 0)
+                               -- TODO ^^^^^^^^ error handling or fail in Astro?
     get n = ut1MinusUTC (a!n) - fromInteger (deltaAT (a!n)) *~ second
 
 
