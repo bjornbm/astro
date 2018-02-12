@@ -26,3 +26,12 @@ newtype Longitude t a = Long { long :: Angle a } deriving (Show)
 --newtype ArgumentOfLatitude  t a = AoLat { argLat :: Angle a } deriving (Show)
 --newtype ArgumentOfLongitude t a = AoLon { argLon :: Angle a } deriving (Show)
 --newtype ArgumentOfPerigee   t a = AoP   { app    :: Angle a } deriving (Show)
+
+
+-- Maneuvers
+-- =========
+
+data Maneuver a = ImpulsiveRTN { dvr :: Velocity a
+                               , dvt :: Velocity a
+                               , dvn :: Velocity a
+                               } deriving (Show, Eq)

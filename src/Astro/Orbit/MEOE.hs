@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
@@ -10,6 +11,8 @@ import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.NonSI (revolution, gee)
 import Numeric.Units.Dimensional.LinearAlgebra
 import Astro.Orbit.Types
+import Astro.Time (E, diffEpoch)
+import Astro.Time.At (At (At))
 import qualified Prelude
 
 -- | Modified Equinoctial Orbital Elements as defined by Walker et al.
@@ -25,6 +28,9 @@ data MEOE long a = MEOE
   -- geographic sense. See Eagle. It is equal to Right Ascension
   -- for an orbit with inclinaton = 0°.
   } deriving (Show)
+
+-- | Time-tagged orbital elements.
+type Datum t a = At t a (MEOE Mean a)
 
 
 -- TODO move orbitalPeriod somewhere more generic?
@@ -96,17 +102,70 @@ longitudeRate MEOE{..} = sqrt (mu * p) * (w / p) ^ pos2
     l = long longitude
     w = _1 + f * cos l + g * sin l
 
--- | Apply an impulsive perturbation (delta-velocity) specified in TNR
--- coordinates to the MEOE. See Eagle.
-impulsivePerturbation :: RealFloat a => MEOE True a -> Velocity a -> Velocity a -> Velocity a -> MEOE True a
-impulsivePerturbation MEOE{..} dvr dvt dvn = MEOE
-  { mu = mu
+-- | Propagate an MEOE for the given amount of time, assuming no
+  -- perturbations are acting on the orbit. In effect only the
+  -- mean longitude is altered by the mean longitude rate.
+propagateUnperturbedFor :: RealFloat a => MEOE Mean a -> Time a -> MEOE Mean a
+propagateUnperturbedFor m dt = m { longitude = l1 }
+  where
+    l1 = Long $ long (longitude m) + meanLongitudeRate m * dt
+
+-- | Propagate an MEOE datum until the given epoch, assuming no
+  -- perturbations are acting on the orbit. In effect only the
+  -- mean longitude is altered by the mean longitude rate.
+propagateUnperturbedTo :: RealFloat a => Datum t a -> E t a -> MEOE Mean a
+propagateUnperturbedTo (m`At`t0) t1 = propagateUnperturbedFor m (diffEpoch t1 t0)
+
+-- | Deltas to Modified Equinoctial Orbital Elements.
+data MEOEDelta long a = MEOEDelta
+  { dmu :: GravitationalParameter a  -- Realistically should not change
+  , dp  :: Length a  -- Also known as semi latus rectum.
+  , df  :: Dimensionless a
+  , dg  :: Dimensionless a
+  , dh  :: Dimensionless a
+  , dk  :: Dimensionless a
+  , dlongitude :: Longitude long a
+  -- ^ Longitude in the sense of RAAN + AoP + Anomaly, not in the
+  -- geographic sense. See Eagle. It is equal to Right Ascension
+  -- for an orbit with inclinaton = 0°.
+  } deriving (Show)
+
+-- | Compute the delta between two MEOE, assuming idential epochs.
+deltaMEOE :: Num a => MEOE long a -> MEOE long a -> MEOEDelta long a
+deltaMEOE m1 m2 = MEOEDelta
+  { dmu = mu m1 - mu m2
+  , dp  = p  m1 - p  m2
+  , df  = f  m1 - f  m2
+  , dg  = g  m1 - g  m2
+  , dh  = h  m1 - h  m2
+  , dk  = k  m1 - k  m2
+  , dlongitude = Long $ (long . longitude) m1 - (long . longitude) m2
+  }
+
+-- | Apply a delta to a MEOE.
+applyMEOEDelta :: Num a => MEOE long a -> MEOEDelta long a -> MEOE long a
+applyMEOEDelta MEOE{..} MEOEDelta{..} = MEOE 
+  { mu = mu + dmu
   , p = p + dp
   , f = f + df
   , g = g + dg
   , h = h + dh
   , k = k + dk
-  , longitude = Long $ l + dl
+  , longitude = Long $ long longitude + long dlongitude
+  }
+
+-- | Compute how an MEOE would change when subjected to an impulsive
+  -- maneuver at the epoch of the MEOE. See Eagle.
+impulsivePerturbationDelta :: RealFloat a
+                           => MEOE True a -> Maneuver a -> MEOEDelta True a
+impulsivePerturbationDelta MEOE{..} ImpulsiveRTN{..} = MEOEDelta
+  { dmu = _0
+  , dp
+  , df
+  , dg
+  , dh
+  , dk
+  , dlongitude = Long dl
   } where
     -- Helpers
     l = long longitude
@@ -126,3 +185,7 @@ impulsivePerturbation MEOE{..} dvr dvt dvn = MEOE
     dh = sqpmu * s2 / (_2 * w) * cos l * dvn
     dk = sqpmu * s2 / (_2 * w) * sin l * dvn
     dl = sqpmu / w * (h * sin l - k * cos l) * dvn
+
+-- | Apply a maneuver to the MEOE.
+impulsivePerturbation :: RealFloat a => MEOE True a -> Maneuver a -> MEOE True a
+impulsivePerturbation meoe = applyMEOEDelta meoe . impulsivePerturbationDelta meoe

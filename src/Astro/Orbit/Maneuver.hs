@@ -10,36 +10,45 @@ import Astro.Time
 import Astro.Time.At
 import Astro.Orbit.Types
 import Astro.Orbit.Conversion
+import Astro.Orbit.MEOE
 import Astro.Trajectory
+import Data.AEq
 import Data.List
 import Data.Maybe (fromJust)
 
-
-data Maneuver a = ImpulsiveRTN { dvr :: Velocity a
-                               , dvt :: Velocity a
-                               , dvn :: Velocity a
-                               } deriving (Show, Eq)
 
 data ManTrajectory t a = forall x. Trajectory x t a => MT (x t a) (Maybe (At t a (Maneuver a)))
 
 applyManeuver :: Trajectory x t a => x t a -> At t a (Maneuver a) -> ManTrajectory t a
 applyManeuver x = MT x . Just
 
-applyManeuvers :: Trajectory x t a => x t a -> [At t a (Maneuver a)] -> ManTrajectory t a
+applyManeuvers :: (RealFloat a, AEq a, Trajectory x t a)
+               => x t a -> [At t a (Maneuver a)] -> ManTrajectory t a
 applyManeuvers x []     = MT x Nothing
 applyManeuvers x [m]    = applyManeuver x m  -- Redundant but avoids extra layer with Nothing.
 applyManeuvers x (m:ms) = foldl' applyManeuver (applyManeuver x m) ms
 
 
-instance (Fractional a, Ord a) => Trajectory ManTrajectory t a where
+instance (RealFloat a, Ord a, AEq a) => Trajectory ManTrajectory t a where
   startTime (MT x _) = startTime x
   endTime   (MT x _) = endTime   x
-  ephemeris (MT x Nothing) = ephemeris x
-  ephemeris (MT x (Just (man`At`tman))) = map massage . ephemeris x
+  ephemeris (MT x  Nothing            ) ts = ephemeris x ts
+  ephemeris (MT x (Just (man`At`tman))) ts
+    | tman < startTime x = ephemeris x ts  -- Ignore maneuver before validity
+    | tman >   endTime x = ephemeris x ts  -- Ignore maneuver after validity
+    | otherwise          = map massage $ ephemeris x ts
     where
-      --manRA = rightAscension $ c2s $ fst $ meoe2sv $ meoeM2meoe $ value $fromJust $ datum x tman
+      -- | Pre-maneuver MEOE at maneuver epoch
+      m0  = value . fromJust $ datum x tman
+      -- | Post-maneuver MEOE at maneuver epoch
+      m0' = meoe2meoeM . flip impulsivePerturbation man . meoeM2meoe $ m0
+      -- | Apply maneuver to datum, if datum is after maneuver.
       massage (m`At`t) = (if t < tman then m else m') `At` t
-        where m' = m  -- NOOP!!! TODO
+        where
+          dt  = diffEpoch t tman
+          dm1 = deltaMEOE (propagateUnperturbedFor m0' dt)
+                          (propagateUnperturbedFor m0  dt)
+          m' = applyMEOEDelta m dm1
         -- This is not generally valid as longitude acceleration is dependent
         -- on longitude. Will have to be more rigorous for trajectories where
         -- longitude varies significantly (TODO GEO).
