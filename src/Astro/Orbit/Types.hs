@@ -34,4 +34,4 @@ newtype Longitude t a = Long { long :: Angle a } deriving (Show)
 data Maneuver a = ImpulsiveRTN { dvr :: Velocity a
                                , dvt :: Velocity a
                                , dvn :: Velocity a
-                               } deriving (Show, Eq)
+                               } deriving (Show, Eq, Ord)
