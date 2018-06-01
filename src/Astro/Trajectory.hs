@@ -13,7 +13,6 @@ import Numeric.Units.Dimensional.Prelude
 import Data.Maybe (listToMaybe)
 import qualified Prelude
 
-type Datum t a = At t a (MEOE Mean a)
 
 -- | A @Trajectory@ is an abstraction for a position-velocity
 -- path through space in a particular time window.

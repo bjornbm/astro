@@ -58,11 +58,12 @@ perfectGEO' l = C' (c $ perfectGEO l) (_0 <: _0 <:. _0)
 -- | @timeAngle hours minutes seconds@ interprets the given time as an
   -- angle, where 24 h corresponds to 360°.
 timeAngle :: Floating a => a -> a -> a -> Angle a
-timeAngle h m s = h *~ hour + m *~ minute + s *~ second
+timeAngle h m s = hours h + minutes m + seconds s
   where
-    hour   = mkUnitR (atom "" "" "") (1 Prelude./ 24) revolution
-    minute = mkUnitR (atom "" "" "") (1 Prelude./ 60) hour
-    second = mkUnitR (atom "" "" "") (1 Prelude./ 60) minute
+    days    = (*~ revolution)
+    hours   = days    . (Prelude./ 24)
+    minutes = hours   . (Prelude./ 60)
+    seconds = minutes . (Prelude./ 60)
 
 -- | @sexagesimalAngle degrees arcminutes arcseconds@ returns the
   -- corresponding angle.

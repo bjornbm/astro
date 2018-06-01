@@ -64,12 +64,12 @@ spec_impulsive = describe "Impulsive perturbations" $ do
 
   it "of zero magnitude do not change the MEOE"
     (property $ \(m :: MT) ->
-      impulsivePerturbation m _0 _0 _0 == m)
+      impulsivePerturbation m (ImpulsiveRTN _0 _0 _0) == m)
 
   it "of non-zero magnitude change the MEOE"
     (property $ \(m::MT) dvr dvt dvn ->
       dvr /= _0 || dvt /= _0 || dvn /= _0 ==>
-      not (impulsivePerturbation m dvr dvt dvn ~== m))
+      not (impulsivePerturbation m (ImpulsiveRTN dvr dvt dvn) ~== m))
 
 {-
   it "do not change the current position"

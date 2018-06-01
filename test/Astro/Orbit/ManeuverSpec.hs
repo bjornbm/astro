@@ -36,8 +36,7 @@ spec_zeroManeuver = describe "Zero maneuver " $ do
 
   it "does not affect the trajectory"
     ( ephemeris (applyManeuver testTrajectory (zeroMan`At`mjd' 1)) (map mjd' [0..])
-    -- ( ephemeris (applyManeuver testTrajectory (zeroMan`At`mjd' 1)) [mjd' 0,mjd' 1..]
-    == ephemeris testTrajectory (map mjd' [0..])
+    ~== ephemeris testTrajectory (map mjd' [0..])
     )
 
   where
@@ -66,11 +65,10 @@ spec_randomManeuver = describe "Random maneuver at time t" $ do
     )
 
   it "affects data after time t" $
-    pendingWith "Need to fix 'ephemeris'"
-    -- property $ \m
-    --   -> absoluteDV m > _0
-    --   ==> ephemeris (applyManeuver testTrajectory (m`At`mjd' 5)) (map mjd' [6])
-    --   /= ephemeris testTrajectory (map mjd' [6])
+    property $ \m
+      -> absoluteDV m > _0
+      ==> ephemeris (applyManeuver testTrajectory (m`At`mjd' 5)) (map mjd' [6])
+      /= ephemeris testTrajectory (map mjd' [6])
 
 absoluteDV :: Floating a => Maneuver a -> Velocity a
 absoluteDV ImpulsiveRTN {..} = sqrt (dvr^pos2 + dvt^pos2 + dvn^pos2)
