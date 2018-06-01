@@ -1,4 +1,4 @@
-Name:                astro
+Name:                astrodynamics
 -- PVP summary:      +-+------- breaking API changes
 --                   | |  +----- non-breaking API additions
 --                   | |  | +--- code changes with no API change
