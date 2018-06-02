@@ -18,16 +18,24 @@ import qualified Prelude
 
 -- | Geodetic height above mean sea level.
 type GeodeticHeight     = Length
+
 -- | Geodetic latitude. North latitudes are positive.
 newtype GeodeticLatitude a = GeodeticLatitude
-  { geodeticLatitude :: Angle a } deriving (Show, Eq, AEq)
+  { geodeticLatitude :: Angle a } deriving (Eq, AEq)
+instance (Floating a, Show a) => Show (GeodeticLatitude a) where
+  show (GeodeticLatitude a) = showIn degree a ++ " N"
+
 -- | Geocentric latitude. North latitudes are positive.
 type GeocentricLatitude = Angle
 -- | Geocentric radius.
 type GeocentricRadius   = Length
+
 -- | Geodetic and geocentric longitude (they are equivalent). East longitudes are positive.
 newtype GeoLongitude a = GeoLongitude
-  { geoLongitude :: Angle a } deriving (Show, Eq, AEq)
+  { geoLongitude :: Angle a } deriving (Eq, AEq)
+instance (Floating a, Show a) => Show (GeoLongitude a) where
+  show (GeoLongitude a) = showIn degree a ++ " E"
+
 -- | Longitude measured around the axis of the CIP from the TIO meridian.
 type CIPLongitude       = Angle
 -- | Latitude measured around the axis of the CIP from the TIO meridian.
