@@ -21,7 +21,7 @@ type GeodeticHeight     = Length
 
 -- | Geodetic latitude. North latitudes are positive.
 newtype GeodeticLatitude a = GeodeticLatitude
-  { geodeticLatitude :: Angle a } deriving (Eq, AEq)
+  { geodeticLatitude :: Angle a } deriving (Functor, Eq, AEq, Ord)
 instance (Floating a, Show a) => Show (GeodeticLatitude a) where
   show (GeodeticLatitude a) = showIn degree a ++ " N"
 
@@ -32,7 +32,7 @@ type GeocentricRadius   = Length
 
 -- | Geodetic and geocentric longitude (they are equivalent). East longitudes are positive.
 newtype GeoLongitude a = GeoLongitude
-  { geoLongitude :: Angle a } deriving (Eq, AEq)
+  { geoLongitude :: Angle a } deriving (Functor, Eq, AEq, Ord)
 instance (Floating a, Show a) => Show (GeoLongitude a) where
   show (GeoLongitude a) = showIn degree a ++ " E"
 
