@@ -8,6 +8,7 @@ other modules.
 > import Numeric.Units.Dimensional.NonSI (revolution)
 > import Data.Time
 > import Data.Time.Clock.TAI
+> import Astro.Place.ReferenceEllipsoid (equatorialRadius, wgs84)
 > import Astro.Time
 > import Astro.Time.Interop
 > import qualified Astro.Time.Sidereal (gmst', phi)
@@ -76,6 +77,10 @@ The sidereal day. See wikipedia[2] for other approximation.
 
 > siderealDay :: Floating a => Time a
 > siderealDay = 1 *~ revolution / phi
+
+The equatorial radius of Earth.
+
+> r_Earth = equatorialRadius wgs84
 
 
 Functions
@@ -156,6 +161,12 @@ Calculate drift rate of an orbit based on the orbital period.
 
 > driftRateToSMA :: Floating a => AngularVelocity a -> Length a
 > driftRateToSMA d = semiMajorAxis (phi + d)
+
+> smaToPeriod :: Floating a => Length a -> Time a
+> smaToPeriod = driftRateToPeriod . smaToDriftRate
+
+> periodToSMA :: Floating a => Time a -> Length a
+> periodToSMA = driftRateToSMA . periodToDriftRate
 
 
 Utility functions
