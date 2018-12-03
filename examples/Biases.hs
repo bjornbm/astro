@@ -29,27 +29,26 @@ import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.AD
 import Tmp.Lifts
-import System.SimpleArgs -- System (getArgs)
+--import System.SimpleArgs -- System (getArgs)
 --import System.Console.ParseArgs
+import System.Environment (getArgs)
 import qualified Prelude
 import Data.Maybe (fromMaybe)
 import Control.Monad (join)
 import Text.Printf
 
-type Longitude = Angle
-
 
 -- | Determine whether the SC at the given longitude is above the horizon
 -- of the given GS.
-visible :: RealFloat a => GeodeticPlace a -> Longitude a -> Bool
+visible :: RealFloat a => GeodeticPlace a -> GeoLongitude a -> Bool
 visible st l = elevation' st (perfectGEO l) >= _0
 
 
 -- | Computes how sensitive the measured position of a geostationary SC is
 -- to biases in range measurements from a GS. The arguments are the
 -- geostationary longitude of the SC and the GS.
-sensitivity :: RealFloat a => Longitude a -> GeodeticPlace a -> WaveNumber a
-sensitivity l st = _1 / diff (range' (lift st) . perfectGEO) l
+sensitivity :: RealFloat a => GeoLongitude a -> GeodeticPlace a -> WaveNumber a
+sensitivity l st = _1 / diff (range' (lift st) . perfectGEO . GeoLongitude) (geoLongitude l)
 
 
 -- Ground stations
@@ -57,7 +56,7 @@ sensitivity l st = _1 / diff (range' (lift st) . perfectGEO) l
 type Station a = (String, GeodeticPlace a)
 
 -- | Convenience function for defining ground stations.
-station name lat long height = (name, GeodeticPlace wgs84 (lat*~degree) (long*~degree) (height*~kilo meter))
+station name lat long height = (name, GeodeticPlace wgs84 (GeodeticLatitude $ lat*~degree) (GeoLongitude $ long*~degree) (height*~kilo meter))
 
 stations =
   [ station "LK" 43.23281  1.2069  0.23258
@@ -88,16 +87,18 @@ stations =
   , station "Al Ghuwayriyah" 25.33 51.28 0  -- TODO
   ]
 
-cibinong = GeodeticPlace wgs84 (negate $ sexagesimalAngle 6 26 52) (sexagesimalAngle 106 56 10) _0
+cibinong = GeodeticPlace wgs84 (GeodeticLatitude $ negate $ sexagesimalAngle 6 26 52) (GeoLongitude $ sexagesimalAngle 106 56 10) _0
 
 -- | Computes sensitivities for a list of ground stations.
 -- If the SC is below the GS's horizon Nothing is returned.
-sensitivities :: RealFloat a => Longitude a -> [Station a] -> [(String, Maybe (WaveNumber a))]
+sensitivities :: RealFloat a => GeoLongitude a -> [Station a] -> [(String, Maybe (WaveNumber a))]
 sensitivities long = map (fmap (\st -> if visible st long then Just (sensitivity long st) else Nothing))
 
 -- | Construct line describing SC location and error.
-showSC :: Angle Double -> Angle Double -> String
-showSC long longBias = printSC (long/~degree) (longBias/~degree) (longBias*r_GEO/~kilo meter)
+showSC :: GeoLongitude Double -> Angle Double -> String
+showSC long longBias = printSC (geoLongitude long /~ degree)
+                               (longBias /~ degree)
+                               (longBias * r_GEO /~ kilo meter)
   where printSC = printf ("GEO longitude: %7.2f   degE\n"
                        ++ "Error:         %9.4f degE  (%.3f km)")
 
@@ -108,9 +109,9 @@ showStation longBias (name, Nothing) = printf "%-14s           no visibility" na
 
 
 main = do
-  (long', station, bias') <- getArgs
-  let long = long' *~ degree
-  let bias = bias' *~ kilo meter
+  [long', station, bias'] <- getArgs
+  let long = GeoLongitude $ read long' *~ degree
+  let bias = read bias' *~ kilo meter
 
   let ss = sensitivities long stations
   let s1 = fromMaybe _0 $ join $ lookup station ss
@@ -127,7 +128,7 @@ main = do
   putStrLn $ "--------------  ------------  ------------  -----------"
   putStrLn $ unlines $ map (showAzElRg long) stations
 
-showAzElRg :: Longitude Double -> (String, GeodeticPlace Double) -> String
+showAzElRg :: GeoLongitude Double -> (String, GeodeticPlace Double) -> String
 showAzElRg long (name, gs) = printf "%-14s  %9.3f km  %8.3f deg  %7.3f deg" name (range' gs s/~kilo meter) (azimuth' gs s/~degree) (elevation' gs s/~degree)
   where s = perfectGEO long
 
@@ -135,7 +136,7 @@ showAzElRg long (name, gs) = printf "%-14s  %9.3f km  %8.3f deg  %7.3f deg" name
 -- Version of main using parseargs library. Pretty nice except negative
 -- args cannot be used (the are parsed as options/flags).
 main2 = do
-  args <- parseArgsIO ArgsComplete 
+  args <- parseArgsIO ArgsComplete
     [ argument Long (argDataRequired "longitude" ArgtypeDouble) "Geostationary satellite longitude [degE]"     -- Cannot be negative!
     , argument GS   (argDataRequired "GS"        ArgtypeString) "Reference ground station"
     , argument Bias (argDataRequired "bias"      ArgtypeDouble) "Bias error of reference ground station [km]"  -- Cannot be negative!
@@ -150,7 +151,7 @@ main2 = do
 
   putStrLn $ showSC long longBias
   putStrLn $ ""
-  putStrLn $ "             Sensitivity        Est. Bias" 
+  putStrLn $ "             Sensitivity        Est. Bias"
   putStrLn $ "Station  [degE/km]  ([kmE/km])    [km]"
   putStrLn $ "-------  ---------  ----------  ---------"
   putStrLn $ unlines $ map (showStation longBias) ss
