@@ -29,8 +29,6 @@ import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.AD
 import Tmp.Lifts
---import System.SimpleArgs -- System (getArgs)
---import System.Console.ParseArgs
 import System.Environment (getArgs)
 import qualified Prelude
 import Data.Maybe (fromMaybe)
@@ -131,33 +129,4 @@ main = do
 showAzElRg :: GeoLongitude Double -> (String, GeodeticPlace Double) -> String
 showAzElRg long (name, gs) = printf "%-14s  %9.3f km  %8.3f deg  %7.3f deg" name (range' gs s/~kilo meter) (azimuth' gs s/~degree) (elevation' gs s/~degree)
   where s = perfectGEO long
-
-{-
--- Version of main using parseargs library. Pretty nice except negative
--- args cannot be used (the are parsed as options/flags).
-main2 = do
-  args <- parseArgsIO ArgsComplete
-    [ argument Long (argDataRequired "longitude" ArgtypeDouble) "Geostationary satellite longitude [degE]"     -- Cannot be negative!
-    , argument GS   (argDataRequired "GS"        ArgtypeString) "Reference ground station"
-    , argument Bias (argDataRequired "bias"      ArgtypeDouble) "Bias error of reference ground station [km]"  -- Cannot be negative!
-    ]
-  let !long    = fromJustDef 0  (getArgDouble args Long) *~ degree
-  let !station = fromJustDef "" (getArgString args GS)
-  let !bias    = fromJustDef 0  (getArgDouble args Bias) *~ kilo meter
-
-  let ss = sensitivities long stations
-  let Just s1 = lookupJustDef (Just (0*~meter^neg1)) station ss
-  let longBias = bias * s1  -- This linearization breaks down when SC and GS longitudes coincide.
-
-  putStrLn $ showSC long longBias
-  putStrLn $ ""
-  putStrLn $ "             Sensitivity        Est. Bias"
-  putStrLn $ "Station  [degE/km]  ([kmE/km])    [km]"
-  putStrLn $ "-------  ---------  ----------  ---------"
-  putStrLn $ unlines $ map (showStation longBias) ss
-
-
-data Options = Long | GS | Bias deriving (Ord, Eq, Show)
-argument i a s = Arg i Nothing Nothing a s
--}
 
