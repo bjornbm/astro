@@ -1,6 +1,6 @@
 -- Instances of Lift.
 
-module Tmp.Lifts where
+module Astro.AD.Place where
 
 import Numeric.Units.Dimensional.AD
 import Astro.Place

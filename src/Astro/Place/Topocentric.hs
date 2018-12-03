@@ -6,9 +6,9 @@ coordinate systems.
 -}
 module Astro.Place.Topocentric where
 
+import Astro.AD.Place
 import Astro.Coords
 import Astro.Place
-import Tmp.Lifts
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.AD
 import Numeric.Units.Dimensional.LinearAlgebra

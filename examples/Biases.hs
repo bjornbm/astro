@@ -20,6 +20,7 @@ on the antennae is minimized.
 Requires simpleargs.
 -}
 
+import Astro.AD.Place
 import Astro.Coords
 import Astro.Place
 import Astro.Place.ReferenceEllipsoid
@@ -28,7 +29,6 @@ import Astro.Util (perfectGEO, r_GEO, sexagesimalAngle)
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.AD
-import Tmp.Lifts
 import System.Environment (getArgs)
 import qualified Prelude
 import Data.Maybe (fromMaybe)

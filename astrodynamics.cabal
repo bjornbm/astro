@@ -2,7 +2,7 @@ Name:                astrodynamics
 -- PVP summary:      +-+------- breaking API changes
 --                   | |  +----- non-breaking API additions
 --                   | |  | +--- code changes with no API change
-Version:             0.20
+Version:             0.21
 License:             BSD3
 License-File:        LICENSE
 Copyright:           Bjorn Buckwalter 2008-2016
@@ -39,6 +39,7 @@ library
                        astro-tables
   Exposed-Modules:     Astro
                        Astro.AD
+                       Astro.AD.Place
                        Astro.DefaultData
                        Astro.Coords
                        Astro.Coords.ECR
@@ -61,7 +62,6 @@ library
                        IAU2000.Nutation
                        IAU2000.Equations
                        Astrodynamics
-                       Tmp.Lifts
                        Astro.Util
                        --TLE
                        --TLE.Parse
