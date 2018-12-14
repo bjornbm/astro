@@ -106,7 +106,21 @@ showStation longBias (name, Just s)  = printf "%-14s  %9.3f  (%8.1f)  %9.3f" nam
 showStation longBias (name, Nothing) = printf "%-14s           no visibility" name
 
 
-main = do
+main = getArgs >>= \args -> case args of  -- Could use LambaCase
+  [long, station, bias] -> main' long station bias
+  _                     -> do
+    putStrLn "Computes sensitivity of observed SC position due to constant errors"
+    putStrLn "(biases) in range measurements."
+    putStrLn ""
+    putStrLn "    Usage: <executable> longitude station bias"
+    putStrLn ""
+    putStrLn "where longitude is the longitude (° E) of a geostationary satellite,"
+    putStrLn "station is the name of on of the ground stations listed below, and"
+    putStrLn "bias (kilometers) is the ranging bias of the ground station."
+    putStrLn ""
+    mapM_ (putStrLn . fst) stations
+
+main' long' station bias' = do
   [long', station, bias'] <- getArgs
   let long = GeoLongitude $ read long' *~ degree
   let bias = read bias' *~ kilo meter
