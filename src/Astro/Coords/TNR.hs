@@ -6,7 +6,6 @@ import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.LinearAlgebra.Rotation (rotX)
 import Astro.Coords
 import Astro.Coords.PosVel
-import qualified Astrodynamics
 
 
 -- | Calculate the TNR orbital coordinate frame of the satellite with the

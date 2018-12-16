@@ -7,7 +7,6 @@ import Astro.Time.Convert
 import Astro.Util.Cyclic -- (adjustZeroOne)
 import Control.Monad.Reader
 import Control.Applicative
-import IAU2000.Nutation
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.NonSI (revolution)
 import qualified Prelude as P

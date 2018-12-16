@@ -10,7 +10,6 @@ import Astro.Coords
 import Astro.Coords.PosVel
 import Astro.Place
 import Astro.Time
-import Astro.Time.Interop
 import Astrodynamics (r_GEO)
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.NonSI (revolution)

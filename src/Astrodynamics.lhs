@@ -10,7 +10,6 @@ other modules.
 > import Data.Time.Clock.TAI
 > import Astro.Place.ReferenceEllipsoid (equatorialRadius, wgs84)
 > import Astro.Time
-> import Astro.Time.Interop
 > import qualified Astro.Time.Sidereal (gmst', phi)
 > import Prelude
 >   ( fromIntegral, toRational, properFraction

@@ -7,7 +7,6 @@ import Test.Hspec
 import Test.QuickCheck (property, (==>))
 import Data.AEq
 
-import TestUtil
 import TestInstances
 
 import Numeric.Units.Dimensional.Prelude

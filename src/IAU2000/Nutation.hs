@@ -14,7 +14,6 @@ referring to [1] unless otherwise specified.
 
 module IAU2000.Nutation where
 
-import Astro
 import Astro.Time
 import Numeric.Units.Dimensional.Prelude
 import IAU2000.Table53

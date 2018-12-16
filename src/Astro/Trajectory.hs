@@ -6,9 +6,7 @@ module Astro.Trajectory
   ) where
 
 import Astro.Time
-import Astro.Time.At
 import Astro.Orbit.MEOE
-import Astro.Orbit.Types
 import Numeric.Units.Dimensional.Prelude
 import Data.Maybe (listToMaybe)
 import qualified Prelude

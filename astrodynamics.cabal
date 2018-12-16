@@ -23,7 +23,6 @@ library
   default-language:    Haskell2010
   hs-source-dirs:      src
   Build-Depends:       base,
-                       old-locale,
                        time,
                        mtl,
                        array,
@@ -35,7 +34,6 @@ library
                        dimensional-experimental,
                        dimensional-dk-experimental,
                        ieee754,
-                       ad,
                        astro-tables
   Exposed-Modules:     Astro
                        Astro.AD
@@ -96,13 +94,10 @@ test-suite properties
   build-depends:       base
                      , astrodynamics
                      , dimensional
-                     , dimensional-dk-experimental
                      , dimensional-experimental
                      , dimensional-homo
-                     , astro
                      , QuickCheck
                      , ieee754
-                     , hspec
                      , time
                      , array
                      -- , template-haskell
@@ -132,15 +127,10 @@ test-suite specs
                      , astrodynamics
                      , dimensional
                      , dimensional-experimental
-                     , dimensional-dk-experimental
                      , dimensional-homo
-                     , astro
                      , QuickCheck
                      , ieee754
                      , hspec
-                     , time
-                     , array
-                     -- , template-haskell
   ghc-options:         -threaded
   default-language:    Haskell2010
 

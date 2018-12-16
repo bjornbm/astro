@@ -3,7 +3,6 @@ module Astro.Trajectory.CroppedSpec where
 import Test.Hspec
 --import Test.QuickCheck (property, (==>))
 
-import TestUtil
 import TestInstances
 
 import Astro.Trajectory
