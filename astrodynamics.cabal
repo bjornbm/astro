@@ -40,6 +40,7 @@ library
   Exposed-Modules:     Astro
                        Astro.AD
                        Astro.AD.Place
+                       Astro.Celestrak
                        Astro.DefaultData
                        Astro.Coords
                        Astro.Coords.ECR
@@ -57,7 +58,6 @@ library
                        Astro.Time.Interop
                        Astro.Time.Sidereal
                        Astro.Time.At
-                       -- TODO Astro.Celestrak
                        IAU2000.FundamentalArguments
                        IAU2000.Nutation
                        IAU2000.Equations
@@ -94,6 +94,7 @@ test-suite properties
                      , TestUtil
 
   build-depends:       base
+                     , astrodynamics
                      , dimensional
                      , dimensional-dk-experimental
                      , dimensional-experimental
@@ -128,6 +129,7 @@ test-suite specs
                      , TestInstances
                      , TestUtil
   build-depends:       base
+                     , astrodynamics
                      , dimensional
                      , dimensional-experimental
                      , dimensional-dk-experimental
