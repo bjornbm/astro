@@ -6,12 +6,12 @@ import Astro.Time hiding (taiToUT1, ut1ToTAI)
 import qualified Astro.Time.Barycentric.Kaplan2005 as TDB
 import IAU2000.Nutation
 import qualified IAU2000.Equations as Eq
-import Data.Time.Clock.AnnouncedLeapSeconds
+import Data.Time.Clock.AnnouncedLeapSeconds (lst)
 import Data.Default
 
 defaultTimeData :: Floating a => TimeData a
 defaultTimeData = TimeData
-  { leapSecondTable = lst
+  { leapSecondMap = lst
   , taiToUT1 = coerceE  -- Astro.Time.taiToUT1 (const 0) ??
   , ut1ToTAI = coerceE
   ,  ttToTDB = TDB.ttToTDB

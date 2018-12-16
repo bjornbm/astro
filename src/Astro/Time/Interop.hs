@@ -65,12 +65,12 @@ taiToUTC lst = fromJust . taiToUTCTime lst . toAbsoluteTime
 -- | Monadic conversion to UTCTime.
 convertToUTC :: (Convert t TAI, Real a, Fractional a) => E t a -> Astro a UTCTime
 convertToUTC t = do
-  lst <- asks (leapSecondTable.time)
+  lst <- asks (leapSecondMap.time)
   tai <- convert t
   return (taiToUTC lst tai)
 
 -- | Monadic conversion from UTCTime.
 convertFromUTC :: (Convert TAI t, Fractional a) => UTCTime -> Astro a (E t a)
 convertFromUTC utc = do
-  lst <- asks (leapSecondTable.time)
+  lst <- asks (leapSecondMap.time)
   convert (utcToTAI lst utc)

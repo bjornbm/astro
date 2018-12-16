@@ -18,7 +18,7 @@ evalM f x = asks f >>= ($x)
 
 
 data TimeData a = TimeData
-  { leapSecondTable :: LeapSecondMap
+  { leapSecondMap :: LeapSecondMap
   , taiToUT1 :: E TAI a -> E UT1 a
   , ut1ToTAI :: E UT1 a -> E TAI a
   ,  ttToTDB :: E TT a  -> E TDB a
