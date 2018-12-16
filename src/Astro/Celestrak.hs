@@ -66,9 +66,11 @@ mkEOPArray :: EOPList a -> EOPArray a
 mkEOPArray table = array (fst $ head table, fst $ last table) table
 
 
--- | Creates a 'Data.Time.Clock.TAI.LeapSecondTable' from an 'EOPArray'.
-mkLeapSecondTable :: EOPArray a -> LeapSecondMap
-mkLeapSecondTable a d = if d <= i then get i else if d >= j then get j else get d
+-- | Creates a 'Data.Time.Clock.TAI.LeapSecondMap' from an 'EOPArray'.
+mkLeapSecondMap :: EOPArray a -> LeapSecondMap
+mkLeapSecondMap a d = Just . fromIntegral
+  $ if d <= i then get i else if d >= j then get j else get d
+  -- TODO Is this sensible, or should Nothing be returned outside bounds?
   where
     (i,j) = bounds a
     get = deltaAT . (a!)
@@ -96,7 +98,7 @@ mkUT1Table :: (Real a, Fractional a) => EOPArray a -> UT1MinusTAI a
 mkUT1Table a t = if d < i then get i else if d >= j then get j
   else interpolate (t0, get d) (t1, get $ succ d) t
   where
-    lst = mkLeapSecondTable a
+    lst = mkLeapSecondMap a
     (i,j) = bounds a
     d = getUTCDay lst t
     t0 = utcDayToTAI d
