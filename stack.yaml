@@ -16,7 +16,8 @@
 #  name: custom-snapshot
 #  location: "./custom-snapshot.yaml"
 # resolver: lts-8.0
-resolver: lts-12.22
+resolver: lts-13.19
+allow-newer: true
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -64,6 +65,8 @@ packages:
 # (e.g., acme-missiles-0.3)
 extra-deps:
 - numeric-quest-0.2.0.2
+- HaTeX-3.20.0.0
+- wl-pprint-extras-3.5.0.5
 
 # Override default flag values for local packages and extra-deps
 flags: {}

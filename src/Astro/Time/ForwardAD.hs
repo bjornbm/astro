@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE NoStarIsType #-}
 
 module Astro.Time.ForwardAD where
 
