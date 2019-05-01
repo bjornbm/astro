@@ -83,6 +83,7 @@ stations =
   , station "Esrange" 67.885 21.0788 327.50 -- STA
   , station "Chilworth" 50.961 (-1.428) 327.50 -- Approximation from Google Maps
   , station "Al Ghuwayriyah" 25.33 51.28 0  -- TODO
+  , station "Tunis" 36.806389 10.181667 0  -- TODO
   ]
 
 cibinong = GeodeticPlace wgs84 (GeodeticLatitude $ negate $ sexagesimalAngle 6 26 52) (GeoLongitude $ sexagesimalAngle 106 56 10) _0
