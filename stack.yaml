@@ -16,7 +16,7 @@
 #  name: custom-snapshot
 #  location: "./custom-snapshot.yaml"
 # resolver: lts-8.0
-resolver: lts-13.19
+resolver: lts-13.25
 allow-newer: true
 
 # User packages to be built.
@@ -39,27 +39,6 @@ allow-newer: true
 # will not be run. This is useful for tweaking upstream packages.
 packages:
 - '.'
-- location:
-    git: https://github.com/bjornbm/astro-tables.git
-    commit: HEAD
-  extra-dep: true
-- location:
-    git: https://github.com/bjornbm/dimensional.git
-    commit: HEAD
-  extra-dep: true
-- location:
-    git: https://github.com/bjornbm/dimensional-dk-experimental.git
-    #commit: 6fd9c299d64b62f58a1e9b4ead0d8c40b3b2df46
-    commit: origin/dimensional-head
-  extra-dep: true
-- location:
-    git: https://github.com/bjornbm/dimensional-experimental.git
-    commit: HEAD
-  extra-dep: true
-- location:
-    git: https://github.com/bjornbm/dimensional-homo.git
-    commit: HEAD
-  extra-dep: true
 
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
@@ -67,7 +46,16 @@ extra-deps:
 - numeric-quest-0.2.0.2
 - HaTeX-3.20.0.0
 - wl-pprint-extras-3.5.0.5
-
+- git: https://github.com/bjornbm/astro-tables.git
+  commit: a53a66d98e03b594f3bb9ed22d4adbb06325cb06  # HEAD
+- git: https://github.com/bjornbm/dimensional.git
+  commit: fb2d9d6c8351ad283ee75f1ae6bee8e8a0dfb28b  # HEAD
+- git: https://github.com/bjornbm/dimensional-dk-experimental.git
+  commit: 6fd9c299d64b62f58a1e9b4ead0d8c40b3b2df46  # origin/dimensional-head
+- git: https://github.com/bjornbm/dimensional-experimental.git
+  commit: c366183be04239d3e538f63b2721a5c0d545490e  # HEAD
+- git: https://github.com/bjornbm/dimensional-homo.git
+  commit: 18cb55d3812aa77f6ee733705dcc3e9d00932031  # HEAD
 # Override default flag values for local packages and extra-deps
 flags: {}
 
