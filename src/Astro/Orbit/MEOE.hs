@@ -76,8 +76,9 @@ raan MEOE{..} = atan2 k h
 -- | Anomaly is the angle between periapsis and the satellite. True or
 -- mean depending on the @MEOE@.
 anomaly :: RealFloat a => MEOE t a -> Anomaly t a
-anomaly m = Anom $ long (longitude m) - (raan m + argumentOfPeriapsis m)
---anomaly MEOE{..} = Anom $ long longitude - atan2 g f
+anomaly MEOE {..} = Anom $ long longitude - atan2 g f  -- Eagle 2f
+-- Obvious definition, verified in test suite:
+--anomaly m = Anom $ long (longitude m) - (raan m + argumentOfPeriapsis m)
 
 -- | Argument of latitude is the angle from the ascending node to the
 -- satellite.
