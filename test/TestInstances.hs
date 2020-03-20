@@ -193,8 +193,8 @@ instance (RealFloat a, AEq a) => AEq (C.COE t a) where
            && C.slr  c0 ~== C.slr  c1
            && C.ecc  c0 ~== C.ecc  c1
            && C.inc  c0 ~== C.inc  c1
-           && C.aop  c0 ~== C.aop  c1
-           && C.raan c0 ~== C.raan c1
+           && C.aop  c0 ~==~ C.aop  c1
+           && C.raan c0 ~==~ C.raan c1
            && anom (C.anomaly c0) ~==~ anom (C.anomaly c1)
 
 instance (RealFloat a, AEq a, AEq x) => AEq (At t a x) where

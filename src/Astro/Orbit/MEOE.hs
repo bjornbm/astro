@@ -64,7 +64,10 @@ inclination MEOE{..} = _2 * atan (sqrt (h^pos2 + k^pos2))
 -- | Argument of Periapsis is the angle from the ascending node to the
 -- periapsis (e.g. perigee) of the orbit.
 argumentOfPeriapsis :: RealFloat a => MEOE long a -> Angle a
-argumentOfPeriapsis MEOE{..} = atan2 (g * h - f * k) (f * h + g * k)
+argumentOfPeriapsis MEOE {..} = atan2 g f - atan2 k h
+-- BROKEN when h == k == 0: atan2 (g * h - f * k) (f * h + g * k)
+-- Obvious definition, verified in test suite:
+--argumentOfPeriapsis m = long (longitude m) - raan m - anom (anomaly m)
 
 -- | Right Ascension of the Ascending Node.
 raan :: RealFloat a => MEOE long a -> Angle a
@@ -73,8 +76,9 @@ raan MEOE{..} = atan2 k h
 -- | Anomaly is the angle between periapsis and the satellite. True or
 -- mean depending on the @MEOE@.
 anomaly :: RealFloat a => MEOE t a -> Anomaly t a
-anomaly m = Anom $ long (longitude m) - (raan m + argumentOfPeriapsis m)
---anomaly MEOE{..} = Anom $ long longitude - atan2 g f
+anomaly MEOE {..} = Anom $ long longitude - atan2 g f  -- Eagle 2f
+-- Obvious definition, verified in test suite:
+--anomaly m = Anom $ long (longitude m) - (raan m + argumentOfPeriapsis m)
 
 -- | Argument of latitude is the angle from the ascending node to the
 -- satellite.

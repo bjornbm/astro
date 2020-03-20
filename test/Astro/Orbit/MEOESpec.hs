@@ -35,15 +35,25 @@ spec_inclination = describe "MEOE inclination" $ do
       inclination m ~== atan2 (_2 * sqrt (h2 + k2)) (_1 - h2 - k2))
 
 spec_aop = describe "MEOE argumentOfperiapsis" $ do
-  it "equals 2d in Eagle"
+  it "equals 2d (middle, but using atan2) in Eagle"
     (property $ \(m@MEOE{..} :: MT) ->
       argumentOfPeriapsis m ~==~ atan2 g f - atan2 k h)
+  {- FAILS: When h = k = 0
+  it "equals 2d (RHS) in Eagle"
+    (property $ \(m@MEOE {..} :: MT) ->
+      argumentOfPeriapsis m ~==~ atan2 (g * h - f * k) (f * h - g * k))
+  -}
+  it "equals ecliptic longitude - RAAN - anomaly"
+    (property $ \(m@MEOE{..} :: MT) ->
+      argumentOfPeriapsis m ~==~ long longitude - raan m - anom (anomaly m))
 
 spec_anomaly = describe "MEOE anomaly" $ do
   it "equals 2f in Eagle"
     (property $ \(m@MEOE{..} :: MT) ->
       anom (anomaly m) ~==~ long longitude - atan2 g f)
-                         -- long (longitude m) - (raan m + argumentOfPeriapsis m))
+  it "equals ecliptic longitude - RAAN - AoP"
+    (property $ \(m :: MT) ->
+      anom (anomaly m) ~==~ long (longitude m) - (raan m + argumentOfPeriapsis m))
 
 spec_aol = describe "MEOE argumentOflatitude" $ do
   it "equals 2g in Eagle"
