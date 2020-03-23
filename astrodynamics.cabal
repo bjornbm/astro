@@ -73,6 +73,7 @@ library
                        Astro.Orbit.SV
                        Astro.Orbit.Types
                        Astro.Orbit.Maneuver
+                       Astro.LunarCoordinates
                        Astro.SolarCoordinates
                        Astro.Trajectory
                        Astro.Trajectory.Cropped

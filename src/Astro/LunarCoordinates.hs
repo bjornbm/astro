@@ -25,19 +25,15 @@ the errors will rarely exceed
 0.001° in semidiameter,
 0.2 Earth radii in distance,
 0.3° in right ascension
-and 0.2° i declination.
+and 0.2° in declination.
 
-TODO: Is this valid only for 2009? See second (RHS) definition of T.
-
-TRUE?: Furthermore the coordinate system of the computation result is not
-specified. However, page C3 of the Astronomical Almanac (2009) implies
-that the formulas on page C5 compute “ICRS geocentric equatorial”
-coordinates, which I assume must strictly mean GCRS coordinates.
+The coordinate system of the computation result is not well
+specified. However, with the given accuracy any Earth-centered
+inertial coordinate system should do.
 -}
 
--- | Computes the Moons angular coordinates to an accuracy of about 1
--- arcminute within two centuries of 2000. For more details see
--- http://aa.usno.navy.mil/faq/docs/SunApprox.php.
+-- | Computes the Moon's coordinates to an accuracy of about 0.3°
+-- during the period of 1900 to 2100.
 lunarCoordinates :: forall a . RealFloat a => E UT1 a -> Coord GCRS a
 lunarCoordinates ut1 = C (x <: y <:. z)
   where
@@ -62,7 +58,6 @@ lunarCoordinates ut1 = C (x <: y <:. z)
     declination_delta = asin cosine_n :: PlaneAngle a
     spherical = S $ Sph r (toZenith declination_delta) rightAscension_alpha
     -}
-
 
 
 lunarEclipticLongitude :: RealFloat a => E UT1 a -> PlaneAngle a
@@ -103,6 +98,7 @@ deg x = x *~ degree
 dpc :: Floating a => a -> AngularVelocity a
 dpc x = x *~ (degree / century)
 
+{-
 -- | The horizontal parallax of the Moon as seen from the given coordinates.
 lunarHorizontalParallax :: RealFloat a => Coord GCRS a -> E UT1 a -> PlaneAngle a
 lunarHorizontalParallax xyz ut1 = undefined
@@ -110,5 +106,4 @@ lunarHorizontalParallax xyz ut1 = undefined
 -- | The semidiameter (SD) of the Moon as seen from the given coordinates.
 lunarSemidiameter :: forall a . Coord GCRS a -> E UT1 a -> PlaneAngle a
 lunarSemidiameter xyz ut1 = undefined
-  -- TODO: formulae in AA 2009 for geocentric latitude (and not geodetic)
-
+-}
