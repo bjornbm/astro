@@ -5,7 +5,7 @@ module Astro.LunarCoordinates (lunarCoordinates) where
 
 import Astro.Time
 import Astro.Coords
-import Astrodynamics (r_GEO)
+import Astrodynamics (r_Earth)
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.LinearAlgebra.PosVel (CPos, Sph (Sph), toZenith)
@@ -42,7 +42,7 @@ lunarCoordinates ut1 = C (x <: y <:. z)
     r = lunarDistance0 ut1
 
     -- Geocentric direction cosines (l, m, n).
-    cosine_l = cos beta / cos lambda  -- cos decl * cos ra
+    cosine_l = cos beta * cos lambda  -- cos decl * cos ra
     cosine_m = 0.9175 *~ one * cos beta * sin lambda - 0.3978 *~ one * sin beta  -- = cos decl * sin ra
     cosine_n = 0.3978 *~ one * cos beta * sin lambda + 0.9175 *~ one * sin beta  -- = sin decl
 
@@ -87,7 +87,7 @@ lunarSemidiameter0 ut1 = 0.0274 *~ one * lunarHorizontalParallax0 ut1
 
 -- | The distance to the Moon from the center of Earth.
 lunarDistance0 :: RealFloat a => E UT1 a -> Length a
-lunarDistance0 ut1 = r_GEO / sin (lunarHorizontalParallax0 ut1)
+lunarDistance0 ut1 = r_Earth / sin (lunarHorizontalParallax0 ut1)
 
 
 -- | Convenience function for angles in degrees.

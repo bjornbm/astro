@@ -79,6 +79,7 @@ The sidereal day. See wikipedia[2] for other approximation.
 
 The equatorial radius of Earth.
 
+> r_Earth :: Fractional a => Length a
 > r_Earth = equatorialRadius wgs84
 
 
