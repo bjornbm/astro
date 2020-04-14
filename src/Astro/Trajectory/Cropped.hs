@@ -1,7 +1,8 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-module Astro.Trajectory.Cropped ( cropStart,  cropEnd,  crop
+module Astro.Trajectory.Cropped ( Cropped
+                                , cropStart,  cropEnd,  crop
                                 , cropStart', cropEnd', crop'
                                 ) where
 
