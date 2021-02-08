@@ -16,7 +16,7 @@
 #  name: custom-snapshot
 #  location: "./custom-snapshot.yaml"
 # resolver: lts-8.0
-resolver: lts-14.27
+resolver: lts-16.22
 allow-newer: true
 
 # User packages to be built.
@@ -45,25 +45,23 @@ packages:
 extra-deps:
 - numeric-quest-0.2.0.2
 - ftphs-1.0.9.2
-- HaTeX-3.20.0.0
-- wl-pprint-extras-3.5.0.5
 # For the faster Cairo backend for Chart.
 - Chart-cairo-1.9.3@sha256:f484a7194ca08ed67f02aa626e2f8f4d1a9b50624e0d50e3ced62958f7481cca,925
 - cairo-0.13.8.0@sha256:9b64a376ebaa4f153bba5866a32291fd4bed48147009cce9158ce6533928eba8,4075
 - gtk2hs-buildtools-0.13.8.0@sha256:132f38155fc677430a47ea750918973161c876fb6f281d342ac2f07eb99229ce,5238
 # Not on hackage
-- git: https://bitbucket.org/bjornbm/astro-sta.git
-  commit: 45465bdd0d3a4c8c7635195a48b23316a79d3f59  # HEAD
+- git: git@github.com:bjornbm/astro-sta.git
+  commit: 40f5bc0d468214108d7db39ff160d3cdb18b5378  # HEAD
 - git: https://github.com/bjornbm/astro-tables.git
   commit: a53a66d98e03b594f3bb9ed22d4adbb06325cb06  # HEAD
-- git: https://github.com/bjornbm/dimensional-codata.git
-  commit: 4671bd818cebf4154f70fbdf6ce7a2cfe8d69b9b  # HEAD
+- git: https://github.com/dmcclean/dimensional-codata.git
+  commit: f5e88d24c31e51d5ba72bacdd1f38848bb1707c9  # HEAD
 - git: https://github.com/bjornbm/dimensional-dk-experimental.git
   commit: 6fd9c299d64b62f58a1e9b4ead0d8c40b3b2df46  # origin/dimensional-head
 - git: https://github.com/bjornbm/dimensional-experimental.git
   commit: c366183be04239d3e538f63b2721a5c0d545490e  # HEAD
 - git: https://github.com/bjornbm/dimensional-homo.git
-  commit: 18cb55d3812aa77f6ee733705dcc3e9d00932031  # HEAD
+  commit: 475f62a24df9fe986ba1584aba0705edc4b5b84c  # HEAD
 
 # Override default flag values for local packages and extra-deps
 flags: {}
