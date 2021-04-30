@@ -61,7 +61,7 @@ extra-deps:
 - git: https://github.com/bjornbm/dimensional-experimental.git
   commit: c366183be04239d3e538f63b2721a5c0d545490e  # HEAD
 - git: https://github.com/bjornbm/dimensional-homo.git
-  commit: 48e2ea9a35444be4fb203c4e973d6c191cb0c326  # HEAD
+  commit: 30a568b303e5f2d64b2fac11e5ca2d4b7a1efbae  # HEAD
 
 # Override default flag values for local packages and extra-deps
 flags: {}
