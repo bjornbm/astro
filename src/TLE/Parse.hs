@@ -4,7 +4,7 @@
 
 module TLE.Parse where
 
-import Numeric.Units.Dimensional.Prelude hiding (take, takeWhile)
+import Numeric.Units.Dimensional.Prelude hiding (name, take, takeWhile)
 import Numeric.Units.Dimensional.NonSI (revolution)
 import Data.Time
 import Data.Char (isAlpha, isLetter, isDigit, digitToInt)
@@ -57,8 +57,8 @@ parseD2Mdt2 = parseLeft' $ mconcat <$> sequence [sign, take 5, expo, take 1]
 
 parseBStar = parseLeft' $ mconcat <$> sequence [sign, take 5, expo, take 1]
                       >>= parseLeft rational
-                      >>= return . \x -> x *~ r_Earth^neg1
-  where r_Earth = prefix 6431 (kilo meter)
+                      >>= return . \x -> x *~ one / r_Earth
+  where r_Earth = 6431 *~ (kilo meter)
 
 degreeP = (*~degree) <$> rational
 
@@ -210,9 +210,9 @@ blubb _ = []  -- Silently throws away any non-triple at the end.
 mangle :: RawTLE -> Either String (TLE Double)
 mangle r@(RawTLE l0 l1 l2) = do
     ok1 <- parseOnly checkSum l1
-    if ok1 then return () else fail $ badTLE "Bad checksum in line 1" r
+    if ok1 then return () else Left $ badTLE "Bad checksum in line 1" r
     ok2 <- parseOnly checkSum l2
-    if ok2 then return () else fail $ badTLE "Bad checksum in line 2" r
+    if ok2 then return () else Left $ badTLE "Bad checksum in line 2" r
     parseOnly parseTLE $ T.unlines [l0,l1,l2]
 
 badTLE err (RawTLE l0 l1 l2) = err ++ " of:\n"

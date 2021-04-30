@@ -1,8 +1,10 @@
+{-# LANGUAGE DataKinds #-}
+
 module TLE where
 
 import qualified Astrodynamics
 import Numeric.Units.Dimensional.Prelude
-import Numeric.NumType (Zero, Neg1, Neg2, Neg3)
+import Numeric.NumType.DK.Integers (TypeInt(Zero, Neg1, Neg2, Neg3))
 import Data.Time
 import qualified Data.Text as T
 import qualified Prelude

@@ -2,15 +2,16 @@
 
 module TLE.Util where
 
-import Astrodynamics
-import TLE
-import TLE.Parse
-import Astro.Util
-import Astro.Time
+import Astrodynamics ( raToLongitude )
+import TLE ( TLE(..) )
+import TLE.Parse ( parseTLE )
+import Astro.Util.Cyclic (zeroTwoPi)
+import Astro.Time ( UT1, E, diffEpoch, unsafeFromLocalTime )
 import Safe (fromJustNote)
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import Data.Attoparsec.Text (parse, maybeResult)
+import Data.Time ( UTCTime, utcToLocalTime, hoursToTimeZone )
 import qualified Data.Text as T (pack)
 
 -- | Parse a three line string.
@@ -32,3 +33,6 @@ meanLongitude t tle@TLE {..} = zeroTwoPi
     + dt * (meanMotion + dMdt * dt + d2Mdt2 * dt ^ pos2)
   where
     dt = t `diffEpoch` coerceUtcToUT1 epoch
+
+coerceUtcToUT1 :: Fractional a => UTCTime -> E UT1 a
+coerceUtcToUT1 = unsafeFromLocalTime . utcToLocalTime (hoursToTimeZone 0)

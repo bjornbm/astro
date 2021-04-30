@@ -35,7 +35,10 @@ library
                        dimensional-dk-experimental,
                        ieee754,
                        astro-tables,
-                       parsec
+                       parsec,
+                       text,
+                       attoparsec,
+                       safe
   Exposed-Modules:     Astro
                        Astro.AD
                        Astro.AD.Place
@@ -81,6 +84,9 @@ library
                        Astro.Trajectory.Cropped
                        Astro.Trajectory.EphemTrajectory
                        Astro.Util.Cyclic
+                       TLE
+                       TLE.Parse
+                       TLE.Util
 
 test-suite properties
   type:                exitcode-stdio-1.0
