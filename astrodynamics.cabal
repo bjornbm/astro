@@ -34,11 +34,13 @@ library
                        dimensional-experimental,
                        dimensional-dk-experimental,
                        ieee754,
-                       astro-tables
+                       astro-tables,
+                       parsec
   Exposed-Modules:     Astro
                        Astro.AD
                        Astro.AD.Place
                        Astro.Celestrak
+                       Astro.Celestrak.Parser
                        Astro.DefaultData
                        Astro.Coords
                        Astro.Coords.ECR

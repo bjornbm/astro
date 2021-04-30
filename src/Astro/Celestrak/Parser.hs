@@ -1,5 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
+module Astro.Celestrak.Parser (parseEOPFile) where
+
 import Astro.Celestrak
 import Data.Time
 import Text.Parsec
