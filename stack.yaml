@@ -16,7 +16,7 @@
 #  name: custom-snapshot
 #  location: "./custom-snapshot.yaml"
 # resolver: lts-8.0
-resolver: lts-16.22
+resolver: lts-17.9
 allow-newer: true
 
 # User packages to be built.
@@ -57,11 +57,11 @@ extra-deps:
 - git: https://github.com/dmcclean/dimensional-codata.git
   commit: f5e88d24c31e51d5ba72bacdd1f38848bb1707c9  # HEAD
 - git: https://github.com/bjornbm/dimensional-dk-experimental.git
-  commit: 6fd9c299d64b62f58a1e9b4ead0d8c40b3b2df46  # origin/dimensional-head
+  commit: 0516f3f10f2589b414a8ede6b949e44dbc1ceebc  # origin/dimensional-head
 - git: https://github.com/bjornbm/dimensional-experimental.git
   commit: c366183be04239d3e538f63b2721a5c0d545490e  # HEAD
 - git: https://github.com/bjornbm/dimensional-homo.git
-  commit: 475f62a24df9fe986ba1584aba0705edc4b5b84c  # HEAD
+  commit: 48e2ea9a35444be4fb203c4e973d6c191cb0c326  # HEAD
 
 # Override default flag values for local packages and extra-deps
 flags: {}

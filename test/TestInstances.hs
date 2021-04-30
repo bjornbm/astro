@@ -84,7 +84,7 @@ instance (Arbitrary a) => Arbitrary (Quantity d a) where
     where coerceQ = coerce :: a -> Quantity d a
 
 instance (KnownNat n, Arbitrary a) => Arbitrary (Vec d n a) where
-  arbitrary = fromListM =<< vectorOf n arbitrary
+  arbitrary = fromListErr <$> vectorOf n arbitrary
     where
       n = fromInteger $ natVal (Proxy :: Proxy n)
 
