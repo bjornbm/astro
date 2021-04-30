@@ -32,7 +32,7 @@ eciToOrbitalFrame pv p = C $ orbitalFrame pv `matVec` (c p `elemSub` cpos pv)
 -- prop> eciToOrbitalFrame pv (orbitalFrameToECI pv p) ~== (p :: Coord Orbital Double)
 -- prop> orbitalFrameToECI pv (eciToOrbitalFrame pv p) ~== (p :: Coord ECI Double)
 orbitalFrameToECI :: RealFloat a => PosVel ECI a -> Coord Orbital a -> Coord ECI a
-orbitalFrameToECI pv p = C $ transpose (orbitalFrame pv) `matVec` (c p `elemAdd` cpos pv)
+orbitalFrameToECI pv p = C $ (transpose (orbitalFrame pv) `matVec` c p) `elemAdd` cpos pv
 
 
 -- | Computes the attitude coordinate system (RPY) for a satellite where
