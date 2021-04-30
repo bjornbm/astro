@@ -146,14 +146,8 @@ instance (Fractional a, Arbitrary a, Arbitrary x) => Arbitrary (At t a x) where
 -- Approximate equality
 -- --------------------
 
-instance (Floating a, AEq a) => AEq (Coord s a) where
-  r1 ~== r2 = c r1 ~== c r2
-
 instance (RealFloat a, AEq a) => AEq (E t a) where
   E t1 ~== E t2 = t1 ~== t2
-
-instance (RealFloat a, AEq a) => AEq (PosVel s a) where
-  pv1 ~== pv2 = cpos pv1 ~== cpos pv2 && cvel pv1 ~== cvel pv2
 
 instance (RealFloat a, AEq a) => AEq (Sph d a) where
   Sph r1 zen1 ra1 ~== Sph r2 zen2 ra2 = r1 ~== r2 && zen1 ~== zen2 && ra1 ~== ra2

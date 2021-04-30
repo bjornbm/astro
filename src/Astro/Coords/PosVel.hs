@@ -9,11 +9,16 @@ import Numeric.Units.Dimensional.Prelude (_0)  -- for liftPVAt.
 import Numeric.Units.Dimensional.LinearAlgebra.PosVel
 import Numeric.Units.Dimensional.LinearAlgebra.VectorAD (applyLinear, applyLinearAt)
 import Astro.AD
+import Data.AEq
 
 
 data PosVel system a = C' (CPos a) (CVel a)
                      | S' (SPos a) (SVel a)
                      deriving (Show, Eq)
+
+-- Cannot derive AEq instance since can have both CPos and SPos.
+instance (RealFloat a, AEq a) => AEq (PosVel s a) where
+  pv1 ~== pv2 = cpos pv1 ~== cpos pv2 && cvel pv1 ~== cvel pv2
 
 pos :: PosVel s a -> Coord s a
 pos (C' p _) = C p

@@ -1,5 +1,6 @@
 module Astro.Coords where
 
+import Data.AEq
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import Numeric.Units.Dimensional.LinearAlgebra (elemSub, (<:), (<:.))
@@ -10,6 +11,12 @@ import Numeric.Units.Dimensional.LinearAlgebra.Rotation (Homo33)
 data Coord system a = C (CPos a)
                     | S (SPos a)
                     deriving (Show, Eq)
+
+-- Cannot derive this instance since we may be mixing SPos and CPos,
+-- and furthermore, comparing the SPos form is not trivial.
+instance (Floating a, AEq a) => AEq (Coord s a) where
+  r1 ~== r2 = c r1 ~== c r2
+
 
 c :: Floating a => Coord s a -> CPos a
 c (C v) = v
