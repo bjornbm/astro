@@ -20,7 +20,7 @@ orbitalFrame :: RealFloat a => PosVel ECI a -> CoordSys a
 orbitalFrame pv = consRow t $ consRow n $ rowMatrix r where
   r = normalize $ cpos pv
   n = normalize $ crossProduct (cpos pv) (cvel pv)
-  t = normalize $ crossProduct n r
+  t = {-normalize $-} crossProduct n r
 
 
 -- | Converts ECI position to orbital frame defined by PosVel.
@@ -30,7 +30,9 @@ eciToOrbitalFrame pv p = C $ orbitalFrame pv `matVec` (c p `elemSub` cpos pv)
 -- | Converts ECI position to orbital frame defined by PosVel.
 --
 -- prop> eciToOrbitalFrame pv (orbitalFrameToECI pv p) ~== (p :: Coord Orbital Double)
--- prop> orbitalFrameToECI pv (eciToOrbitalFrame pv p) ~== (p :: Coord ECI Double)
+--
+-- This one can fail due to numerics for null coords:
+-- prop> \(NonNull p) -> orbitalFrameToECI pv (eciToOrbitalFrame pv p) ~== (p :: Coord ECI Double)
 orbitalFrameToECI :: RealFloat a => PosVel ECI a -> Coord Orbital a -> Coord ECI a
 orbitalFrameToECI pv p = C $ (transpose (orbitalFrame pv) `matVec` c p) `elemAdd` cpos pv
 

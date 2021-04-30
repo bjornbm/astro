@@ -91,6 +91,18 @@ instance (KnownNat n, Arbitrary a) => Arbitrary (Vec d n a) where
 instance Arbitrary a => Arbitrary (Coord s a) where
   arbitrary = C <$> arbitrary
 
+-- | Guarantees the vector (or @Coord@) is non-null.
+newtype NonNull v = NonNull v deriving (Show)
+
+instance Functor NonNull where fmap f (NonNull v) = NonNull (f v)
+
+instance (KnownNat n, Num a, Eq a, Arbitrary a) => Arbitrary (NonNull (Vec d n a)) where
+  arbitrary = NonNull <$> suchThat arbitrary (/= nullVector)
+
+instance (Num a, Eq a, Arbitrary a) => Arbitrary (NonNull (Coord s a)) where
+  arbitrary = fmap C <$> arbitrary
+
+
 instance Arbitrary a => Arbitrary (GeodeticLatitude a) where
   arbitrary = GeodeticLatitude <$> arbitrary
 
