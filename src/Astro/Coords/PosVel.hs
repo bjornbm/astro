@@ -6,6 +6,7 @@ import Astro.Coords
 import Astro.Time (E (E), addTime)  -- For the Lift instance.
 import Astro.Time.At (At (At))
 import Numeric.Units.Dimensional.Prelude (_0)  -- for liftPVAt.
+import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.LinearAlgebra.PosVel
 import Numeric.Units.Dimensional.LinearAlgebra.VectorAD (applyLinear, applyLinearAt)
 import Astro.AD
@@ -42,6 +43,11 @@ svel :: RealFloat a => PosVel s a -> SVel a
 svel (S' _ v) = v
 svel (C' p v) = snd $ c2sEphem (p,v)
 
+-- | Returns true if the state vector is degenerate. A state vector is
+-- degenerate if the angular momentum (about the central body/origo) is
+-- zero.
+degeneratePosVel :: (Num a, AEq a) => PosVel s a -> Bool
+degeneratePosVel (C' pos vel) = (pos `crossProduct` vel) ~== (_0 <: _0 <:. _0)
 
 -- | Lift a function on @Coord@s to a function on 'PosVel's.
 liftPV :: RealFloat a

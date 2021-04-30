@@ -109,8 +109,10 @@ instance (Num a, Ord a, Arbitrary a) => Arbitrary (ReferenceEllipsoid a) where
 instance (Arbitrary a, Fractional a) => Arbitrary (E t a) where
   arbitrary = mjd' <$> arbitrary
 
-instance (Arbitrary a, Fractional a) => Arbitrary (PosVel s a) where
-  arbitrary = C' <$> arbitrary <*> arbitrary
+instance (Arbitrary a, Fractional a, AEq a) => Arbitrary (PosVel s a) where
+  arbitrary = do
+      let pv = C' <$> arbitrary <*> arbitrary
+      suchThat pv (not . degeneratePosVel)
 
 deriving instance Arbitrary a => Arbitrary (SemiMajorAxis a)
 deriving instance Arbitrary a => Arbitrary (SemiLatusRectum a)
