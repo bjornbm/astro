@@ -7,6 +7,10 @@ import Numeric.Units.Dimensional.LinearAlgebra.Rotation (rotX)
 import Astro.Coords
 import Astro.Coords.PosVel
 
+-- $setup
+-- >>> import Data.AEq
+-- >>> import TestInstances
+
 
 -- | Calculate the TNR orbital coordinate frame of the satellite with the
 -- given ECI PosVel. The frame is defined by the Radial and Normal axes,
@@ -22,6 +26,14 @@ orbitalFrame pv = consRow t $ consRow n $ rowMatrix r where
 -- | Converts ECI position to orbital frame defined by PosVel.
 eciToOrbitalFrame :: RealFloat a => PosVel ECI a -> Coord ECI a -> Coord Orbital a
 eciToOrbitalFrame pv p = C $ orbitalFrame pv `matVec` (c p `elemSub` cpos pv)
+
+-- | Converts ECI position to orbital frame defined by PosVel.
+--
+-- prop> eciToOrbitalFrame pv (orbitalFrameToECI pv p) ~== (p :: Coord Orbital Double)
+-- prop> orbitalFrameToECI pv (eciToOrbitalFrame pv p) ~== (p :: Coord ECI Double)
+orbitalFrameToECI :: RealFloat a => PosVel ECI a -> Coord Orbital a -> Coord ECI a
+orbitalFrameToECI pv p = C $ transpose (orbitalFrame pv) `matVec` (c p `elemAdd` cpos pv)
+
 
 -- | Computes the attitude coordinate system (RPY) for a satellite where
 -- the Z (yaw) axis is nadir-pointing, the Y (pitch) axis is normal to

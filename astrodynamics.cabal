@@ -2,7 +2,7 @@ Name:                astrodynamics
 -- PVP summary:      +-+------- breaking API changes
 --                   | |  +----- non-breaking API additions
 --                   | |  | +--- code changes with no API change
-Version:             0.22
+Version:             0.23
 License:             BSD3
 License-File:        LICENSE
 Copyright:           Bjorn Buckwalter 2008-2016
@@ -142,6 +142,24 @@ test-suite specs
                      , hspec
   ghc-options:         -threaded
   default-language:    Haskell2010
+
+test-suite doctests
+  type:           exitcode-stdio-1.0
+  ghc-options:    -threaded
+  default-language:    Haskell2010
+  hs-source-dirs: test
+  main-is:        Doctests.hs
+  other-modules:  TestInstances
+                , TestUtil
+  build-depends:  base
+                , doctest >= 0.8
+                , Glob
+                , astrodynamics
+                , ieee754
+                , QuickCheck
+                , dimensional
+                , dimensional-experimental
+                , dimensional-homo
 
 -- test-suite dimensional-homo-test
 --   type:                exitcode-stdio-1.0

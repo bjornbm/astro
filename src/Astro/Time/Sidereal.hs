@@ -11,6 +11,9 @@ import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.NonSI (revolution)
 import qualified Prelude as P
 
+-- $setup
+-- >>> import TestInstances
+-- >>> import Numeric.Units.Dimensional.AD
 
 -- | Earth rotation angle, from AsA2009 B8.
   --
@@ -31,7 +34,7 @@ era ut1 = tau * ( 0.7790572732640 *~ one
 -- | Earth's adopted mean angular velocity (the time derivative of the
   -- Earth rotation angle, see [AsA2009] B8).
   --
-  -- prop> phi t == diff era t
+  -- prop> phi == diff (era . addTime j2000') (t :: Time Double)
 phi :: Floating a => AngularVelocity a
 phi = 1.00273781191135448 *~ (revolution / day)
 
