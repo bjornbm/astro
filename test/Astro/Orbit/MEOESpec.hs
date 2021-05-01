@@ -15,6 +15,7 @@ import qualified Prelude
 
 import Astro.Orbit.MEOE
 import Astro.Orbit.Types
+import Astro.Util.Cyclic ((~==~))
 
 
 main = hspec spec

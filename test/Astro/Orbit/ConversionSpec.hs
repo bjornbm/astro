@@ -21,6 +21,7 @@ import Astro.Orbit.MEOE (MEOE (..), eccentricity2)
 import Astro.Orbit.SV
 import Astro.Orbit.Conversion
 import Astro.Orbit.Types hiding (ecc)
+import Astro.Util.Cyclic ((~==~))
 
 
 main = hspec spec

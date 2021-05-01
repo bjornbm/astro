@@ -8,6 +8,7 @@ module Astro.Util.Cyclic where
 import qualified Prelude
 import Numeric.Units.Dimensional.Prelude
 
+import Data.AEq
 import Astro.Time
 import Astro.Time.At
 
@@ -147,3 +148,18 @@ adjustCyclicT :: RealFrac a
               -> Time a -> Quantity dy a -> Quantity dy a
 adjustCyclicT (y0`At`t0) (y1`At`t1) = adjustCyclic (f t0 ,y0) (f t1, y1)
   where f t = diffEpoch t (mjd' 0)
+
+
+-- Angle comparisons
+-- -----------------
+
+-- | Compares two angles for cyclic equality.
+(==~) :: (RealFloat a, Eq a) => Angle a -> Angle a -> Bool
+x ==~ y = plusMinusPi x == plusMinusPi y
+
+-- | Compares two angles for approximate cyclic equality.
+(~==~) :: (RealFloat a, AEq a) => Angle a -> Angle a -> Bool
+x ~==~ y = plusMinusPi x ~== plusMinusPi y
+        ||   zeroTwoPi x ~==   zeroTwoPi y  -- move the boundaries.
+
+infixl 4 ==~, ~==~
