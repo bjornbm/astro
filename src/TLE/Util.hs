@@ -5,9 +5,9 @@ module TLE.Util where
 import Astrodynamics ( raToLongitude )
 import TLE ( TLE(..) )
 import TLE.Parse ( parseTLE )
-import Astro.Util.Cyclic (zeroTwoPi)
 import Astro.Time ( UT1, E, diffEpoch, unsafeFromLocalTime )
 import Safe (fromJustNote)
+import Numeric.Units.Dimensional.Cyclic ( zeroTwoPi )
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import Data.Attoparsec.Text (parse, maybeResult)

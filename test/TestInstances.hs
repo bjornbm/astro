@@ -19,13 +19,13 @@ import Data.Proxy
 import GHC.TypeLits
 import TestUtil
 import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional.Cyclic (plusMinusPi, zeroTwoPi, (==~), (~==~))
 import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional (Dimensional (..))
 import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.LinearAlgebra.Vector (Vec (ListVec))
 import Numeric.Units.Dimensional.LinearAlgebra.PosVel (Sph (..))
 import qualified Prelude
-import Astro.Util.Cyclic (plusMinusPi, zeroTwoPi, (==~), (~==~))
 import Astro.Coords
 import Astro.Coords.PosVel
 import Astro.Place
@@ -162,9 +162,6 @@ instance (Fractional a, Arbitrary a, Arbitrary x) => Arbitrary (At t a x) where
 
 instance (RealFloat a, AEq a) => AEq (E t a) where
   E t1 ~== E t2 = t1 ~== t2
-
-instance (RealFloat a, AEq a) => AEq (Sph d a) where
-  Sph r1 zen1 ra1 ~== Sph r2 zen2 ra2 = r1 ~== r2 && zen1 ~== zen2 && ra1 ~== ra2
 
 deriving instance AEq a => AEq (SemiMajorAxis a)
 deriving instance AEq a => AEq (SemiLatusRectum a)

@@ -9,13 +9,13 @@ import Data.AEq
 
 import TestInstances
 
+import Numeric.Units.Dimensional.Cyclic (fractionalPart, adjustZeroOne)
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
 import qualified Prelude
 
 import Astro.Orbit.Types
 import Astro.Orbit.Anomaly
-import Astro.Util.Cyclic (fractionalPart, adjustZeroOne)
 
 
 main = hspec spec

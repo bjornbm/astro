@@ -11,11 +11,11 @@ import TestInstances
 
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.AD (diff)
+import Numeric.Units.Dimensional.Cyclic
 import Numeric.Units.Dimensional.NonSI (revolution)
 import qualified Prelude
 
 import Astro.Util
-import Astro.Util.Cyclic
 import Astro.Time
 import Astro.Time.Sidereal
 

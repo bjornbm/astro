@@ -4,9 +4,9 @@ import Astro hiding (ut1ToTAI)
 import Astro.Place
 import Astro.Time
 import Astro.Time.Convert
-import Astro.Util.Cyclic -- (adjustZeroOne)
 import Control.Monad.Reader
 import Control.Applicative
+import Numeric.Units.Dimensional.Cyclic ( fractionalPart )
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.NonSI (revolution)
 import qualified Prelude as P

@@ -59,7 +59,7 @@ extra-deps:
 - git: https://github.com/bjornbm/dimensional-dk-experimental.git
   commit: 0516f3f10f2589b414a8ede6b949e44dbc1ceebc  # origin/dimensional-head
 - git: https://github.com/bjornbm/dimensional-experimental.git
-  commit: c366183be04239d3e538f63b2721a5c0d545490e  # HEAD
+  commit: 6dbba521682e7cb01b3842d989da88b63ee7169f  # HEAD
 - git: https://github.com/bjornbm/dimensional-homo.git
   commit: 30a568b303e5f2d64b2fac11e5ca2d4b7a1efbae  # HEAD
 

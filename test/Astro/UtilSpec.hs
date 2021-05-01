@@ -13,10 +13,10 @@ import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 
 import Astro.Util
-import Astro.Util.Cyclic
 import Astro.Coords
 import Astro.Coords.PosVel
 import Astro.Place
+import Numeric.Units.Dimensional.Cyclic
 import Numeric.Units.Dimensional.LinearAlgebra
 import Numeric.Units.Dimensional.LinearAlgebra.PosVel
 

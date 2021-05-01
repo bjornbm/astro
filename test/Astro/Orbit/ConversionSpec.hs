@@ -11,6 +11,7 @@ import Data.AEq
 import TestUtil
 import TestInstances
 
+import Numeric.Units.Dimensional.Cyclic ((~==~))
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
 import qualified Prelude
@@ -21,7 +22,6 @@ import Astro.Orbit.MEOE (MEOE (..), eccentricity2)
 import Astro.Orbit.SV
 import Astro.Orbit.Conversion
 import Astro.Orbit.Types hiding (ecc)
-import Astro.Util.Cyclic ((~==~))
 
 
 main = hspec spec
