@@ -31,6 +31,7 @@ import Astro.Coords.PosVel
 import Astro.Place
 import Astro.Place.ReferenceEllipsoid
 import Astro.Orbit.Types
+import Astro.Orbit.DeltaV
 import Astro.Orbit.MEOE as M -- (MEOE (MEOE), meoe2vec)
 import qualified Astro.Orbit.COE as C -- (COE (COE), coe2vec)
 import Astro.Orbit.Conversion (meoe2coe)
@@ -91,6 +92,9 @@ instance (KnownNat n, Arbitrary a) => Arbitrary (Vec d n a) where
 instance Arbitrary a => Arbitrary (Coord s a) where
   arbitrary = C <$> arbitrary
 
+instance Arbitrary a => Arbitrary (ImpulsiveDV s a) where
+  arbitrary = DV <$> arbitrary
+
 -- | Guarantees the vector (or @Coord@) is non-null.
 newtype NonNull v = NonNull v deriving (Show)
 
@@ -101,6 +105,12 @@ instance (KnownNat n, Num a, Eq a, Arbitrary a) => Arbitrary (NonNull (Vec d n a
 
 instance (Num a, Eq a, Arbitrary a) => Arbitrary (NonNull (Coord s a)) where
   arbitrary = fmap C <$> arbitrary
+
+instance (Num a, Eq a, Arbitrary a) => Arbitrary (NonNull (ImpulsiveDV s a)) where
+  arbitrary = fmap DV <$> arbitrary
+
+instance (Num a, Eq a, Arbitrary a) => Arbitrary (NonNull (Maneuver a)) where
+  arbitrary = fmap toManeuver <$> arbitrary
 
 
 instance Arbitrary a => Arbitrary (GeodeticLatitude a) where

@@ -73,6 +73,7 @@ library
                        Astro.Orbit.Anomaly
                        Astro.Orbit.COE
                        Astro.Orbit.Conversion
+                       Astro.Orbit.DeltaV
                        Astro.Orbit.Interpolate
                        Astro.Orbit.MEOE
                        Astro.Orbit.SV

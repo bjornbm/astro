@@ -10,11 +10,21 @@ import Astro.Time
 import Astro.Time.At
 import Astro.Orbit.Types
 import Astro.Orbit.Conversion
+import Astro.Orbit.DeltaV
 import Astro.Orbit.MEOE
 import Astro.Trajectory
 import Data.AEq
 import Data.List
 import Data.Maybe (fromJust)
+
+
+-- | Apply a @Maneuver@ to an @MEOE@.
+impulsivePerturbation :: RealFloat a => MEOE True a -> Maneuver a -> MEOE True a
+impulsivePerturbation meoe man 
+  | man == ImpulsiveRTN _0 _0 _0 = meoe  -- Ugly, but avoids MEOE->SV->MEOE conversion numerics.
+  | otherwise = sv2meoe (mu meoe) m'
+  where
+    m' = applyTnrDV (fromManeuver man) (meoe2sv meoe)
 
 
 data ManTrajectory t a = forall x. Trajectory x t a => MT (x t a) (Maybe (At t a (Maneuver a)))

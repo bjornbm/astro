@@ -204,7 +204,7 @@ mps = meter / second
 mu_Earth = 398600.4418 *~ (kilo meter ^ pos3 / second ^ pos2)
 
 -- | Fudge a state vector to avoid comparing to zero elements
--- where the deviation may be greated than epsilon.
+-- where the deviation may be greater than epsilon.
 fudgeSV :: SVD -> SVD
 fudgeSV state = sv (r >+< (a<:a<:.a)) (v >+< (b<:b<:.b))
   where

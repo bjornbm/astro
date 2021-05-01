@@ -191,5 +191,7 @@ impulsivePerturbationDelta MEOE{..} ImpulsiveRTN{..} = MEOEDelta
     dl = sqpmu / w * (h * sin l - k * cos l) * dvn
 
 -- | Apply a maneuver to the MEOE.
-impulsivePerturbation :: RealFloat a => MEOE True a -> Maneuver a -> MEOE True a
-impulsivePerturbation meoe = applyMEOEDelta meoe . impulsivePerturbationDelta meoe
+-- TODO This one is broken. Specs show that it changes position. Seems to have worked
+-- OK historically (for GEO), but seems not trustworthy.
+impulsivePerturbation' :: RealFloat a => MEOE True a -> Maneuver a -> MEOE True a
+impulsivePerturbation' meoe = applyMEOEDelta meoe . impulsivePerturbationDelta meoe

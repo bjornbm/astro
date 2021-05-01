@@ -14,7 +14,10 @@ import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.LinearAlgebra
 import qualified Prelude
 
+import Astro.Coords.PosVel
+import Astro.Orbit.Conversion
 import Astro.Orbit.MEOE
+import Astro.Orbit.Maneuver (impulsivePerturbation)
 import Astro.Orbit.Types
 
 
@@ -78,18 +81,24 @@ spec_impulsive = describe "Impulsive perturbations" $ do
       impulsivePerturbation m (ImpulsiveRTN _0 _0 _0) == m)
 
   it "of non-zero magnitude change the MEOE"
-    (property $ \(m::MT) dvr dvt dvn ->
-      dvr /= _0 || dvt /= _0 || dvn /= _0 ==>
-      not (impulsivePerturbation m (ImpulsiveRTN dvr dvt dvn) ~== m))
+    (property $ \(m::MT) (NonNull man) ->
+      not (impulsivePerturbation m man ~== m))
+
+  -- it "behave identically when applied via SV or Eagle"
+  --   (property $ \dvr dvt dvn -> let man = ImpulsiveRTN dvr dvt dvn :: Maneuver Double in
+  --     impulsivePerturbation testM man ~== impulsivePerturbation' testM man
+  --   )
+
+  it "do not change the current position"
+    (property $ \(m::MT) man ->
+      position (impulsivePerturbation m man) ~== position m
+    )
+
+  where
+    position = {-trace "Position" .-} cpos . meoe2sv
+
 
 {-
-  it "do not change the current position"
-    (property $ \(m::MT) dvr dvt dvn ->
-      position (impulsivePerturbation m dvr dvt dvn) ~== position m
-    ) where position = undefined
--- -}
-
--- {-
 testM :: MEOE True Double
 testM = MEOE
   { mu = mu_Earth

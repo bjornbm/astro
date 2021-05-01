@@ -70,6 +70,7 @@ type ECR = ITRS   -- Losely defined.
 
 data Topocentric = Topocentric deriving (Show, Read)  -- Defined by geographic location.
 data Orbital = Orbital deriving (Show, Read)  -- Defined by orbital state.
+type TNR = Orbital
 
 -- | Earth Centered Inertial. A losely defined “of Date” coordinate system.
 -- Could be either Mean or True.
