@@ -13,7 +13,7 @@ import Numeric.Units.Dimensional.Cyclic
 import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 
-
+-- TODO These tests should be migrated to dimensional-experimental.
 
 main = hspec spec
 spec = do
@@ -39,21 +39,6 @@ spec_fundamentals = describe "Fundamentals" $ do
 -- ----------------------------------------------------------
 spec_plusMinusPi = describe "plusMinusPi" $ do
 
-  it "plusMinusPi -tau = 0"
-    (plusMinusPi (negate tau) == _0)
-
-  it "plusMinusPi -pi = -pi"
-    (plusMinusPi (negate pi) == negate pi)
-
-  it "plusMinusPi 0 = 0"
-    (plusMinusPi _0 == _0)
-
-  it "plusMinusPi pi = -pi"
-    (plusMinusPi pi == negate pi)
-
-  it "plusMinusPi tau = 0"
-    (plusMinusPi tau == _0)
-
   it "plusMinusPi x = x for x in [-pi,pi)"
     (property $ \(x'::Angle Double) ->
       let x = fractionalPart x' * pi in plusMinusPi x ~== x)
@@ -67,21 +52,6 @@ spec_plusMinusPi = describe "plusMinusPi" $ do
 
 -- ----------------------------------------------------------
 spec_zeroTwoPi = describe "zeroTwoPi" $ do
-
-  it "zeroTwoPi -tau = 0"
-    (zeroTwoPi (negate tau) == _0)
-
-  it "zeroTwoPi -pi = pi"
-    (zeroTwoPi (negate pi) == pi)
-
-  it "zeroTwoPi 0 = 0"
-    (zeroTwoPi _0 == _0)
-
-  it "zeroTwoPi pi = pi"
-    (zeroTwoPi pi == pi)
-
-  it "zeroTwoPi tau = 0"
-    (zeroTwoPi tau == _0)
 
   it "zeroTwoPi x = x for x in [0,tau)"
     (property $ \(x'::Angle Double) ->
