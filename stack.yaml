@@ -50,12 +50,8 @@ extra-deps:
 - cairo-0.13.8.0@sha256:9b64a376ebaa4f153bba5866a32291fd4bed48147009cce9158ce6533928eba8,4075
 - gtk2hs-buildtools-0.13.8.0@sha256:132f38155fc677430a47ea750918973161c876fb6f281d342ac2f07eb99229ce,5238
 # Not on hackage
-- git: git@github.com:bjornbm/astro-sta.git
-  commit: 40f5bc0d468214108d7db39ff160d3cdb18b5378  # HEAD
 - git: https://github.com/bjornbm/astro-tables.git
   commit: a53a66d98e03b594f3bb9ed22d4adbb06325cb06  # HEAD
-- git: https://github.com/dmcclean/dimensional-codata.git
-  commit: f5e88d24c31e51d5ba72bacdd1f38848bb1707c9  # HEAD
 - git: https://github.com/bjornbm/dimensional-dk-experimental.git
   commit: 0516f3f10f2589b414a8ede6b949e44dbc1ceebc  # origin/dimensional-head
 - git: https://github.com/bjornbm/dimensional-experimental.git
