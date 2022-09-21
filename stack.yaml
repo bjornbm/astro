@@ -16,7 +16,7 @@
 #  name: custom-snapshot
 #  location: "./custom-snapshot.yaml"
 # resolver: lts-8.0
-resolver: lts-17.9
+resolver: lts-19.8
 allow-newer: true
 
 # User packages to be built.
@@ -53,7 +53,7 @@ extra-deps:
 - git: https://github.com/bjornbm/astro-tables.git
   commit: a53a66d98e03b594f3bb9ed22d4adbb06325cb06  # HEAD
 - git: https://github.com/bjornbm/dimensional-dk-experimental.git
-  commit: 0516f3f10f2589b414a8ede6b949e44dbc1ceebc  # origin/dimensional-head
+  commit: 6993685dbdbcb9ea76aca0453bd93b33d9edbef2  # origin/dimensional-head
 - git: https://github.com/bjornbm/dimensional-experimental.git
   commit: 6dbba521682e7cb01b3842d989da88b63ee7169f  # HEAD
 - git: https://github.com/bjornbm/dimensional-homo.git
