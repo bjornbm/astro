@@ -83,7 +83,7 @@ omega = phi_14
 -- luni-solar terms. The order of arguments in the list is chosen to match
 -- that in [3] rather than that used in [1].
 fundamentalArguments :: Floating a => E TT a -> [Angle a]
-fundamentalArguments tt = fmap ($tt) [phi_10, phi_11, phi_12, phi_13, phi_14, phi_1, phi_2, phi_3, phi_4, phi_5, phi_6, phi_7, phi_8, phi_9]
+fundamentalArguments tt = fmap ($ tt) [phi_10, phi_11, phi_12, phi_13, phi_14, phi_1, phi_2, phi_3, phi_4, phi_5, phi_6, phi_7, phi_8, phi_9]
 
 
 -- | The arguments @A_k@ used in calculating the equation of the equinoxes
