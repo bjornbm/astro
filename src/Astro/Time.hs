@@ -3,6 +3,7 @@
            , FlexibleInstances
            , GeneralizedNewtypeDeriving
            , DataKinds
+           , KindSignatures
   #-}
 
 {- |
@@ -113,7 +114,7 @@ import Data.Time hiding (utc)
 -- representation the accuracy will be below one microsecond in
 -- the 21st century. For exact numerical representation use e.g.
 -- Rational.
-newtype E t a = E (Time a) deriving (Eq, Ord)
+newtype E (t :: *) a = E (Time a) deriving (Eq, Ord)
 instance (Show t, Show a, Real a, Fractional a) => Show (E t a) where
   show = showClock
 
